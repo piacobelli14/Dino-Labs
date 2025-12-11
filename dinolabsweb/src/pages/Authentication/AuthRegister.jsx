@@ -352,6 +352,12 @@ const Register = () => {
                         <>
                             {isPersonal && (
                                <div className={!isTouchDevice ? "registerBlock" : "registerBlockTouch"} style={{"padding-top": "60px"}}>
+                                     <img className={!isTouchDevice ? "loginLogo" : "loginLogoTouch"}
+                                        src="./DinoLabsLogo-White.png" 
+                                        alt="" 
+                                        style={{"margin": 0}}
+                                    />
+                                    
                                     <div className="registerInputFlex">
                                         <div className="registerNameFlex" style={{"width": "100%", "height": "100%", "display": "flex", "justify-content": "space-between"}}> 
                                             <input className="registerNameInput"  placeholder={"First Name"} onChange={(e) => setFirstName(e.target.value)}/>
