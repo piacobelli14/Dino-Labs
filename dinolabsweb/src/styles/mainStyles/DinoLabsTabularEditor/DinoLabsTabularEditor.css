@@ -1,0 +1,994 @@
+.dinolabsTabularContentWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.dinolabsTabularToolbarWrapper {
+    width: 100%;
+    z-index: 10;
+}
+
+.dinolabsTabularToolBar {
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-bottom: 1px solid #475569;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularWrapperContainer {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 200px);
+    overflow: hidden;
+}
+
+.dinolabsTabularTitleWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 35%;
+    box-sizing: border-box;
+    overflow: scroll;
+    padding: 0 0.4rem;
+    margin-right: 2rem;
+}
+
+.dinolabsTabularFileNameStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.dinolabsTabularFileNameInput {
+    padding: 0.6rem 0.8rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    width: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dinolabsTabularFileNameInput svg {
+    margin-right: 8px;
+}
+
+.dinolabsTabularOperationsButtonsWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px 0 8px;
+}
+
+.dinolabsTabularOperationsButton {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    outline: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularOperationsButton:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+    outline: none;
+}
+
+.dinolabsTabularOperationsButton:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dinolabsTabularDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px; 
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    z-index: 20;
+    box-shadow: 0 0 20px black;
+    overflow: hidden;
+    user-select: none;
+}
+
+.dinolabsTabularDropdownMenu.filter-dropdown,
+.dinolabsTabularDropdownMenu[data-filter="true"],
+.dinolabsTabularDropdownMenu:has(.dinolabsTabularDropdownMenuHeader),
+.dinolabsTabularDropdownMenu:has(.dinolabsTabularDropdownMenuSelection) {
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: 320px !important;
+    max-height: 60vh !important;
+}
+
+.dinolabsTabularDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.dinolabsTabularDropdownMenuItem:hover {
+    opacity: 0.8;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    transform: translateX(1px);
+}
+
+.dinolabsTabularDropdownMenuHeader {
+    padding: 14px 24px;
+    border-bottom: 1px solid #475569;
+    box-sizing: border-box;
+}
+
+.dinolabsTabularDropdownMenuHeaderSearch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+    padding: 6px 4px; 
+}
+
+.dinolabsTabularDropdownMenuHeaderSearch svg {
+    font-size: 10px;
+    color: #f1f5f9;
+}
+
+.dinolabsTabularDropdownMenuSearch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #475569;
+    padding: 0; 
+}
+
+.dinolabsTabularDropdownMenuSearch input {
+    background: transparent;
+    color: #f1f5f9;
+    border: none;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    outline: none;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.dinolabsTabularDropdownMenuSearch input::placeholder {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.dinolabsTabularDropdownMenuSearch input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsTabularDropdownMenuSelection {
+    display: flex;
+    gap: 8px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #475569;
+    box-sizing: border-box;
+}
+
+.dinolabsTabularDropdownMenuSelection button {
+    flex: 1;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularDropdownMenuSelection button:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsTabularDropdownMenuSelection button:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularDropdownMenuSelectionList {
+    overflow: auto;
+    max-height: 120px;
+    min-height: 120px;
+}
+
+.dinolabsTabularDropdownMenuSelectionListNoValue {
+    padding: 14px 24px;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+}
+
+.dinolabsTabularDropdownMenuSelectionListLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+}
+
+.dinolabsTabularDropdownMenuSelectionListLabel:hover {
+    opacity: 0.6; 
+    transform: translateX(1px);
+}
+
+.dinolabsTabularDropdownMenuSelectionListLabel span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dinolabsTabularDropdownMenuSelectionBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-top: 1px solid #475569;
+    box-sizing: border-box;
+}
+
+.dinolabsTabularDropdownMenuSelectionBottom span {
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+}
+
+.dinolabsTabularDropdownMenuSelectionBottom button {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    color: #f1f5f9;
+    border: 1px solid #1e40af;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularDropdownMenuSelectionBottom button:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsTabularWrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.dinolabsEditingTableGridWrapper {
+    border: none;
+    outline: none;
+    padding: 24px;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.dinolabsEditingTableGrid {
+    display: grid;
+    grid-template-columns: repeat(10, auto);
+    grid-template-rows: repeat(8, auto);
+    gap: 8px;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.dinolabsEditingTableGridCells {
+    width: 1.8vw;
+    height: 1.8vw;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+}
+
+.dinolabsTabularWrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dinolabsTabularWrapper::-webkit-scrollbar-track {
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dinolabsTabularWrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTabularWrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+.dinolabsTableGridContainer::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dinolabsTableGridContainer::-webkit-scrollbar-track {
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dinolabsTableGridContainer::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTableGridContainer::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+.dinolabsTableColumnHeaderContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 60px;
+    height: 50px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+}
+
+.dinolabsTableCornerHeader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 50px;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+    border-right: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    box-sizing: border-box;
+    cursor: pointer; 
+}
+
+.dinolabsTableColumnHeaderContent {
+    position: relative;
+    height: 100%;
+    will-change: transform;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsTableColumnHeaderCell {
+    height: 30px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1vw;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsTableCornerHeader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 50px;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    border-right: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    box-sizing: border-box;
+}
+
+.dinolabsTableColumnHeaderContent {
+    position: relative;
+    height: 100%;
+    will-change: transform;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsColumnHeaderCellWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    position: absolute;
+    top: 0;
+}
+
+.dinolabsTabularHeaderFilterContainer {
+    width: 100%;
+    height: 30px;
+    border-right: 1px solid #475569;
+    border-top: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%) !important; 
+    box-sizing: border-box;
+}
+
+.dinolabsTabularHeaderFilterIcon {
+    width: 20%;
+    height: 100%;
+    font-size: 0.6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid #475569;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%) !important; 
+    color: #94a3b8;
+}
+
+.dinolabsTabularHeaderFilter {
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    width: 80%;
+    height: 100%;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e2e8f0;
+    border: none;
+    cursor: pointer;
+    padding: 0 0.6rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    border-radius: 0;
+}
+
+.dinolabsTabularHeaderFilter:hover,
+.dinolabsTabularHeaderFilter:focus {
+    outline: none;
+    border: none;
+}
+
+.dinolabsTabularHeaderFilter::-ms-expand {
+    display: none;
+}
+
+.dinolabsTabularHeaderFilter {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.dinolabsTabularColumnResizeHandle {
+    position: absolute;
+    right: -2.5;
+    top: 0;
+    width: 5;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+}
+
+.dinolabsTableRowHeaderContainer {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsTableRowHeaderContent {
+    position: relative;
+    width: 100%;
+    will-change: transform;
+    background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsTableRowHeaderCell {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    color: #e2e8f0;
+    border-bottom: 1px solid #475569;
+    border-right: 1px solid #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(to right, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.dinolabsTabularRowResizeHandle {
+    position: absolute;
+    bottom: -2.5;
+    left: 0;
+    width: 100%;
+    height: 5;
+    cursor: row-resize;
+    background: transparent;
+}
+
+.dinolabsTableGridContainer {
+    position: absolute;
+    top: 50px;
+    left: 60px;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #1e40af #334155;
+}
+
+.dinolabsTableSelectionOverlay {
+    position: absolute;
+    background-color: rgba(30, 64, 175, 0.1);
+    box-sizing: border-box;
+    border: 2px solid #1e40af;
+    pointer-events: auto;
+}
+
+.dinolabsTableSelectionHandleBottomRight {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 10px;
+    height: 10px; 
+    background-color: #1e40af;
+    cursor: grab;
+    border: 1px solid #f1f5f9;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+.dinolabsTableSelectionHandleBottomRight:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+.dinolabsTableSelectionHandleBottomRight:focus {
+    opacity: 1.0;
+    outline: none;
+}
+
+.dinolabsTableSelectionFormulaOverlay {
+    position: absolute;
+    border: 2px dashed #fbbf24;
+    background-color: rgba(251, 191, 36, 0.08);
+}
+
+.dinolabsTableSelectionRangeOverlay {
+    position: absolute;
+    border: 2px dashed #a855f7;
+    background-color: rgba(168, 85, 247, 0.08);
+}
+
+.dinolabsTableSummaryStatsWrapper {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dinolabsTableSummaryStatsSubWrapper {
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 12px 24px;
+    min-width: 200px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 10px black;
+}
+
+.dinolabsTableSummaryTitleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.dinolabsTableSummaryTitleWrapper strong {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+}
+
+.dinolabsTableSummaryStatList {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+    line-height: 1.4;
+}
+
+.dinolabsTableEditingSearchBoxWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    border: 3px solid #475569;
+    border-radius: 6px;
+    box-shadow: 0 0 40px black;
+    cursor: move;
+    z-index: 6;
+    width: 400px;
+    box-sizing: border-box;
+    padding: 24px 0; 
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    top: 0; 
+    left: 0;
+}
+
+.dinolabsTableEditngSearchBarWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    width: 90%;
+    min-width: 90%;
+    max-width: 90%;
+    border-radius: 6px;
+    padding: 1rem 0.4rem; 
+    border: 1px solid #475569; 
+    border-radius: 6px; 
+    background-color: rgba(255,255,255,0.05);
+    margin: 0.6rem 0; 
+}
+
+.dinolabsTableEditingSearchLabel {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    width: 90%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.4rem;
+    margin-bottom: 8px; 
+}
+
+.dinolabsTableEditingSearchLabel span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.dinolabsTableEditingSearchInput {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTableEditingSearchInput::placeholder {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.dinolabsTableEditingSearchInput:hover {
+    outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsTableEditingSearchInput:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dinolabsTableEditingSearchOperationsButtonWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 90%;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.dinolabsTableEditingSearchOperationsButton {
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.8rem 0.8rem;
+    border: 1px solid #475569;
+}
+
+.dinolabsTableEditingSearchOperationsButton:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsTableEditingSearchOperationsButton:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTableCell {
+    box-sizing: border-box;
+    border-bottom: 1px solid #475569;
+    border-right: 1px solid #475569;
+    overflow: hidden;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    padding: 0px 0px;
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+.dinolabsTableCell:hover {
+    outline: none;
+}
+
+.dinolabsTableCell:focus {
+    outline: none;
+}
+
+.dinolabsTableCellInput {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+    padding: 0 8px;
+    background-color: transparent;
+    color: #e2e8f0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.dinolabsTableCellInput:hover {
+    outline: none;
+}
+
+.dinolabsTableCellInput:focus {
+    outline: none;
+}
+
+.dinolabsTableEditingButtonsWrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 60%;
+    padding: 8px 24px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: scroll;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dinolabsTableEditingInputWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 0rem;
+    padding: 0 0.4rem;
+}
+
+.dinolabsTableEditingButton {
+    background-color: transparent;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #f5f5f5;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dinolabsTableEditingButton:hover {
+    opacity: 0.6; 
+    transform: scale(1.05); 
+    border: none; 
+    outline: none; 
+}
+
+.dinolabsTableEditingButton:focus {
+    background-color: transparent;
+    border: none; 
+    outline: none; 
+}
+
+.dinolabsFormulaBarWrapper {
+    padding: 12px 24px; 
+    border-bottom: 1px solid #475569; 
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+}
+
+.dinolabsFormulaBarWrapper select {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    outline: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    appearance: none;
+    min-width: 150px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dinolabsFormulaBarWrapper select:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsFormulaBarWrapper select:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dinolabsFormulaBarWrapper input {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    color: #f1f5f9; 
+    border: 1px solid #475569; 
+    border-radius: 6px; 
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    outline: none; 
+    flex: 1;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dinolabsFormulaBarWrapper input::placeholder {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.dinolabsFormulaBarWrapper input:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsFormulaBarWrapper input:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}

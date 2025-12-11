@@ -1,0 +1,915 @@
+.dinolabsImageEditorWrapper {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    overflow: scroll;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.dinolabsImageEditorContentCropIndicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 400;
+}
+
+.dinolabsImageEditorToolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    min-height: 100%; 
+    max-height: 100%; 
+    min-width: 40%;
+    max-width: 40%;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%) !important;
+    border-right: 1px solid #475569 !important;
+    overflow: visible;
+}
+
+.dinolabsImageEditorContainerWrapper {
+    min-width: 60%;
+    max-width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%) !important;
+}
+
+.dinolabsImageEditorContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.dinolabsImageEditorContainerInnerStack {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden !important;
+}
+
+.dinolabsImageEditorCellWrapper, 
+.dinolabsImageEditorCellWrapperCollapsed,
+.dinolabsImageEditorCellWrapperLayers, 
+.dinolabsImageEditorCellWrapperLayersCollapsed,
+.dinolabsImageEditorCellWrapperStackNonLayers, 
+.dinolabsImageEditorCellWrapperStackNonLayersLong {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%; 
+    width: 100%; 
+    padding-bottom: 24px;
+    position: relative; 
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    margin: 0; 
+    gap: 0; 
+    overflow: visible;
+}
+
+.dinolabsImageEditorCellWrapperCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.dinolabsImageEditorCellWrapperStackNonLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: auto; 
+    box-sizing: border-box;
+}
+
+.dinolabsImageEditorCellWrapperStackNonLayersLong {
+    min-height: calc(100% - 60px); 
+    max-height: calc(100% - 60px); 
+    height: calc(100% - 60px); 
+    overflow: auto; 
+    box-sizing: border-box;
+    gap: 0; 
+    overflow-x: hidden; 
+    overflow-y: visible; 
+}
+
+.dinolabsImageEditorCellWrapperLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: scroll; 
+    border-top: none; 
+    box-sizing: border-box;
+}
+
+.dinolabsImageEditorCellWrapperLayersCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.dinolabsImageEditorHeaderFlex, 
+.dinolabsImageEditorHeaderFlexDark {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 16px;
+    min-height: 60px;
+    max-height: 60px;
+    margin-bottom: 16px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    border-bottom: 2px solid #475569 !important;
+}
+
+.dinolabsImageEditorHeaderFlexDark {
+    background: linear-gradient(145deg, #37414E 0%, #364254 100%) !important;
+    position: sticky; 
+    top: 0; 
+    z-index: 900; 
+}
+
+.dinolabsImageEditorCellTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.dinolabsImageEditorCellFlexStackSplitWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 0 0 16px !important;
+    overflow: scroll; 
+}
+
+.dinolabsImageEditorCellFlexStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    overflow: scroll; 
+    padding: 0 16px 16px 16px !important;
+}
+
+.dinolabsImageEditorCellFlexStackHalf {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 46%;
+}
+
+.dinolabsImageEditorTextArea {
+    min-width: 100%; 
+    max-width: 100%;
+    height: 60px; 
+    box-sizing: border-box;
+    padding: 0.8rem 1rem; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9; 
+    border: 1px solid #475569; 
+    border-radius: 6px; 
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); 
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    transition: all 0.2s ease;
+}
+
+.dinolabsImageEditorTextArea:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsImageEditorTextArea:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.dinolabsImageEditorLargeStack,
+.dinolabsImageEditorMiniStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.dinolabsImageEditorLargeStack {
+    min-width: 40%;
+    max-width: 40%;
+}
+
+.dinolabsImageEditorMiniStack {
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.dinolabsImageEditorPositionInput,
+.dinolabsImageEditorPositionInputMini,
+.dinolabsImageEditorPositionInputFlexed,
+.dinolabsImageEditorPositionInputFlexedMini,
+.dinolabsImageEditorCSSInput {
+    padding: 0.8rem 0.8rem;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+.dinolabsImageEditorPositionInput::placeholder,
+.dinolabsImageEditorPositionInputMini::placeholder,
+.dinolabsImageEditorPositionInputFlexed::placeholder,
+.dinolabsImageEditorPositionInputFlexedMini::placeholder,
+.dinolabsImageEditorCSSInput::placeholder {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.dinolabsImageEditorPositionInput:hover,
+.dinolabsImageEditorPositionInputMini:hover,
+.dinolabsImageEditorPositionInputFlexed:hover,
+.dinolabsImageEditorPositionInputFlexedMini:hover,
+.dinolabsImageEditorCSSInput:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsImageEditorPositionInput:focus,
+.dinolabsImageEditorPositionInputMini:focus,
+.dinolabsImageEditorPositionInputFlexed:focus,
+.dinolabsImageEditorPositionInputFlexedMini:focus,
+.dinolabsImageEditorCSSInput:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.dinolabsImageEditorPositionInputFlexed {
+    width: 35%;
+    max-width: 35%;
+    min-width: 35%;
+}
+
+.dinolabsImageEditorPositionInputFlexedMini {
+    width: 20%;
+    max-width: 20%;
+    min-width: 20%;
+}
+
+.dinolabsImageEditorPositionInput {
+    max-width: 40%;
+}
+
+.dinolabsImageEditorPositionInputMini {
+    max-width: 20%;
+}
+
+.dinolabsImageEditorCSSInput {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.dinolabsImageEditorCellFlexTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+    opacity: 1;
+    margin: 8px 0;
+}
+
+.dinolabsImageEditorCellFlexTitle span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin-left: 8px;
+}
+
+.dinolabsImageEditorCellFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-width: 100%;
+    gap: 4%;
+}
+
+.dinolabsImageEditorCellFlexSubStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px; 
+    width: 100%; 
+}
+
+.dinolabsImageEditorCellFlexSubRow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0;
+    width: 100%;
+    gap: 4%;
+}
+
+.dinolabsImageEditorCellFlexSupplement {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+}
+
+.dinolabsImageEditorCellMiniInputWrapper {
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px; 
+    min-width: 30%; 
+    max-width: 30%; 
+}
+
+.dinolabsImageEditorBrushSizeFlex {
+    width: 80%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5%;
+}
+
+.dinolabsImageEditorToolButton,
+.dinolabsImageEditorToolButtonBig,
+.dinolabsImageEditorToolButtonBigger,
+.dinolabsImageEditorToolButtonHeader,
+.dinolabsImageEditorToolButtonText,
+.dinolabsImageEditorToolButtonMini, 
+.dinolabsImageEditorToolSelect {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.8rem 0.8rem !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.dinolabsImageEditorToolButton {
+    min-width: 10%;
+    max-width: 10%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.dinolabsImageEditorToolButtonBig {
+    min-width: 50%;
+    max-width: 50%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.dinolabsImageEditorToolButtonBigger {
+    min-width: 40%;
+    max-width: 40%;
+    padding: 0.8rem 0.8rem !important;
+    gap: 8px;
+}
+
+.dinolabsImageEditorToolButtonHeader {
+    width: auto;
+    padding: 0.8rem 0.8rem !important;
+    max-height: 55%;
+}
+
+.dinolabsImageEditorToolButtonText {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.dinolabsImageEditorToolButtonMini {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.dinolabsImageEditorToolButton:hover,
+.dinolabsImageEditorToolButtonBig:hover,
+.dinolabsImageEditorToolButtonBigger:hover,
+.dinolabsImageEditorToolButtonHeader:hover,
+.dinolabsImageEditorToolButtonText:hover,
+.dinolabsImageEditorToolButtonMini:hover,
+.dinolabsImageEditorToolSelect:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+    outline: none;
+}
+
+.dinolabsImageEditorToolButton:focus,
+.dinolabsImageEditorToolButtonBig:focus,
+.dinolabsImageEditorToolButtonBigger:focus,
+.dinolabsImageEditorToolButtonHeader:focus,
+.dinolabsImageEditorToolButtonText:focus,
+.dinolabsImageEditorToolButtonMini:focus,
+.dinolabsImageEditorToolSelect:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.dinolabsImageEditorColorPicker {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsImageEditorColorPicker:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+    border-color: #1e40af;
+}
+
+.dinolabsImageEditorSliderWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 8px;
+}
+
+.dinolabsConfrmationCheck {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0 0 0; 
+}
+
+.dinolabsConfrmationCheck span {
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+    margin: 0; 
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    overflow: hidden; 
+    white-space: nowrap;
+    padding: 0 8px; 
+}
+
+.dinolabsImageResizer {
+    position: absolute;
+    cursor: move;
+}
+
+.dinolabsImageEditorContent {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+    max-width: none;
+    max-height: none;
+}
+
+.dinolabsImageEditorResizeHandle {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #000;
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.dinolabsImageEditorResizeHandle.top-left,
+.dinolabsImageEditorResizeHandle.bottom-left,
+.dinolabsImageEditorResizeHandle.top-right,
+.dinolabsImageEditorResizeHandle.bottom-right,
+.dinolabsImageEditorRotationHandle.top-left,
+.dinolabsImageEditorRotationHandle.bottom-left,
+.dinolabsImageEditorRotationHandle.top-right,
+.dinolabsImageEditorRotationHandle.bottom-right {
+    cursor: grab;
+}
+
+.dinolabsImageEditorResizeHandle:hover {
+    opacity: 0.6;
+}
+
+.dinolabsImageEditorCropRectangle .dinolabsImageEditorResizeHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+}
+
+.dinolabsImageEditorRotationHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.dinolabsCornerInputGridWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.dinolabsCornerInputFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.dinolabsImageEditorModeIndicator {
+    width: 33%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #94a3b8;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.dinolabsImageEditorModeIndicator span {
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+.dinolabsVideoInputBottomBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    min-height: 10%;
+    max-height: 10%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 4;
+    box-sizing: border-box;
+    padding: 0 16px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+    border-top: 1px solid #475569 !important;
+}
+
+.dinolabsClipSliderTrack {
+    background-color: rgba(92, 43, 226, 0.2);
+    pointer-events: none;
+    height: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.dinolabsClipSliderBar {
+    background-color: rgba(229, 75, 75, 0.8);
+    width: 12px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+}
+
+.dinolabsVideoContentFlexBig,
+.dinolabsVideoContentFlexSmall {
+    width: 33%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.dinolabsVideoContentFlexBig {
+    width: auto;
+    justify-content: center;
+    overflow: scroll;
+}
+
+.dinolabsVideoContentFlexSmall {
+    width: auto;
+}
+
+.dinolabsVideoButton,
+.dinolabsVideoButtonHelper,
+.dinolabsVideoButtonSupplementLeading,
+.dinolabsVideoButtonSupplementTrailing,
+.dinolabsVideoButtonX {
+    background-color: transparent;
+    padding: 0;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+.dinolabsVideoButton {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.dinolabsVideoButtonHelper {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.dinolabsVideoButtonSupplementLeading,
+.dinolabsVideoButtonSupplementTrailing {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.dinolabsVideoButtonX {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    opacity: 0.8;
+}
+
+.dinolabsVideoButtonSupplementLeading {
+    margin-right: 8px;
+}
+
+.dinolabsVideoButtonSupplementTrailing {
+    margin-left: 8px;
+    margin-right: 16px;
+}
+
+.dinolabsVideoButton:hover,
+.dinolabsVideoButtonHelper:hover,
+.dinolabsVideoButtonSupplementLeading:hover,
+.dinolabsVideoButtonSupplementTrailing:hover,
+.dinolabsVideoButtonX:hover {
+    color: #f1f5f9;
+    
+    outline: none;
+    border: none;
+}
+
+.dinolabsVideoButton:focus,
+.dinolabsVideoButtonHelper:focus,
+.dinolabsVideoButtonSupplementLeading:focus,
+.dinolabsVideoButtonSupplementTrailing:focus,
+.dinolabsVideoButtonX:focus {
+    outline: none;
+    border: none;
+}
+
+.dinolabsAudioWaveformDisplayBig,
+.dinolabsAudioWaveformDisplaySmall {
+    width: 100%;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-bottom: 1px solid #475569;
+    overflow: visible;
+    position: relative;
+}
+
+.dinolabsAudioWaveformDisplayBig {
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+    border: 1px solid #475569;
+}
+
+.dinolabsAudioWaveformDisplaySmall {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    border: 1px solid #475569;
+    padding: 16px;
+}
+
+.dinolabsAudioWaveformDisplayFlex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+}
+
+.dinolabsImageEditorTextOverlay {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+    border-color: #475569;
+    border-width: 1px;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsImageEditorTextDragSectionTop,
+.dinolabsImageEditorTextDragSectionBottom {
+    width: 100%;
+    height: 10%;
+    background-color: #475569;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+}
+
+.dinolabsImageEditorTextSpace {
+    height: calc(100% - 20%);
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    padding: 8px;
+}
+
+.dinolabsImageEditorTextSpace:hover,
+.dinolabsImageEditorTextSpace:focus {
+    border: none;
+    outline: none;
+}
+
+.dinolabsImageEditorTextCloseButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    color: #f1f5f9;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.dinolabsImageEditorTextResizeHandle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 40%;
+    background-color: #475569;
+    cursor: nwse-resize;
+}
+
+.dinolabsTextEditorLayerList, 
+.dinolabsTextEditorHistoryTimeline {
+    width: 100%; 
+    box-sizing: border-box;
+    padding: 0; 
+    margin: 0; 
+    height: 100%; 
+    overflow: scroll;
+}
+
+.dinolabsTextEditorLayerList li, 
+.dinolabsTextEditorHistoryItem {
+    width: 100%; 
+    overflow: scroll;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0;
+    cursor: pointer;
+    border-bottom: 1px solid #475569; 
+    transition: all 0.2s ease;
+    padding: 0; 
+}
+
+.dinolabsTextEditorLayerList li:hover, 
+.dinolabsTextEditorHistoryItem:hover {
+    background: rgba(30, 64, 175, 0.15);
+    transform: translateX(1px);
+}
+
+.dinolabsTextEditorLayerListFlex {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px; 
+    padding: 0.6rem 0 0 0; 
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}
+
+.dinolabsLayerItem {
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%; 
+}
+
+.dinolabsTextEditorLayerList li small, 
+.dinolabsTextEditorHistoryItem small {
+    font-size: 0.7rem !important; 
+    font-weight: 700; 
+    color: #94a3b8;
+    padding: 0; 
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+     width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}

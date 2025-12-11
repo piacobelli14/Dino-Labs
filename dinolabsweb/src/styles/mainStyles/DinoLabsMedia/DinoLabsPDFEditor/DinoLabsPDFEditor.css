@@ -1,0 +1,591 @@
+.dinolabsPDFContentWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.dinolabsPDFToolbarWrapper {
+    width: 100%;
+    z-index: 4;
+}
+
+.dinolabsPDFToolBar {
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-bottom: 1px solid #475569;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFTitleWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 35%;
+    box-sizing: border-box;
+    overflow: scroll;
+    padding: 0 0.4rem;
+    margin-right: 2rem;
+}
+
+.dinolabsPDFFileNameStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.dinolabsPDFFileNameInput {
+    padding: 0.6rem 0.8rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    width: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dinolabsPDFFileNameInput svg {
+    margin-right: 8px;
+}
+
+.dinolabsPDFOperationsButtonsWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px 0 8px;
+}
+
+.dinolabsPDFOperationsButton {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    outline: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFOperationsButton:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+    outline: none;
+}
+
+.dinolabsPDFOperationsButton:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dinolabsPDFContent {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%) !important;
+}
+
+.dinolabsPDFEditor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 24px;
+    outline: none;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%) !important;
+    color: #f1f5f9;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.4;
+    z-index: 1;
+    overflow: auto;
+    min-height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    box-sizing: border-box;
+}
+
+.dinolabsPDFEditingSearchBoxWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    cursor: move;
+    z-index: 6;
+    width: 400px;
+    box-sizing: border-box;
+    padding: 24px 0; 
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dinolabsPDFEditngSearchBarWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    width: 60%;
+    min-width: 100%;
+    max-width: 100%;
+    border-radius: 6px;
+    padding: 24px; 
+    border-bottom: 1px solid #475569; 
+    border-radius: 0; 
+}
+
+.dinolabsPDFEditingSearchLabel {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    width: 90%;
+    text-align: left;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dinolabsPDFEditingSearchLabel span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.dinolabsPDFEditingSearchInput {
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFEditingSearchInput::placeholder {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.dinolabsPDFEditingSearchInput:hover {
+    outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFEditingSearchInput:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dinolabsPDFEditingSearchOperationsButtonWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 90%;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.dinolabsPDFEditingSearchOperationsButton {
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #475569;
+}
+
+.dinolabsPDFEditingSearchOperationsButton:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFEditingSearchOperationsButton:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFEditingSearchCloseButton {
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+}
+
+.dinolabsPDFDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px; 
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    z-index: 20;
+    box-shadow: 0 0 20px black;
+    overflow: hidden;
+    user-select: none;
+}
+
+.dinolabsPDFDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.dinolabsPDFDropdownMenuItem:hover {
+    opacity: 0.8;
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    transform: translateX(1px);
+}
+
+.math-expression {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    vertical-align: baseline;
+    font-family: 'Times New Roman', serif;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.math-expression:hover {
+    background-color: rgba(30, 64, 175, 0.15);
+}
+
+sup,
+sub {
+    font-size: 0.65em;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+[contenteditable="true"]:focus {
+    outline: 1px solid #1e40af;
+    background-color: rgba(30, 64, 175, 0.1);
+    border-radius: 2px;
+}
+
+.search-match {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 2px;
+}
+
+.search-match-active {
+    background-color: rgba(255, 165, 0, 0.8);
+    border-radius: 2px;
+}
+
+.dinolabsPDFEquationPicker {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    z-index: 10;
+    min-width: 400px;
+    max-width: 400px;
+    max-height: 60%;
+    overflow: auto;
+    color: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsPDFEquationNavButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    padding: 14px 24px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #475569;
+    width: 100%;
+}
+
+.dinolabsPDFEquationNavButtons button {
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #475569;
+}
+
+.dinolabsPDFEquationNavButtons button:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFEquationNavButtons button:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFEquationSelectionButtons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    padding-bottom: 24px;
+    width: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+    overflow: auto;
+    z-index: 1;
+}
+
+.dinolabsPDFEquationSelectionButtons button {
+    padding: 12px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    outline: none;
+    z-index: 1;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFEquationSelectionButtons button:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFEquationSelectionButtons button:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFEquationSelectionButtons label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f1f5f9;
+}
+
+.dinolabsPDFEquationSelectionButtons div {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e40af;
+}
+
+.dinolabsPDFDrawSymbolWrapper {
+    display: flex;
+    width: 100%;
+    min-height: 500px;
+    max-height: 500px;
+    height: 500px;
+    padding-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStack {
+    flex: 1;
+    width: 60%;
+    overflow: hidden;
+    padding: 24px 12px;
+    box-sizing: border-box;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStack canvas {
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: crosshair;
+    display: block;
+    border: 1px solid #475569;
+    border-radius: 6px;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackSuggestions {
+    width: 30%;
+    height: 250px;
+    padding: 24px 12px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackSuggestionsButtons {
+    overflow: auto;
+    display: grid;
+    gap: 8px;
+    height: 250px;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackSuggestionsButtons button {
+    padding: 12px;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border: 1px solid #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    outline: none;
+    z-index: 1;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackSuggestionsButtons button:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackSuggestionsButtons button:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackBottom {
+    display: flex;
+    gap: 8px;
+    padding: 12px 0;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackBottomButton {
+    color: #f1f5f9;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(145deg, #334155 0%, #475569 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.6rem 0.8rem;
+    width: 100%;
+    border: 1px solid #475569;
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackBottomButton:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    border-color: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2);
+}
+
+.dinolabsPDFDrawSymbolSketchBoxStackBottomButton:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}

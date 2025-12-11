@@ -1,0 +1,316 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.dinolabsMonitoringLeadingPanel,
+.dinolabsMonitoringLeadingPanel *,
+.dinolabsMonitoringLeadingPanel *::before,
+.dinolabsMonitoringLeadingPanel *::after {
+  box-sizing: border-box;
+}
+
+.dinolabsMonitoringLeadingPanel {
+  min-width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+}
+
+.dinolabsMonitoringTopBar {
+  min-height: 4.5rem;
+  max-height: 4.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  border-bottom: 1px solid #475569;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsMonitoringTitleSection {
+  display: flex;
+  align-items: center;
+}
+
+.dinolabsMonitoringTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-style: italic;
+}
+
+.dinolabsMonitoringActionSection {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.dinolabsMonitoringButton {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  min-height: 34px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.dinolabsMonitoringButton:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsMonitoringButton:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.dinolabsMonitoringButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsMonitoringButton svg {
+  font-size: 0.8rem;
+}
+
+.dinolabsMonitoringContentStack {
+  min-height: calc(100% - 2.5rem);
+  max-height: calc(100% - 2.5rem);
+  height: calc(100% - 2.5rem);
+  width: 100%;
+  flex-grow: 1;
+  box-sizing: border-box;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dinolabsMonitoringSection {
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid #475569;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsMonitoringSectionHeader {
+  min-height: 4rem;
+  max-height: 4rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  border-bottom: 1px solid #475569;
+}
+
+.dinolabsMonitoringSectionHeader svg {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.dinolabsMonitoringSectionContent {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dinolabsMonitoringRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+  box-sizing: border-box;
+}
+
+.dinolabsMonitoringRow:last-child {
+  border-bottom: none;
+}
+
+.dinolabsMonitoringKey {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.dinolabsMonitoringValue {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dinolabsMonitoringUsageWrapper {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.dinolabsMonitoringUsageBar {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsMonitoringUsageFill {
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(59, 130, 246, 0.3);
+}
+
+.dinolabsMonitoringContentStack::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dinolabsMonitoringContentStack::-webkit-scrollbar-track {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dinolabsMonitoringContentStack::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsMonitoringContentStack::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+@media (max-width: 1024px) {
+  .dinolabsMonitoringSectionContent {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dinolabsMonitoringTopBar {
+    padding: 0 0.75rem;
+  }
+  
+  .dinolabsMonitoringActionSection {
+    gap: 0.75rem;
+  }
+  
+  .dinolabsMonitoringSectionContent {
+    padding: 16px;
+  }
+  
+  .dinolabsMonitoringButton {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+  
+  .dinolabsMonitoringKey,
+  .dinolabsMonitoringValue {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dinolabsMonitoringTopBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-height: auto;
+    max-height: auto;
+    padding: 12px;
+  }
+  
+  .dinolabsMonitoringTitleSection {
+    justify-content: center;
+  }
+  
+  .dinolabsMonitoringActionSection {
+    justify-content: center;
+  }
+  
+  .dinolabsMonitoringSectionContent {
+    padding: 12px;
+  }
+  
+  .dinolabsMonitoringRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .dinolabsMonitoringKey {
+    min-width: auto;
+  }
+  
+  .dinolabsMonitoringValue {
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .dinolabsMonitoringSection,
+  .dinolabsMonitoringTopBar,
+  .dinolabsMonitoringSectionHeader,
+  .dinolabsMonitoringButton,
+  .dinolabsMonitoringUsageBar {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dinolabsMonitoringButton,
+  .dinolabsMonitoringUsageFill {
+    transition: none;
+  }
+}

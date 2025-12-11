@@ -1,0 +1,1527 @@
+.dinolabsCalendarWeekContent .dinolabsCalendarHourSlot {
+  margin-bottom: 4px;
+}
+
+.dinolabsCalendarWeekContent .dinolabsCalendarHourSlot:last-child {
+  margin-bottom: 0;
+}*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.calendarPageWrapper,
+.calendarPageWrapper *,
+.calendarPageWrapper *::before,
+.calendarPageWrapper *::after {
+  box-sizing: border-box;
+}
+
+.calendarPageWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw; 
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.calendarCellHeaderContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100vw;
+  height: calc(100vh - 60px) !important;
+  min-height: calc(100vh - 60px) !important;
+  max-height: calc(100vh - 60px) !important;
+  position: relative;
+}
+
+.calendarCellContentWrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: #24242B;
+  width: 100%;
+  flex: 1;
+}
+
+.calendarContentSideBar {
+  width: 280px;
+  height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  position: relative;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden !important;
+}
+
+.calendarSideBarButtonWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 100% !important;
+  max-width: 100% !important; 
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 20px;
+}
+
+.calendarSection {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.calendarSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  color: #f1f5f9;
+}
+
+.calendarSectionTitle svg {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.calendarViewButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendarViewButton {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendarViewButton:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.calendarViewButton.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.calendarSearchBox {
+  margin-bottom: 10px;
+}
+
+.calendarSearchInput {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.calendarSearchInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.calendarFilterSelect {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+}
+
+.calendarFilterSelect::-ms-expand {
+  display: none;
+}
+
+.calendarActionButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  word-break: break-word;
+  margin-bottom: 8px;
+}
+
+.calendarActionButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.calendarActionButton.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #2563eb;
+  color: #ffffff;
+  width: 100%;
+}
+
+.calendarActionButton.secondary {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-color: #475569;
+  color: #f1f5f9;
+  width: 100%;
+}
+
+.calendarActionButton.secondary:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+}
+
+.calendarActionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendarEventTypes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendarEventType {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.calendarEventTypeColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #475569;
+}
+
+.dinolabsCalendarMini {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsCalendarMiniHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dinolabsCalendarMiniHeader h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.dinolabsCalendarNavButton {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dinolabsCalendarNavButton:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.dinolabsCalendarMiniWeekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.dinolabsCalendarMiniWeekDay {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 4px 2px;
+}
+
+.dinolabsCalendarMiniDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dinolabsCalendarMiniDay {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #f1f5f9;
+  padding: 6px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dinolabsCalendarMiniDay:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.dinolabsCalendarMiniDay.today {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+.dinolabsCalendarMiniDay.selected {
+  background: rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.dinolabsCalendarMiniDay.otherMonth {
+  color: #64748b;
+}
+
+.calendarContentMainFlex {
+  width: calc(100% - 280px);
+  height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.calendarContentMainScroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex; 
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+  height: 100%; 
+  max-width: 100%;
+  min-height: 0;
+}
+
+.calendarMainHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.calendarNavigation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.calendarCurrentDate {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+  min-width: 200px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.calendarHeaderActions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.calendarMainContent {
+  width: 100%;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+
+}
+
+.dinolabsCalendarGrid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dinolabsCalendarWeekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: transparent;
+  padding: 0;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.dinolabsCalendarWeekDay {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  padding: 12px 8px;
+  border: 1px solid #475569;
+  margin: 0 2px;
+}
+
+.dinolabsCalendarWeekDay:first-child {
+  border-radius: 6px 0 0 6px;
+  margin-left: 0;
+}
+
+.dinolabsCalendarWeekDay:last-child {
+  border-radius: 0 6px 6px 0;
+  margin-right: 0;
+}
+
+.dinolabsCalendarDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 4px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.dinolabsCalendarDay {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  min-height: 80px;
+  max-height: 120px;
+}
+
+.dinolabsCalendarDay:hover {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+}
+
+.dinolabsCalendarDay.today {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  border: 2px solid #3b82f6;
+}
+
+.dinolabsCalendarDay.selected {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+  border: 2px solid #2563eb;
+}
+
+.dinolabsCalendarDay.otherMonth {
+  opacity: 0.4;
+}
+
+.dinolabsCalendarDayNumber {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.dinolabsCalendarDayEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.dinolabsCalendarDayEvent {
+  background: #3b82f6;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dinolabsCalendarDayEvent:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dinolabsCalendarEventTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.dinolabsCalendarEventTime {
+  font-size: 9px;
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+.dinolabsCalendarEventCount {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  color: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  border: 1px solid #475569;
+  margin: 2px 0;
+}
+
+.dinolabsCalendarEventCount:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+}
+
+.dinolabsCalendarCollapseEvents {
+  background: linear-gradient(145deg, #374151 0%, #4b5563 100%);
+  color: #9ca3af;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  border: 1px solid #4b5563;
+  margin-top: 2px;
+}
+
+.dinolabsCalendarCollapseEvents:hover {
+  background: linear-gradient(135deg, #6b7280 0%, #374151 100%);
+  color: #f3f4f6;
+}
+
+.calendarActionButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.dinolabsCalendarMoreEvents {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: center;
+  padding: 2px;
+}
+
+.dinolabsCalendarWeekView,
+.dinolabsCalendarDayView {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dinolabsCalendarWeekView .dinolabsCalendarWeekHeader {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  background: transparent;
+  padding: 0;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.dinolabsCalendarWeekView .dinolabsCalendarWeekDay {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dinolabsCalendarWeekView .dinolabsCalendarWeekDay:hover {
+  background: linear-gradient(145deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.dinolabsCalendarWeekView .dinolabsCalendarWeekDay.today {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  border: 2px solid #3b82f6;
+}
+
+.dinolabsCalendarWeekView .dinolabsCalendarWeekDay.selected {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+  border: 2px solid #2563eb;
+}
+
+.dinolabsCalendarTimeColumn {
+  width: 80px;
+  background: transparent;
+}
+
+.dinolabsCalendarWeekDayName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.dinolabsCalendarWeekDayNumber {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-top: 4px;
+}
+
+.dinolabsCalendarWeekContent {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  gap: 4px;
+  background: transparent;
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100% - 80px);
+}
+
+.dinolabsCalendarWeekContent .dinolabsCalendarTimeColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dinolabsCalendarWeekContent .dinolabsCalendarTimeSlot {
+  margin-bottom: 4px;
+}
+
+.dinolabsCalendarWeekContent .dinolabsCalendarTimeSlot:last-child {
+  margin-bottom: 0;
+}
+
+.dinolabsCalendarTimeSlot {
+  height: 60px;
+  padding: 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.dinolabsCalendarTimeLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dinolabsCalendarDayColumn {
+  position: relative;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 4px;
+}
+
+.dinolabsCalendarHourSlot {
+  height: 60px;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+  margin-bottom: 0;
+}
+
+.dinolabsCalendarHourSlot:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.dinolabsCalendarHourSlot:last-child {
+  border-bottom: none;
+}
+
+.dinolabsCalendarCurrentTimeLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ef4444;
+  z-index: 10;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+.dinolabsCalendarWeekEvent {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.dinolabsCalendarDayEvent {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.dinolabsCalendarWeekEvent:hover,
+.dinolabsCalendarDayEvent:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+}
+
+.dinolabsCalendarEventLocation {
+  font-size: 10px;
+  opacity: 0.8;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dinolabsCalendarDayView {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dinolabsCalendarDayHeader {
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.dinolabsCalendarDayHeader h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+  text-align: center;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  padding: 16px;
+  border: 1px solid #475569;
+  border-radius: 6px;
+}
+
+.dinolabsCalendarDayContent {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0 4px;
+  background: transparent;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarTimeColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarTimeSlot {
+  height: 60px;
+  padding: 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarTimeSlot:last-child {
+  margin-bottom: 0;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarTimeLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarDayColumn {
+  position: relative;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 4px;
+  min-height: calc(24 * 64px);
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarHourSlot {
+  height: 60px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.dinolabsCalendarDayContent .dinolabsCalendarHourSlot:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.dinolabsCalendarModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dinolabsCalendarModal {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.dinolabsCalendarModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #475569;
+}
+
+.dinolabsCalendarModalHeader h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.dinolabsCalendarModalClose {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dinolabsCalendarModalClose:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.dinolabsCalendarModalContent {
+  padding: 20px;
+}
+
+.dinolabsCalendarFormGroup {
+  margin-bottom: 16px;
+}
+
+.dinolabsCalendarFormGroup label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.dinolabsCalendarInput,
+.dinolabsCalendarTextarea,
+.dinolabsCalendarSelect {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsCalendarSelect {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+  cursor: pointer;
+}
+
+.dinolabsCalendarSelect::-ms-expand {
+  display: none;
+}
+
+.dinolabsCalendarInput:focus,
+.dinolabsCalendarTextarea:focus,
+.dinolabsCalendarSelect:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.dinolabsCalendarTextarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.dinolabsCalendarFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.dinolabsCalendarColorPicker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dinolabsCalendarColorOption {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dinolabsCalendarColorOption:hover {
+  border-color: #f1f5f9;
+}
+
+.dinolabsCalendarColorOption.selected {
+  border-color: #f1f5f9;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.dinolabsCalendarModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid #475569;
+}
+
+.dinolabsCalendarButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.dinolabsCalendarButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsCalendarButton.secondary {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.dinolabsCalendarButton.secondary:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+}
+
+.dinolabsCalendarButton.danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.dinolabsCalendarButton.danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  border-color: #b91c1c;
+}
+
+.customDateTimePickerWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.customDateTimePickerDisplay {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customDateTimePickerDisplay:hover {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.customDateTimePickerDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  margin-top: 4px;
+}
+
+.customDatePickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.customDatePickerHeader h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.customDatePickerNavButton {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.customDatePickerNavButton:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.customDatePickerWeekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.customDatePickerWeekDay {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 4px 2px;
+}
+
+.customDatePickerDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.customDatePickerDay {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #f1f5f9;
+  padding: 6px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customDatePickerDay:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.customDatePickerDay.today {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+.customDatePickerDay.selected {
+  background: rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.customDatePickerDay.otherMonth {
+  color: #64748b;
+}
+
+.customTimePickerSection {
+  border-top: 1px solid #475569;
+  padding-top: 12px;
+  margin-bottom: 12px;
+}
+
+.customTimePickerLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.customTimePickerInputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customTimePickerSelect {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  min-width: 60px;
+}
+
+.customTimePickerSelect:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.customTimePickerSeparator {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.customDateTimePickerActions {
+  border-top: 1px solid #475569;
+  padding-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.customDateTimePickerButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.customDateTimePickerButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+}
+
+.customDateTimePickerButton.secondary {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.customDateTimePickerButton.secondary:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+}
+
+@media (max-width: 1024px) {
+  .calendarContentSideBar {
+    width: 240px;
+  }
+  
+  .calendarContentMainFlex {
+    width: calc(100% - 240px);
+  }
+  
+  .dinolabsCalendarFormRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendarCellContentWrapper {
+    flex-direction: column;
+  }
+  
+  .calendarContentSideBar {
+    width: 100%;
+    height: auto;
+    order: 2;
+  }
+  
+  .calendarContentMainFlex {
+    width: 100%;
+    order: 1;
+  }
+  
+  .calendarMainHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .calendarNavigation {
+    order: 2;
+  }
+  
+  .calendarHeaderActions {
+    order: 1;
+  }
+  
+  .calendarCurrentDate {
+    font-size: 1.2rem;
+    min-width: auto;
+  }
+  
+  .dinolabsCalendarDaysGrid {
+    gap: 2px;
+  }
+  
+  .dinolabsCalendarDay {
+    min-height: 80px;
+    padding: 4px;
+  }
+  
+  .dinolabsCalendarModalActions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendarContentMainScroll {
+    padding: 12px;
+  }
+  
+  .calendarMainHeader {
+    padding: 12px;
+  }
+  
+  .calendarMainContent {
+    padding: 12px;
+  }
+  
+  .calendarSideBarButtonWrapper {
+    padding: 12px;
+  }
+  
+  .dinolabsCalendarDay {
+    min-height: 60px;
+    padding: 2px;
+  }
+  
+  .dinolabsCalendarDayNumber {
+    font-size: 0.8rem;
+  }
+  
+  .dinolabsCalendarEventTitle {
+    font-size: 9px;
+  }
+  
+  .dinolabsCalendarModal {
+    width: 95%;
+    margin: 10px;
+  }
+}
+
+.calendarContentSideBar::-webkit-scrollbar,
+.calendarContentMainScroll::-webkit-scrollbar,
+.dinolabsCalendarModal::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.calendarContentSideBar::-webkit-scrollbar-thumb,
+.calendarContentMainScroll::-webkit-scrollbar-thumb,
+.dinolabsCalendarModal::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.calendarContentSideBar::-webkit-scrollbar-thumb:hover,
+.calendarContentMainScroll::-webkit-scrollbar-thumb:hover,
+.dinolabsCalendarModal::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.calendarContentSideBar::-webkit-scrollbar-track,
+.calendarContentMainScroll::-webkit-scrollbar-track,
+.dinolabsCalendarModal::-webkit-scrollbar-track {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.calendarNavButton {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%) !important;
+  border: 1px solid #475569 !important;
+  color: #f1f5f9 !important;
+  border-radius: 6px !important;
+  padding: 0.6rem 0.8rem !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 50px !important;
+  height: 50px !important;
+}
+
+.calendarNavButton:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  border-color: #3b82f6 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2) !important;
+}
+
+.dinolabsCalendarDayEventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dinolabsCalendarDayEventItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.dinolabsCalendarDayEventItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsCalendarDayEventInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.dinolabsCalendarDayEventColor {
+  width: 4px;
+  height: 40px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.dinolabsCalendarDayEventDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.dinolabsCalendarDayEventTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dinolabsCalendarDayEventTime {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.dinolabsCalendarDayEventLocation {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dinolabsCalendarDayEventDescription {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.dinolabsCalendarDayEventActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dinolabsCalendarDayEventActions .dinolabsCalendarButton {
+  padding: 0.8rem 1rem;
+  min-width: 32px;
+  height: 32px;
+}
+
+.calendarNavButton:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+}
+
+.calendarTimezoneInfo {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+}

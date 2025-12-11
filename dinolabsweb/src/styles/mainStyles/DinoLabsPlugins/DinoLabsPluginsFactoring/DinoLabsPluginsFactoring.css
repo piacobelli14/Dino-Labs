@@ -1,0 +1,425 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.dinolabsPluginsFactoringApp {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: #f1f5f9;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  height: 100vh !important;
+  min-height: auto !important;
+}
+
+.dinolabsPluginsFactoringContainer {
+  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  min-height: 0 !important;
+  position: relative;
+}
+
+.dinolabsPluginsFactoringHistory {
+  height: 160px;
+  overflow-y: auto;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  display: flex;
+  flex-direction: column-reverse;
+  border-bottom: 1px solid #475569;
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+.dinolabsPluginsFactoringHistoryItem {
+  padding: 1rem 0.8rem;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border-bottom: 1px solid #475569;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f1f5f9;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPluginsFactoringHistoryItem:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  opacity: 0.6;
+}
+
+.dinolabsPluginsFactoringHistoryExpression {
+  margin-bottom: 0.5rem;
+  text-align: right;
+}
+
+.dinolabsPluginsFactoringHistoryMode {
+  color: #3b82f6;
+  font-size: 0.7rem;
+  margin-right: 0.5rem;
+  font-weight: 700;
+}
+
+.dinolabsPluginsFactoringHistorySteps {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  text-align: right;
+}
+
+.dinolabsPluginsFactoringHistoryStep {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  padding: 0.25rem 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dinolabsPluginsFactoringHistoryStep:last-child {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.dinolabsPluginsFactoringInputContainer {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-bottom: 1px solid #475569;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.6rem 0;
+}
+
+.dinolabsPluginsFactoringInput {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f5f9;
+  background: none;
+  border: none;
+  outline: none;
+  text-align: right;
+}
+
+.dinolabsPluginsFactoringInput::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.dinolabsPluginsFactoringTabs {
+  display: flex;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  padding: 1rem 0.8rem;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid #475569;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.dinolabsPluginsFactoringTabButton {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  cursor: pointer;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPluginsFactoringTabButton.dinolabsPluginsFactoringTabActive {
+  color: white;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsPluginsFactoringTabButton:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsPluginsFactoringKeyboard {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 20px;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  padding: 20px;
+  flex: 0 0 auto !important;
+  align-items: start;
+}
+
+.dinolabsPluginsFactoringKeyboardMain,
+.dinolabsPluginsFactoringKeyboardFunctions,
+.dinolabsPluginsFactoringKeyboardVariables,
+.dinolabsPluginsFactoringKeyboardControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dinolabsPluginsFactoringKeyboardRow {
+  display: flex;
+  gap: 8px;
+}
+
+.dinolabsPluginsFactoringKeyboardMain .dinolabsPluginsFactoringKeyboardRow {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+}
+
+.dinolabsPluginsFactoringKeyboardMain .dinolabsPluginsFactoringKeyboardRow:last-child {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.dinolabsPluginsFactoringKeyboardFunctions .dinolabsPluginsFactoringKeyboardRow {
+  display: flex;
+  gap: 8px;
+}
+
+.dinolabsPluginsFactoringKeyboardVariables .dinolabsPluginsFactoringKeyboardRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.dinolabsPluginsFactoringKeyboardControls .dinolabsPluginsFactoringKeyboardRow {
+  display: flex;
+}
+
+.dinolabsPluginsFactoringButton {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid #475569;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  color: #f1f5f9;
+  padding: 0 12px;
+}
+
+.dinolabsPluginsFactoringButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+}
+
+.dinolabsPluginsFactoringButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPluginsFactoringButton:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPluginsFactoringNumber {
+  background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.dinolabsPluginsFactoringNumber:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsPluginsFactoringOperator {
+  background: linear-gradient(145deg, #64748b 0%, #475569 100%);
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.dinolabsPluginsFactoringOperator:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsPluginsFactoringFunction {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border-color: #2563eb;
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.dinolabsPluginsFactoringFunction:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.dinolabsPluginsFactoringVariable {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border-color: #7c3aed;
+  font-style: italic;
+  font-weight: 700;
+  min-width: 60px;
+}
+
+.dinolabsPluginsFactoringVariable:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border-color: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+}
+
+.dinolabsPluginsFactoringControl {
+  background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+  color: #f9fafb;
+  border-color: #1f2937;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 80px;
+}
+
+.dinolabsPluginsFactoringControl:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsPluginsFactoringEnter {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.dinolabsPluginsFactoringEnter:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-color: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.dinolabsPluginsFactoringHistory::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dinolabsPluginsFactoringHistory::-webkit-scrollbar-track {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dinolabsPluginsFactoringHistory::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsPluginsFactoringHistory::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+@media (max-width: 768px) {
+  .dinolabsPluginsFactoringKeyboard {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 14px;
+  }
+
+  .dinolabsPluginsFactoringKeyboardMain .dinolabsPluginsFactoringKeyboardRow {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .dinolabsPluginsFactoringKeyboardMain .dinolabsPluginsFactoringKeyboardRow:last-child {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .dinolabsPluginsFactoringKeyboardFunctions .dinolabsPluginsFactoringKeyboardRow,
+  .dinolabsPluginsFactoringKeyboardVariables,
+  .dinolabsPluginsFactoringKeyboardControls {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dinolabsPluginsFactoringKeyboardVariables {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dinolabsPluginsFactoringKeyboardVariables .dinolabsPluginsFactoringKeyboardRow {
+    display: contents;
+  }
+
+  .dinolabsPluginsFactoringKeyboardControls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dinolabsPluginsFactoringKeyboardControls .dinolabsPluginsFactoringKeyboardRow {
+    display: contents;
+  }
+
+  .dinolabsPluginsFactoringButton {
+    height: 36px;
+    font-size: 11px;
+    min-width: 36px;
+  }
+
+  .dinolabsPluginsFactoringTabs {
+    padding: 12px;
+  }
+
+  .dinolabsPluginsFactoringTabButton {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .dinolabsPluginsFactoringInput {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .dinolabsPluginsFactoringHistoryStep {
+    font-size: 0.7rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dinolabsPluginsFactoringKeyboard {
+    padding: 18px;
+    gap: 18px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .dinolabsPluginsFactoringKeyboard {
+    padding: 22px;
+    gap: 22px;
+  }
+}
