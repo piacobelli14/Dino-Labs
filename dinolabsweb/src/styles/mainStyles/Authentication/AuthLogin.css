@@ -123,10 +123,12 @@
     z-index: 10;
     border-radius: 0; 
     border: none; 
-    min-height: calc(100% - 60px); 
     width: 30vw;
     z-index: 1;
     overflow: scroll; 
+    height: 100%; 
+    min-height: 100%; 
+    max-height: 100%; 
 }
 
 .loginBlockTouch {
@@ -135,9 +137,14 @@
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    max-height: calc(100% - 60px);  
-    min-height: calc(100% - 60px); 
     overflow: scroll; 
+}
+
+
+@media (min-width: 1200px) {
+    .loginBlock {
+        justify-content: center; 
+    }
 }
 
 
