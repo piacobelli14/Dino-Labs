@@ -103,10 +103,7 @@ export default function DinoLabsPluginsFactoring() {
     });
     
     formatted = formatted.replace(/\*/g, '×');
-    formatted = formatted.replace(/-/g, '−');
-    formatted = formatted.replace(/ /g, ''); 
-    
-    formatted = formatted.replace(/([+−×÷])/g, ' $1 ');
+    formatted = formatted.replace(/(?<![a-zA-Z])-(?![a-zA-Z])/g, '−');
     
     formatted = formatted.replace(/\s+/g, ' ').trim();
 
@@ -126,7 +123,6 @@ export default function DinoLabsPluginsFactoring() {
 
     return formatted;
   };
-
 
   const primeFactorize = (n) => {
     const steps = [];
@@ -226,15 +222,162 @@ export default function DinoLabsPluginsFactoring() {
     }
 
     divs.sort((a, b) => a - b);
-    steps.push(`Divisors: {${divs.join(", ")}}. `);
+    steps.push(`Divisors: {${divs.join(", ")}}.`);
     steps.push(`Count: ${divs.length} divisors.`);
 
     return { result: `{${divs.join(", ")}}`, steps };
   };
 
+  const stripOuterParentheses = (expr) => {
+    let result = expr.trim();
+    while (result.startsWith("(") && result.endsWith(")")) {
+      let depth = 0;
+      let isOuter = true;
+      for (let i = 0; i < result.length - 1; i++) {
+        if (result[i] === "(") depth++;
+        else if (result[i] === ")") depth--;
+        if (depth === 0 && i < result.length - 1) {
+          isOuter = false;
+          break;
+        }
+      }
+      if (isOuter) {
+        result = result.slice(1, -1).trim();
+      } else {
+        break;
+      }
+    }
+    return result;
+  };
+
+  const parseBinomial = (expr) => {
+    const cleaned = expr.replace(/\s+/g, "");
+    let coeff = 0;
+    let constant = 0;
+    
+    let processExpr = cleaned.replace(/^(?=[^+-])/, "+");
+    const terms = processExpr.match(/[+-][^+-]+/g) || [];
+    
+    terms.forEach(term => {
+      term = term.trim();
+      if (term.includes("x")) {
+        let c = term.replace(/x/g, "").replace(/\s/g, "");
+        if (c === "+" || c === "") c = "1";
+        if (c === "-") c = "-1";
+        coeff = parseInt(c);
+      } else {
+        const num = parseInt(term);
+        if (!isNaN(num)) constant = num;
+      }
+    });
+    
+    return { coeff, constant };
+  };
+
+  const expandBinomialProduct = (expr) => {
+    const cleaned = expr.replace(/\s+/g, "").replace(/\]\[/g, ")(").replace(/\[/g, "(").replace(/\]/g, ")");
+    
+    const match = cleaned.match(/^\(([^)]+)\)\(([^)]+)\)$/);
+    if (!match) return null;
+    
+    const first = parseBinomial(match[1]);
+    const second = parseBinomial(match[2]);
+    
+    const a = first.coeff * second.coeff;
+    const b = first.coeff * second.constant + first.constant * second.coeff;
+    const c = first.constant * second.constant;
+    
+    let result = "";
+    if (a !== 0) {
+      result += a === 1 ? "x^2" : a === -1 ? "-x^2" : `${a}x^2`;
+    }
+    if (b !== 0) {
+      if (result && b > 0) result += "+";
+      result += b === 1 ? "x" : b === -1 ? "-x" : `${b}x`;
+    }
+    if (c !== 0) {
+      if (result && c > 0) result += "+";
+      result += `${c}`;
+    }
+    
+    return result || "0";
+  };
+
+  const expandCoefficientProduct = (expr) => {
+    const cleaned = expr.replace(/\s+/g, "").replace(/\[/g, "(").replace(/\]/g, ")");
+    
+    const match = cleaned.match(/^(-?\d+)\(([^)]+)\)$/);
+    if (!match) return null;
+    
+    const coeff = parseInt(match[1]);
+    const inner = match[2];
+    
+    const coeffs = { 2: 0, 1: 0, 0: 0 };
+    let processExpr = inner.replace(/^(?=[^+-])/, "+");
+    const terms = processExpr.match(/[+-][^+-]+/g) || [];
+    
+    terms.forEach(term => {
+      term = term.trim();
+      if (term.includes("x^2") || term.includes("x²")) {
+        let c = term.replace(/x\^?2?|x²/g, "").replace(/\s/g, "");
+        if (c === "+" || c === "") c = "1";
+        if (c === "-") c = "-1";
+        coeffs[2] = parseInt(c);
+      } else if (term.includes("x") && !term.includes("^")) {
+        let c = term.replace(/x/g, "").replace(/\s/g, "");
+        if (c === "+" || c === "") c = "1";
+        if (c === "-") c = "-1";
+        coeffs[1] = parseInt(c);
+      } else {
+        const num = parseInt(term);
+        if (!isNaN(num)) coeffs[0] = num;
+      }
+    });
+    
+    const a = coeffs[2] * coeff;
+    const b = coeffs[1] * coeff;
+    const c = coeffs[0] * coeff;
+    
+    let result = "";
+    if (a !== 0) {
+      result += a === 1 ? "x^2" : a === -1 ? "-x^2" : `${a}x^2`;
+    }
+    if (b !== 0) {
+      if (result && b > 0) result += "+";
+      result += b === 1 ? "x" : b === -1 ? "-x" : `${b}x`;
+    }
+    if (c !== 0) {
+      if (result && c > 0) result += "+";
+      result += `${c}`;
+    }
+    
+    return result || "0";
+  };
+
+  const preprocessExpression = (expr) => {
+    let processed = convertSymbolsForEvaluation(expr);
+    processed = processed.replace(/\s+/g, "").replace(/\[/g, "(").replace(/\]/g, ")");
+    
+    processed = stripOuterParentheses(processed);
+    
+    const binomialExpanded = expandBinomialProduct(processed);
+    if (binomialExpanded) {
+      return binomialExpanded;
+    }
+    
+    const coeffExpanded = expandCoefficientProduct(processed);
+    if (coeffExpanded) {
+      return coeffExpanded;
+    }
+    
+    processed = processed.replace(/[()[\]]/g, "");
+    
+    return processed;
+  };
+
   const parsePolynomial = (expr) => {
-    const evalExpr = convertSymbolsForEvaluation(expr); 
-    const cleaned = evalExpr.replace(/\s+/g, "").replace(/−/g, "-");
+    const processed = preprocessExpression(expr);
+    const cleaned = processed.replace(/\s+/g, "").replace(/−/g, "-");
     const coeffs = { 2: 0, 1: 0, 0: 0 };
 
     let processExpr = cleaned.replace(/^(?=[^+-])/, "+");
@@ -263,10 +406,14 @@ export default function DinoLabsPluginsFactoring() {
 
   const factorQuadratic = (expr) => {
     const steps = [];
+    const preprocessed = preprocessExpression(expr);
     const coeffs = parsePolynomial(expr);
     const a = coeffs[2], b = coeffs[1], c = coeffs[0];
 
-    steps.push(`Parsing: ${a}x^2 + ${b}x + ${c}.`); 
+    if (preprocessed !== convertSymbolsForEvaluation(expr).replace(/\s+/g, "").replace(/[()[\]]/g, "")) {
+      steps.push(`Expanded: ${preprocessed}.`);
+    }
+    steps.push(`Parsing: ${a}x^2 + ${b}x + ${c}.`);
 
     if (a === 0) {
       if (b === 0) {
@@ -325,7 +472,12 @@ export default function DinoLabsPluginsFactoring() {
 
   const factorCommon = (expr) => {
     const steps = [];
-    steps.push(`Analyzing: ${expr}.`);
+    const preprocessed = preprocessExpression(expr);
+    
+    if (preprocessed !== convertSymbolsForEvaluation(expr).replace(/\s+/g, "").replace(/[()[\]]/g, "")) {
+      steps.push(`Expanded: ${preprocessed}.`);
+    }
+    steps.push(`Analyzing: ${preprocessed}.`);
 
     const coeffs = parsePolynomial(expr);
     const a = coeffs[2], b = coeffs[1], c = coeffs[0];
@@ -342,7 +494,7 @@ export default function DinoLabsPluginsFactoring() {
 
     if (commonFactor <= 1) {
       steps.push("No common factor greater than 1.");
-      return { result: expr, steps };
+      return { result: preprocessed, steps };
     }
 
     steps.push(`GCF of coefficients: ${commonFactor}.`);

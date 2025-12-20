@@ -6,6 +6,17 @@ import { faGear, faXmarkSquare } from "@fortawesome/free-solid-svg-icons";
 
 export default function DinoLabsPluginsCalculator() {
 
+  const SUPERSCRIPT_MAP = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '-': '⁻', '+': '⁺', '.': '·'
+  };
+
+  const SUBSCRIPT_MAP = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+    '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
+  };
+
   const SYMBOL_REPLACEMENTS = [
     { pattern: /sqrt\(/g, replacement: "√(", description: "Square Root" },
     { pattern: /cbrt\(/g, replacement: "∛(", description: "Cube Root" },
@@ -28,21 +39,10 @@ export default function DinoLabsPluginsCalculator() {
     { pattern: /\+\-/g, replacement: "±", description: "Plus-Minus" },
     { pattern: /-\+/g, replacement: "∓", description: "Minus-Plus" },
     { pattern: /\*\*/g, replacement: "^", description: "Exponentiation" },
-    { pattern: /\^-(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g, replacement: "^⁻$1", description: "Negative Exponent" },
     { pattern: /(?<![a-zA-Z])\*(?![a-zA-Z])/g, replacement: "×", description: "Multiplication" },
     { pattern: /(?<![a-zA-Z])\/(?![a-zA-Z])/g, replacement: "÷", description: "Division" },
     { pattern: /\binfinity\b/g, replacement: "∞", description: "Infinity" },
     { pattern: /\binf\b/g, replacement: "∞", description: "Infinity" },
-    { pattern: /\b1\/2\b/g, replacement: "½", description: "One Half" },
-    { pattern: /\b1\/3\b/g, replacement: "⅓", description: "One Third" },
-    { pattern: /\b2\/3\b/g, replacement: "⅔", description: "Two Thirds" },
-    { pattern: /\b1\/4\b/g, replacement: "¼", description: "One Quarter" },
-    { pattern: /\b3\/4\b/g, replacement: "¾", description: "Three Quarters" },
-    { pattern: /\b1\/5\b/g, replacement: "⅕", description: "One Fifth" },
-    { pattern: /\b1\/6\b/g, replacement: "⅙", description: "One Sixth" },
-    { pattern: /\b1\/8\b/g, replacement: "⅛", description: "One Eighth" },
-    { pattern: /\^2(?!\d)/g, replacement: "²", description: "Squared" },
-    { pattern: /\^3(?!\d)/g, replacement: "³", description: "Cubed" },
     { pattern: /\bsum\(/g, replacement: "∑(", description: "Summation" },
     { pattern: /\bprod\(/g, replacement: "∏(", description: "Product" },
     { pattern: /\bintegral\(/g, replacement: "∫(", description: "Integral" },
@@ -73,6 +73,8 @@ export default function DinoLabsPluginsCalculator() {
     "×": "*",
     "÷": "/",
     "⁻": "-",
+    "⁺": "+",
+    "·": ".",
     "½": "0.5",
     "⅓": "(1/3)",
     "⅔": "(2/3)", 
@@ -81,6 +83,8 @@ export default function DinoLabsPluginsCalculator() {
     "⅕": "0.2",
     "⅙": "(1/6)",
     "⅛": "0.125",
+    "⁰": "^0",
+    "¹": "^1",
     "²": "^2",
     "³": "^3", 
     "⁴": "^4",
@@ -162,6 +166,8 @@ export default function DinoLabsPluginsCalculator() {
   const [decimalPlaces, setDecimalPlaces] = useState(10);
   const [useSignificantFigures, setUseSignificantFigures] = useState(false);
   const [significantFigures, setSignificantFigures] = useState(6);
+  const [useScientificNotation, setUseScientificNotation] = useState(false);
+  const [scientificNotationThreshold, setScientificNotationThreshold] = useState(6);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const inputRef = useRef(null);
@@ -169,6 +175,51 @@ export default function DinoLabsPluginsCalculator() {
 
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  };
+
+  const toSuperscript = (str) => {
+    return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+  };
+
+  const formatExponentsInText = (text, cursorPos) => {
+    let result = '';
+    let newCursorPos = cursorPos;
+    let i = 0;
+    
+    while (i < text.length) {
+      if (text[i] === '^') {
+        let expStart = i + 1;
+        let expEnd = expStart;
+        
+        if (expEnd < text.length && (text[expEnd] === '-' || text[expEnd] === '+')) {
+          expEnd++;
+        }
+        
+        while (expEnd < text.length && /[0-9.]/.test(text[expEnd])) {
+          expEnd++;
+        }
+        
+        if (expEnd > expStart && (text[expStart] !== '-' && text[expStart] !== '+' || expEnd > expStart + 1)) {
+          const exponent = text.substring(expStart, expEnd);
+          const superscripted = toSuperscript(exponent);
+          
+          if (cursorPos > i && cursorPos <= expEnd) {
+            const offsetInExp = cursorPos - expStart;
+            newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
+          } else if (cursorPos > expEnd) {
+            newCursorPos -= (expEnd - i) - superscripted.length;
+          }
+          
+          result += superscripted;
+          i = expEnd;
+          continue;
+        }
+      }
+      result += text[i];
+      i++;
+    }
+    
+    return { text: result, cursorPos: Math.max(0, Math.min(newCursorPos, result.length)) };
   };
 
   const applySymbolFormatting = (text, cursorPos) => {
@@ -195,28 +246,76 @@ export default function DinoLabsPluginsCalculator() {
       }
     }
     
-    return { text: formattedText, cursorPos: newCursorPos };
+    const expFormatted = formatExponentsInText(formattedText, newCursorPos);
+    
+    return { text: expFormatted.text, cursorPos: expFormatted.cursorPos };
   };
 
   const convertSymbolsForEvaluation = (displayExpression) => {
     let evalExpression = displayExpression;
     
+    const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]+/g;
+    evalExpression = evalExpression.replace(superscriptPattern, (match) => {
+      let converted = '';
+      for (const char of match) {
+        converted += SYMBOL_TO_FUNCTION[char] || char;
+      }
+      return converted;
+    });
+    
     for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
-      evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
+      if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]/.test(symbol)) {
+        evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
+      }
     }
     
     return evalExpression;
   };
 
+  const formatScientificNotation = (value) => {
+    if (value === 0) return "0";
+    
+    const exp = Math.floor(Math.log10(Math.abs(value)));
+    const mantissa = value / Math.pow(10, exp);
+    
+    let mantissaStr;
+    if (useSignificantFigures) {
+      mantissaStr = parseFloat(mantissa.toPrecision(significantFigures)).toString();
+    } else {
+      mantissaStr = parseFloat(mantissa.toFixed(decimalPlaces)).toString();
+    }
+    
+    const expStr = exp.toString().split('').map(c => {
+      if (c === '-') return '⁻';
+      return SUPERSCRIPT_MAP[c] || c;
+    }).join('');
+    
+    return mantissaStr + "×10" + expStr;
+  };
+
   const formatResult = (value) => {
     if (!isFinite(value)) return value.toString();
+    
+    if (useScientificNotation) {
+      const absVal = Math.abs(value);
+      if (absVal === 0) return "0";
+      const exp = Math.floor(Math.log10(absVal));
+      if (Math.abs(exp) >= scientificNotationThreshold || (absVal !== 0 && absVal < 1e-6)) {
+        return formatScientificNotation(value);
+      }
+    }
     
     if (useSignificantFigures) {
       return parseFloat(value.toPrecision(significantFigures)).toString();
     } else {
       if (Number.isInteger(value)) return value.toString();
       if (Math.abs(value) < 1e-100) return "0";
-      if (Math.abs(value) > 1e12 || Math.abs(value) < 1e-6) return value.toExponential(decimalPlaces);
+      if (Math.abs(value) > 1e12 || Math.abs(value) < 1e-6) {
+        if (useScientificNotation) {
+          return formatScientificNotation(value);
+        }
+        return value.toExponential(decimalPlaces);
+      }
       return parseFloat(value.toFixed(decimalPlaces)).toString();
     }
   };
@@ -235,33 +334,39 @@ export default function DinoLabsPluginsCalculator() {
       const c = s[i];
       if (/\s/.test(c)) { i++; continue; }
       
-      if (isDigit(c) || c === ".") {
+      if (isDigit(c) || (c === "." && i + 1 < s.length && isDigit(s[i + 1]))) {
         let num = "";
         
         if (c === ".") {
-          if (i + 1 < s.length && isDigit(s[i + 1])) {
-            num += "0.";
-            i++;
-            while (i < s.length && isDigit(s[i])) num += s[i++];
-          } else {
-            num = "0.";
-            i++;
-          }
+          num += "0.";
+          i++;
+          while (i < s.length && isDigit(s[i])) num += s[i++];
         } else {
           while (i < s.length && (isDigit(s[i]) || s[i] === ".")) num += s[i++];
         }
         
         if (i < s.length && (s[i] === "e" || s[i] === "E")) {
           let j = i + 1;
-          if (j < s.length && (s[j] === "+" || s[j] === "-")) j++;
+          let hasSign = false;
+          if (j < s.length && (s[j] === "+" || s[j] === "-")) {
+            hasSign = true;
+            j++;
+          }
           if (j < s.length && isDigit(s[j])) {
             num += s[i++];
-            if (i < s.length && (s[i] === "+" || s[i] === "-")) num += s[i++];
+            if (hasSign) num += s[i++];
             while (i < s.length && isDigit(s[i])) num += s[i++];
           }
         }
         
-        tokens.push({ type: "number", value: parseFloat(num) });
+        const parsed = parseFloat(num);
+        if (isNaN(parsed)) throw new Error("Invalid number: " + num);
+        tokens.push({ type: "number", value: parsed });
+        continue;
+      }
+      
+      if (c === ".") {
+        i++;
         continue;
       }
       
@@ -555,6 +660,7 @@ export default function DinoLabsPluginsCalculator() {
       if (raw.includes("Stack Underflow")) return { value: null, error: "Malformed Expression." };
       if (raw.startsWith("Unknown variable")) return { value: null, error: "Unknown Variable." };
       if (raw.includes("Invalid Expression")) return { value: null, error: "Malformed Expression." };
+      if (raw.includes("Invalid number")) return { value: null, error: "Invalid Number Format." };
       return { value: null, error: "Error." };
     }
   };
@@ -724,18 +830,14 @@ export default function DinoLabsPluginsCalculator() {
     const cursorPos = e.target.selectionStart;
     
     cursorPositionRef.current = cursorPos;
-    setExpression(newValue);
     
-    const shouldFormat = /(?:sqrt|cbrt|pi|tau|alpha|beta|gamma|delta|epsilon|theta|lambda|mu|sigma|phi|omega|\*\*|\+\-|\-\+|!=|<=|>=|\^2|\^3|\b1\/[2-8]\b)\s*$/.test(newValue.substring(0, cursorPos));
+    const formatted = applySymbolFormatting(newValue, cursorPos);
+    setExpression(formatted.text);
     
-    if (shouldFormat) {
+    if (formatted.text !== newValue || formatted.cursorPos !== cursorPos) {
       setTimeout(() => {
-        const formatted = applySymbolFormatting(newValue, cursorPos);
-        if (formatted.text !== newValue) {
-          setExpression(formatted.text);
-          setCursorPosition(formatted.cursorPos);
-        }
-      }, 50);
+        setCursorPosition(formatted.cursorPos);
+      }, 0);
     }
   };
 
@@ -744,16 +846,11 @@ export default function DinoLabsPluginsCalculator() {
     const newExpression = expression.slice(0, currentPos) + value + expression.slice(currentPos);
     const newCursorPos = currentPos + value.length;
     
-    setExpression(newExpression);
+    const formatted = applySymbolFormatting(newExpression, newCursorPos);
+    setExpression(formatted.text);
     
     setTimeout(() => {
-      const formatted = applySymbolFormatting(newExpression, newCursorPos);
-      if (formatted.text !== newExpression) {
-        setExpression(formatted.text);
-        setCursorPosition(formatted.cursorPos);
-      } else {
-        setCursorPosition(newCursorPos);
-      }
+      setCursorPosition(formatted.cursorPos);
     }, 10);
   };
 
@@ -773,18 +870,31 @@ export default function DinoLabsPluginsCalculator() {
   };
 
   const handleKeyPress = (e) => {
+    if (e.target.tagName === "INPUT") {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleEnter();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        clearExpression();
+      }
+      return;
+    }
+    
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      return;
+    }
+    
     if (e.key === "Enter") { 
       e.preventDefault(); 
       handleEnter(); 
-    } else if (e.key === "Backspace") { 
-      e.preventDefault(); 
-      deleteLast(); 
     } else if (e.key === "Escape") { 
       e.preventDefault(); 
       clearExpression(); 
-    } else if (/[0-9+\-*/().=^,]/.test(e.key)) { 
-      e.preventDefault(); 
-      appendToExpression(e.key); 
+    } else if (e.key.length === 1) {
+      e.preventDefault();
+      appendToExpression(e.key);
+      inputRef.current?.focus();
     }
   };
 
@@ -832,7 +942,7 @@ export default function DinoLabsPluginsCalculator() {
             className="dinolabsPluginsCalculatorInput"
             value={expression}
             onChange={handleInputChange}
-            placeholder="Enter an expression. Try: sqrt(16), pi, x^2, 1/2"
+            placeholder="Enter expression. Try: 1e5, 2.5E-3, x^10, sin(x²)"
             autoFocus
           />
           {expression && detectVariablesInExpression(expression).length > 0 && (
@@ -883,6 +993,7 @@ export default function DinoLabsPluginsCalculator() {
               <CalcButton onClick={() => appendToExpression("|")} className="dinolabsPluginsCalculatorOperator">|</CalcButton>
               <CalcButton onClick={() => appendToExpression("^")} className="dinolabsPluginsCalculatorOperator">^</CalcButton>
               <CalcButton onClick={() => appendToExpression("+-")} className="dinolabsPluginsCalculatorOperator">±</CalcButton>
+              <CalcButton onClick={() => appendToExpression("e")} className="dinolabsPluginsCalculatorOperator">E</CalcButton>
             </div>
           </div>
 
@@ -998,6 +1109,42 @@ export default function DinoLabsPluginsCalculator() {
                   />
                 </div>
               </div>
+
+              <div className="dinolabsPluginsCalculatorSettingsSection">
+                <div className="dinolabsPluginsCalculatorSettingsLabel">Scientific Notation:</div>
+                <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
+                  <button 
+                    className={`dinolabsPluginsCalculatorSettingsButton ${!useScientificNotation ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setUseScientificNotation(false)}
+                  >
+                    Off
+                  </button>
+                  <button 
+                    className={`dinolabsPluginsCalculatorSettingsButton ${useScientificNotation ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setUseScientificNotation(true)}
+                  >
+                    On
+                  </button>
+                </div>
+              </div>
+
+              {useScientificNotation && (
+                <div className="dinolabsPluginsCalculatorSettingsSection">
+                  <div className="dinolabsPluginsCalculatorSettingsLabel">
+                    Use Scientific Notation When Exponent ≥ {scientificNotationThreshold}
+                  </div>
+                  <div className="dinolabsPluginsCalculatorSliderContainer">
+                    <input
+                      type="range"
+                      min="1"
+                      max="12"
+                      value={scientificNotationThreshold}
+                      onChange={(e) => setScientificNotationThreshold(parseInt(e.target.value))}
+                      className="dinolabsPluginsCalculatorSlider"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Variables:</div>
