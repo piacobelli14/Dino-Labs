@@ -15,7 +15,8 @@ import {
   faHighlighter,
   faCompressArrowsAlt,
   faScissors, 
-  faDivide
+  faDivide,
+  faClock
 } from "@fortawesome/free-solid-svg-icons";
 import DinoLabsNav from "../../helpers/Nav.jsx";
 import DinoLabsLoading from "../../helpers/Loading.jsx";
@@ -86,6 +87,14 @@ const DinoLabsPlugins = () => {
         icon: faPalette,
         gradientClass: "dinolabsPluginsGradientColorTypeLab",
         path: "/colortypelab"
+      },
+      {
+        key: "timestamplab",
+        title: "Timestamp Lab",
+        description: "Convert timestamps, timezones, and date formats instantly.",
+        icon: faClock,
+        gradientClass: "dinolabsPluginsGradientTimestampLab",
+        path: "/timestamplab"
       },
       {
         key: "compressionlab",

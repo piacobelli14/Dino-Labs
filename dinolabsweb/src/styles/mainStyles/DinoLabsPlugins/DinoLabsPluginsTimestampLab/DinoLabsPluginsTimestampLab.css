@@ -1,0 +1,772 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.dinolabsTimestampLabApp,
+.dinolabsTimestampLabApp *,
+.dinolabsTimestampLabApp *::before,
+.dinolabsTimestampLabApp *::after {
+  box-sizing: border-box;
+}
+
+.dinolabsTimestampLabApp button {
+  padding: 0.6rem 0.8rem;
+}
+
+.dinolabsTimestampLabApp {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dinolabsTimestampLabShell {
+  flex: 1;
+  display: grid;
+  grid-template-columns: clamp(240px, 26vw, 340px) minmax(0, 1fr);
+  border-top: 1px solid #475569;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dinolabsTimestampLabSidebar {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-right: 1px solid #475569;
+  padding: 20px;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsTimestampLabSection {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsTimestampLabSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 24px;
+  color: #f1f5f9;
+}
+
+.dinolabsTimestampLabSectionTitle svg {
+  font-size: 0.9rem;
+  margin-right: 0.4rem;
+}
+
+.dinolabsTimestampLabRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-width: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 16px 12px;
+  border-radius: 6px;
+}
+
+.dinolabsTimestampLabLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+.dinolabsTimestampLabSmall {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #94a3b8;
+  padding: 0 0.4rem;
+}
+
+.dinolabsTimestampLabInput,
+.dinolabsTimestampLabSelect,
+.dinolabsTimestampLabTextArea,
+.dinolabsTimestampLabNumber {
+  width: 100%;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  height: 34px;
+  min-width: 0;
+}
+
+.dinolabsTimestampLabSelect {
+  height: 44px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+}
+
+.dinolabsTimestampLabSelect::-ms-expand {
+  display: none;
+}
+
+.dinolabsTimestampLabTextArea {
+  height: auto;
+  resize: vertical;
+  min-height: 72px;
+}
+
+.dinolabsTimestampLabInput:focus,
+.dinolabsTimestampLabSelect:focus,
+.dinolabsTimestampLabTextArea:focus,
+.dinolabsTimestampLabNumber:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.dinolabsTimestampLabInput::placeholder,
+.dinolabsTimestampLabSelect::placeholder,
+.dinolabsTimestampLabTextArea::placeholder,
+.dinolabsTimestampLabNumber::placeholder {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.dinolabsTimestampLabActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dinolabsTimestampLabMain {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dinolabsTimestampLabMainGrid {
+  padding: 20px;
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+.dinolabsTimestampLabCard {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dinolabsTimestampLabCardWide {
+  grid-column: span 2;
+}
+
+.dinolabsTimestampLabCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1rem !important;
+  margin-bottom: 10px;
+  color: #f1f5f9;
+  min-width: 0;
+}
+
+.dinolabsTimestampLabBtn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
+}
+
+.dinolabsTimestampLabBtn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsTimestampLabBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabBtn.subtle,
+.dinolabsTimestampLabSubtle {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-color: #475569;
+  color: #f1f5f9;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabBtn.subtle:hover,
+.dinolabsTimestampLabSubtle:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsTimestampLabLiveDisplay {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsTimestampLabLiveValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #3b82f6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.05em;
+}
+
+.dinolabsTimestampLabLiveMs {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin-top: 8px;
+}
+
+.dinolabsTimestampLabLiveLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dinolabsTimestampLabStopwatch {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsTimestampLabStopwatchDisplay {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #10b981;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.1em;
+}
+
+.dinolabsTimestampLabFormatGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dinolabsTimestampLabFormatItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabFormatLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dinolabsTimestampLabFormatValue {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  word-break: break-all;
+}
+
+.dinolabsTimestampLabCopyBtn {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  color: #94a3b8;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dinolabsTimestampLabCopyBtn:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.dinolabsTimestampLabMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dinolabsTimestampLabMetaItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabMetaIcon {
+  font-size: 1.2rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.dinolabsTimestampLabMetaContent {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dinolabsTimestampLabMetaValue {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dinolabsTimestampLabMetaLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dinolabsTimestampLabTimezoneGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.dinolabsTimestampLabTimezoneItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabTimezoneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dinolabsTimestampLabTimezoneName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dinolabsTimestampLabTimezoneValue {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dinolabsTimestampLabDiffResult {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dinolabsTimestampLabDiffItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabDiffValue {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #10b981;
+  display: block;
+}
+
+.dinolabsTimestampLabDiffLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-top: 4px;
+}
+
+.dinolabsTimestampLabEpochInfo {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabEpochName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.dinolabsTimestampLabEpochDesc {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.dinolabsTimestampLabTemplateList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dinolabsTimestampLabTemplateItem {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabTemplateHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dinolabsTimestampLabTemplateName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dinolabsTimestampLabTemplateFormat {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dinolabsTimestampLabExportBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dinolabsTimestampLabExportHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.dinolabsTimestampLabExportTitle {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #f1f5f9;
+}
+
+.dinolabsTimestampLabExportActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dinolabsTimestampLabCode {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 11px;
+  color: #f1f5f9;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  word-break: break-word;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dinolabsTimestampLabSidebar::-webkit-scrollbar,
+.dinolabsTimestampLabTemplateList::-webkit-scrollbar,
+.dinolabsTimestampLabMain::-webkit-scrollbar,
+.dinolabsTimestampLabCode::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dinolabsTimestampLabSidebar::-webkit-scrollbar-thumb,
+.dinolabsTimestampLabTemplateList::-webkit-scrollbar-thumb,
+.dinolabsTimestampLabMain::-webkit-scrollbar-thumb,
+.dinolabsTimestampLabCode::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dinolabsTimestampLabSidebar::-webkit-scrollbar-thumb:hover,
+.dinolabsTimestampLabTemplateList::-webkit-scrollbar-thumb:hover,
+.dinolabsTimestampLabMain::-webkit-scrollbar-thumb:hover,
+.dinolabsTimestampLabCode::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.dinolabsTimestampLabSidebar::-webkit-scrollbar-track,
+.dinolabsTimestampLabTemplateList::-webkit-scrollbar-track,
+.dinolabsTimestampLabMain::-webkit-scrollbar-track,
+.dinolabsTimestampLabCode::-webkit-scrollbar-track {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+@media (max-width: 1280px) {
+  .dinolabsTimestampLabMainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dinolabsTimestampLabCardWide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dinolabsTimestampLabShell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dinolabsTimestampLabSidebar {
+    order: 2;
+  }
+
+  .dinolabsTimestampLabMain {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dinolabsTimestampLabMetaGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dinolabsTimestampLabDiffResult {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dinolabsTimestampLabTimezoneGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .dinolabsTimestampLabSection {
+    padding: 12px;
+  }
+
+  .dinolabsTimestampLabMainGrid {
+    padding: 12px;
+    gap: 14px;
+  }
+
+  .dinolabsTimestampLabSidebar {
+    padding: 12px;
+  }
+
+  .dinolabsTimestampLabCard {
+    padding: 12px;
+  }
+
+  .dinolabsTimestampLabInput,
+  .dinolabsTimestampLabSelect,
+  .dinolabsTimestampLabTextArea,
+  .dinolabsTimestampLabNumber {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .dinolabsTimestampLabMetaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dinolabsTimestampLabDiffResult {
+    grid-template-columns: 1fr;
+  }
+
+  .dinolabsTimestampLabLiveValue {
+    font-size: 1.1rem;
+  }
+
+  .dinolabsTimestampLabStopwatchDisplay {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 768px) {
+  .dinolabsTimestampLabSection {
+    padding: 16px;
+  }
+
+  .dinolabsTimestampLabMainGrid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .dinolabsTimestampLabSidebar {
+    padding: 16px;
+  }
+
+  .dinolabsTimestampLabCard {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dinolabsTimestampLabSection {
+    padding: 18px;
+  }
+
+  .dinolabsTimestampLabMainGrid {
+    padding: 18px;
+    gap: 18px;
+  }
+
+  .dinolabsTimestampLabSidebar {
+    padding: 18px;
+  }
+
+  .dinolabsTimestampLabCard {
+    padding: 18px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .dinolabsTimestampLabSection {
+    padding: 22px;
+  }
+
+  .dinolabsTimestampLabMainGrid {
+    padding: 22px;
+    gap: 22px;
+  }
+
+  .dinolabsTimestampLabSidebar {
+    padding: 22px;
+  }
+
+  .dinolabsTimestampLabCard {
+    padding: 22px;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .dinolabsTimestampLabInput,
+  .dinolabsTimestampLabSelect,
+  .dinolabsTimestampLabTextArea,
+  .dinolabsTimestampLabNumber {
+    border-width: 2px;
+  }
+
+  .dinolabsTimestampLabSection,
+  .dinolabsTimestampLabCard,
+  .dinolabsTimestampLabCode {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dinolabsTimestampLabBtn,
+  .dinolabsTimestampLabInput,
+  .dinolabsTimestampLabSelect,
+  .dinolabsTimestampLabTextArea,
+  .dinolabsTimestampLabNumber,
+  .dinolabsTimestampLabCopyBtn {
+    transition: none;
+  }
+}

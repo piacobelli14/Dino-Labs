@@ -168,10 +168,124 @@ export default function DinoLabsPluginsCalculator() {
   const [significantFigures, setSignificantFigures] = useState(6);
   const [useScientificNotation, setUseScientificNotation] = useState(false);
   const [scientificNotationThreshold, setScientificNotationThreshold] = useState(6);
+  const [useFractionMode, setUseFractionMode] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const inputRef = useRef(null);
   const cursorPositionRef = useRef(null);
+
+  const gcd = (a, b) => {
+    a = Math.abs(Math.round(a));
+    b = Math.abs(Math.round(b));
+    while (b !== 0) {
+      const t = b;
+      b = a % b;
+      a = t;
+    }
+    return a;
+  };
+
+  const createFraction = (num, den = 1) => {
+    if (den === 0) throw new Error("Division by zero");
+    if (den < 0) {
+      num = -num;
+      den = -den;
+    }
+    const g = gcd(Math.abs(num), Math.abs(den));
+    return { num: num / g, den: den / g, isFraction: true };
+  };
+
+  const fractionToNumber = (f) => {
+    if (f && f.isFraction) return f.num / f.den;
+    return f;
+  };
+
+  const numberToFraction = (n) => {
+    if (n && n.isFraction) return n;
+    if (!Number.isFinite(n)) return { num: n, den: 1, isFraction: true };
+    if (Number.isInteger(n)) return createFraction(n, 1);
+    const precision = 1e10;
+    const wholePart = Math.floor(n);
+    const decimalPart = n - wholePart;
+    let num = Math.round(decimalPart * precision);
+    let den = precision;
+    const g = gcd(num, den);
+    num = num / g;
+    den = den / g;
+    return createFraction(wholePart * den + num, den);
+  };
+
+  const addFractions = (a, b) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    const fb = b.isFraction ? b : numberToFraction(b);
+    return createFraction(fa.num * fb.den + fb.num * fa.den, fa.den * fb.den);
+  };
+
+  const subtractFractions = (a, b) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    const fb = b.isFraction ? b : numberToFraction(b);
+    return createFraction(fa.num * fb.den - fb.num * fa.den, fa.den * fb.den);
+  };
+
+  const multiplyFractions = (a, b) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    const fb = b.isFraction ? b : numberToFraction(b);
+    return createFraction(fa.num * fb.num, fa.den * fb.den);
+  };
+
+  const divideFractions = (a, b) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    const fb = b.isFraction ? b : numberToFraction(b);
+    if (fb.num === 0) throw new Error("Division by zero");
+    return createFraction(fa.num * fb.den, fa.den * fb.num);
+  };
+
+  const negateFraction = (a) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    return createFraction(-fa.num, fa.den);
+  };
+
+  const powerFraction = (a, b) => {
+    const fa = a.isFraction ? a : numberToFraction(a);
+    const fb = b.isFraction ? b : numberToFraction(b);
+    const expVal = fractionToNumber(fb);
+    if (Number.isInteger(expVal) && expVal >= 0 && expVal <= 100) {
+      let numPow = Math.pow(fa.num, expVal);
+      let denPow = Math.pow(fa.den, expVal);
+      if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
+        return createFraction(numPow, denPow);
+      }
+    }
+    if (Number.isInteger(expVal) && expVal < 0 && expVal >= -100) {
+      const posExp = Math.abs(expVal);
+      let numPow = Math.pow(fa.den, posExp);
+      let denPow = Math.pow(fa.num, posExp);
+      if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
+        return createFraction(numPow, denPow);
+      }
+    }
+    const result = Math.pow(fractionToNumber(fa), expVal);
+    return numberToFraction(result);
+  };
+
+  const formatFraction = (f) => {
+    if (!f || !f.isFraction) return formatResult(f);
+    if (!Number.isFinite(f.num) || !Number.isFinite(f.den)) return fractionToNumber(f).toString();
+    if (f.den === 1) return f.num.toString();
+    if (Math.abs(f.den) > 1e10 || Math.abs(f.num) > 1e10) {
+      return formatResult(fractionToNumber(f));
+    }
+    return f.num + "/" + f.den;
+  };
+
+  const FRACTION_OPERATORS = {
+    "+": { prec: 1, assoc: "L", arity: 2, fn: addFractions },
+    "-": { prec: 1, assoc: "L", arity: 2, fn: subtractFractions },
+    "*": { prec: 2, assoc: "L", arity: 2, fn: multiplyFractions },
+    "/": { prec: 2, assoc: "L", arity: 2, fn: divideFractions },
+    "^": { prec: 4, assoc: "R", arity: 2, fn: powerFraction },
+    neg: { prec: 4, assoc: "R", arity: 1, fn: negateFraction },
+  };
 
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -582,37 +696,65 @@ export default function DinoLabsPluginsCalculator() {
     return output;
   };
 
-  const evalRPN = (rpn, variables = {}) => {
+  const evalRPN = (rpn, variables = {}, fractionMode = false) => {
     const st = [];
     for (let i = 0; i < rpn.length; i++) {
       const t = rpn[i];
       
       if (t.type === "number") { 
-        st.push(t.value); 
+        if (fractionMode) {
+          st.push(numberToFraction(t.value));
+        } else {
+          st.push(t.value);
+        }
         continue; 
       }
       
       if (t.type === "ident") {
-        if (Object.prototype.hasOwnProperty.call(variables, t.value)) st.push(Number(variables[t.value]));
-        else throw new Error("Unknown variable \"" + t.value + "\"");
+        if (Object.prototype.hasOwnProperty.call(variables, t.value)) {
+          const val = Number(variables[t.value]);
+          if (fractionMode) {
+            st.push(numberToFraction(val));
+          } else {
+            st.push(val);
+          }
+        } else {
+          throw new Error("Unknown variable \"" + t.value + "\"");
+        }
         continue;
       }
       
       if (t.type === "op") {
-        const def = OPERATORS[t.value];
-        if (def.arity === 1) {
-          if (st.length < 1) throw new Error("Stack Underflow.");
-          const a = st.pop();
-          const v = def.fn(a);
-          if (!isFinite(v)) throw new Error("Invalid result");
-          st.push(v);
+        if (fractionMode) {
+          const def = FRACTION_OPERATORS[t.value];
+          if (def.arity === 1) {
+            if (st.length < 1) throw new Error("Stack Underflow.");
+            const a = st.pop();
+            const v = def.fn(a);
+            st.push(v);
+          } else {
+            if (st.length < 2) throw new Error("Stack Underflow.");
+            const b = st.pop();
+            const a = st.pop();
+            const v = def.fn(a, b);
+            st.push(v);
+          }
         } else {
-          if (st.length < 2) throw new Error("Stack Underflow.");
-          const b = st.pop();
-          const a = st.pop();
-          const v = def.fn(a, b);
-          if (!isFinite(v)) throw new Error("Invalid result");
-          st.push(v);
+          const def = OPERATORS[t.value];
+          if (def.arity === 1) {
+            if (st.length < 1) throw new Error("Stack Underflow.");
+            const a = st.pop();
+            const v = def.fn(a);
+            if (!isFinite(v)) throw new Error("Invalid result");
+            st.push(v);
+          } else {
+            if (st.length < 2) throw new Error("Stack Underflow.");
+            const b = st.pop();
+            const a = st.pop();
+            const v = def.fn(a, b);
+            if (!isFinite(v)) throw new Error("Invalid result");
+            st.push(v);
+          }
         }
         continue;
       }
@@ -622,10 +764,21 @@ export default function DinoLabsPluginsCalculator() {
         const argc = def.arity === "var" ? t.argc ?? 1 : def.arity;
         if (st.length < argc) throw new Error("Stack Underflow.");
         const args = [];
-        for (let k = 0; k < argc; k++) args.unshift(st.pop());
+        for (let k = 0; k < argc; k++) {
+          const arg = st.pop();
+          if (fractionMode && arg && arg.isFraction) {
+            args.unshift(fractionToNumber(arg));
+          } else {
+            args.unshift(arg);
+          }
+        }
         const v = def.fn(...args);
         if (!isFinite(v)) throw new Error("Invalid result");
-        st.push(v);
+        if (fractionMode) {
+          st.push(numberToFraction(v));
+        } else {
+          st.push(v);
+        }
         continue;
       }
       
@@ -636,11 +789,18 @@ export default function DinoLabsPluginsCalculator() {
     
     if (st.length !== 1) throw new Error("Invalid Expression.");
     const val = st[0];
+    if (fractionMode) {
+      if (val && val.isFraction) {
+        if (!isFinite(val.num) || !isFinite(val.den)) throw new Error("Invalid result");
+        return val;
+      }
+      return numberToFraction(val);
+    }
     if (typeof val !== "number" || !isFinite(val)) throw new Error("Invalid result");
     return val;
   };
 
-  const parseAndEvaluate = (expr, allVariables = {}) => {
+  const parseAndEvaluate = (expr, allVariables = {}, fractionMode = false) => {
     try {
       const evalExpr = convertSymbolsForEvaluation(expr);
       
@@ -649,7 +809,7 @@ export default function DinoLabsPluginsCalculator() {
       const annotatedTokens = annotateIdentifiers(splitTokens);
       const withImplicitMult = insertImplicitMultiplication(annotatedTokens);
       const rpn = toRPN(withImplicitMult);
-      const val = evalRPN(rpn, allVariables);
+      const val = evalRPN(rpn, allVariables, fractionMode);
       return { value: val, error: null };
     } catch (error) {
       const raw = String(error && error.message ? error.message : "Error");
@@ -709,10 +869,12 @@ export default function DinoLabsPluginsCalculator() {
     
     const f = (x) => {
       const allVars = { ...variables, [variable]: x };
-      const l = parseAndEvaluate(leftStr, allVars);
-      const r = parseAndEvaluate(rightStr, allVars);
+      const l = parseAndEvaluate(leftStr, allVars, false);
+      const r = parseAndEvaluate(rightStr, allVars, false);
       if (l.error || r.error) return NaN;
-      return l.value - r.value;
+      const lVal = l.value && l.value.isFraction ? fractionToNumber(l.value) : l.value;
+      const rVal = r.value && r.value.isFraction ? fractionToNumber(r.value) : r.value;
+      return lVal - rVal;
     };
     
     const ranges = [[-1e6, 1e6], [-1e3, 1e3], [-100, 100], [-10, 10], [0, 100], [0, 10], [-5, 5]];
@@ -780,10 +942,11 @@ export default function DinoLabsPluginsCalculator() {
       return true;
     }
     
-    const result = parseAndEvaluate(valueExpr, variables);
+    const result = parseAndEvaluate(valueExpr, variables, false);
     if (result.error) return false;
     
-    setVariables(prev => ({ ...prev, [varName]: result.value }));
+    const numVal = result.value && result.value.isFraction ? fractionToNumber(result.value) : result.value;
+    setVariables(prev => ({ ...prev, [varName]: numVal }));
     return true;
   };
 
@@ -797,15 +960,20 @@ export default function DinoLabsPluginsCalculator() {
       if (handleVariableAssignment(originalExpression)) {
         const parts = originalExpression.split("=");
         const varName = parts[0].trim().toLowerCase();
-        const value = variables[varName] || parseAndEvaluate(parts[1].trim(), variables).value;
-        result = varName + " = " + formatResult(value);
+        const value = variables[varName] || parseAndEvaluate(parts[1].trim(), variables, false).value;
+        const numVal = value && value.isFraction ? fractionToNumber(value) : value;
+        result = varName + " = " + formatResult(numVal);
       } else {
         result = solveEquation(originalExpression);
       }
     } else {
-      const { value, error } = parseAndEvaluate(originalExpression, variables);
+      const { value, error } = parseAndEvaluate(originalExpression, variables, useFractionMode);
       if (!error) {
-        result = formatResult(value);
+        if (useFractionMode && value && value.isFraction) {
+          result = formatFraction(value);
+        } else {
+          result = formatResult(value);
+        }
       } else {
         result = error;
       }
@@ -1076,6 +1244,24 @@ export default function DinoLabsPluginsCalculator() {
             </div>
             
             <div className="dinolabsPluginsCalculatorModalContent">
+              <div className="dinolabsPluginsCalculatorSettingsSection">
+                <div className="dinolabsPluginsCalculatorSettingsLabel">Fraction Mode:</div>
+                <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
+                  <button 
+                    className={`dinolabsPluginsCalculatorSettingsButton ${!useFractionMode ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setUseFractionMode(false)}
+                  >
+                    Decimal
+                  </button>
+                  <button 
+                    className={`dinolabsPluginsCalculatorSettingsButton ${useFractionMode ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setUseFractionMode(true)}
+                  >
+                    Fraction
+                  </button>
+                </div>
+              </div>
+
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Rounding Mode:</div>
                 <div className="dinolabsPluginsCalculatorSettingsButtonGroup">

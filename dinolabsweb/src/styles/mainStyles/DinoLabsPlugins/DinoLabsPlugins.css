@@ -144,6 +144,10 @@
   background: linear-gradient(135deg, #4d4a86 0%, #d5957c 100%);
 }
 
+.dinolabsPluginsGradientTimestampLab {
+  background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%);
+}
+
 .dinolabsPluginsGradientCompressionLab {
   background: linear-gradient(135deg, #274661 0%, #66a2c0 100%);
 }
@@ -189,4 +193,3 @@
     grid-template-columns: 1fr;
   }
 }
-

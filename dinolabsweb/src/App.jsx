@@ -18,6 +18,7 @@ import DinoLabsPluginsCalculator from "./pages/DinoLabsPlugins/DinoLabsPluginsCa
 import DinoLabsPluginsMatrix from "./pages/DinoLabsPlugins/DinoLabsPluginsMatrix/DinoLabsPluginsMatrix";
 import DinoLabsPluginsFactoring from "./pages/DinoLabsPlugins/DinoLabsPluginsFactoring/DinoLabsPluginsFactoring";
 import DinoLabsPluginsColorTypeLab from "./pages/DinoLabsPlugins/DinoLabsPluginsColorTypeLab/DinoLabsPluginsColorTypeLab";
+import DinoLabsPluginsTimestampLab from "./pages/DinoLabsPlugins/DinoLabsPluginsTimestampLab/DinoLabsPluginsTimestampLab";
 import DinoLabsPluginsCompressionLab from "./pages/DinoLabsPlugins/DinoLabsPluginsCompressionLab/DinoLabsPluginsCompressionLab";
 import DinoLabsPluginsPlot from "./pages/DinoLabsPlugins/DinoLabsPluginsPlot/DinoLabsPluginsPlot";
 import DinoLabsPluginsBackgroundRemover from "./pages/DinoLabsPlugins/DinoLabsPluginsBackgroundRemover/DinoLabsPluginsBackgroundRemover";
@@ -107,6 +108,11 @@ function App() {
           <Route path="/colortypelab" element={
             <ProtectedRoute>
               <DinoLabsPluginsColorTypeLab />
+            </ProtectedRoute>
+          } />
+          <Route path="/timestamplab" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsTimestampLab />
             </ProtectedRoute>
           } />
           <Route path="/compressionlab" element={
