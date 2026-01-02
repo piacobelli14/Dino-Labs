@@ -1210,50 +1210,6 @@ font-size: 1.5rem;
   background: transparent;
 }
 
-@media (max-width: 1024px) {
-  .dbSidebar {
-    width: 240px;
-    min-width: 240px;
-  }
-  
-  .dbFormRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .dbContainer {
-    flex-direction: column;
-  }
-  
-  .dbSidebar {
-    width: 100%;
-    min-width: 100%;
-    max-height: 40vh;
-  }
-  
-  .dbMainContent {
-    flex: 1;
-    min-height: 60vh;
-  }
-  
-  .dbEditorTabs {
-    flex-wrap: wrap;
-  }
-  
-  .dbTableStats {
-    gap: 1rem;
-  }
-  
-  .dbModalActions {
-    flex-direction: column;
-  }
-  
-  .dbModalActions .dbButton {
-    width: 100%;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .dbNewConnectionButton,
   .dbDisconnectButton,
