@@ -11,6 +11,7 @@ import DinoLabsAccount from "./pages/DinoLabsAccount/DinoLabsAccount";
 import DinoLabsTeam from "./pages/DinoLabsAccount/DinoLabsTeam";
 import DinoLabsMonitor from "./pages/DinoLabsAccount/DinoLabsMonitoring";
 import DinoLabsCalendar from "./pages/DinoLabsAccount/DinoLabsCalendar";
+import DinoLabsDatabase from "./pages/DinoLabsAccount/DinoLabsDatabase";
 import DinoLabsPlugins from "./pages/DinoLabsPlugins/DinoLabsPlugins";
 import DinoLabsPluginsDictionary from "./pages/DinoLabsPlugins/DinoLabsPluginsDictionary/DinoLabsPluginsDictionary";
 import DinoLabsPluginsThesaurus from "./pages/DinoLabsPlugins/DinoLabsPluginsThesaurus/DinoLabsPluginsThesaurus";
@@ -73,6 +74,11 @@ function App() {
           <Route path="/calendar" element={
             <ProtectedRoute>
               <DinoLabsCalendar />
+            </ProtectedRoute>
+          } />
+          <Route path="/database" element={
+            <ProtectedRoute>
+              <DinoLabsDatabase />
             </ProtectedRoute>
           } />
           <Route path="/plugins" element={

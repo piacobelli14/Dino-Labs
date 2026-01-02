@@ -1,0 +1,1277 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.dbPageWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.dbContainer {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.dbSidebar {
+  width: 280px;
+  min-width: 280px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-right: 1px solid #475569;
+}
+
+.dbSidebarHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #475569;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dbSidebarTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.025em;
+}
+
+.dbSidebarContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dbNewConnectionButton {
+  width: 100%;
+  padding: 0.6rem 1rem; 
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.dbNewConnectionButton:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border-color: #1e40af;
+  transform: translateY(-1px);
+}
+
+.dbActiveConnection {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dbConnectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dbStatusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.dbStatusDot.active {
+  background: #10b981;
+}
+
+.dbStatusText {
+  font-size: 0.7rem;
+  font-weight: 1000;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dbConnectionName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dbConnectionDetails {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  word-break: break-all;
+}
+
+.dbDisconnectButton {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.1rem;
+  background: transparent;
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dbDisconnectButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.dbTablesSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+    border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.dbTablesSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dbRefreshButton {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05); 
+  border: 2px solid rgba(255,255,255,0.25); 
+  border-radius: 4px;
+  font-size: 0.7rem;
+  overflow: scroll;
+}
+
+.dbRefreshButton:hover {
+  color: #f1f5f9;
+}
+
+.dbSearchWrapper {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.dbSearchInput {
+  width: 100%;
+  background: rgba(51, 65, 85, 0.5);
+  border: 2px solid #475569;
+  color: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem 0.5rem 2rem;
+  outline: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.dbSearchInput:focus {
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.dbSearchInput::placeholder {
+  color: #64748b;
+}
+
+.dbSearchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.dbTableList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dbSchemaGroup {
+  display: flex;
+  flex-direction: column;
+  width: 100%; 
+  min-width: 100% ; 
+  max-width: 100%; 
+}
+
+.dbSchemaHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 100%; 
+}
+
+.dbSchemaHeader:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dbSchemaHeader svg {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.dbSchemaCount {
+  margin-left: auto;
+  background: rgba(71, 85, 105, 0.6);
+  color: #cbd5e1;
+  padding:  0.2rem 0.5rem;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05); 
+  border: 2px solid rgba(255,255,255,0.25); 
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  overflow: scroll;
+}
+
+.dbSchemaTables {
+  display: flex;
+  flex-direction: column;
+  padding-left: 1.25rem;
+  width: 100%; 
+}
+
+.dbTableItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #cbd5e1;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  overflow: hidden; 
+  white-space: nowrap; 
+  text-overflow: ellipsis;
+}
+
+.dbTableItem:hover {
+  background: rgba(30, 64, 175, 0.15);
+  color: #f1f5f9;
+}
+
+.dbTableItem.selected {
+  background: rgba(30, 64, 175, 0.25);
+  color: #60a5fa;
+}
+
+.dbViewBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(71, 85, 105, 0.5);
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.dbNoTables,
+.dbNoConnections,
+.dbNoData,
+.dbNoHistory {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #c1c1c1;
+  text-align: center;
+  padding: 2rem 1rem;
+  width: 100%; 
+  min-width: 100%; 
+  max-width: 100%; 
+}
+
+.dbSavedConnectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dbSavedConnectionsHeader {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0;
+}
+
+.dbSavedConnection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 1rem;
+}
+
+.dbSavedConnection:hover {
+  border-color: #1e40af;
+  transform: translateY(-1px);
+}
+
+.dbSavedConnectionInfo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dbSavedConnectionName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dbSavedConnectionHost {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 0.125rem;
+  text-overflow: ellipsis; 
+  overflow: hidden; 
+}
+
+.dbDeleteButton {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dbDeleteButton:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.dbMainContent {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dbWelcome {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dbWelcomeContent {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+  background-color: rgba(255,255,255,0.05); 
+  border: 1px solid rgba(255,255,255,0.25); 
+  border-radius: 6px; 
+  box-shadow: 0 0 10px black;
+}
+
+.dbWelcomeTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.dbWelcomeText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.dbWelcomeButton {
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border: 1px solid #1e40af;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.dbWelcomeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.dbEditorPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dbEditorPanel.fullscreen {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.dbEditorTabs {
+  display: flex;
+  gap: 0;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border-bottom: 1px solid #475569;
+  padding: 0 1rem; 
+}
+
+.dbEditorTab {
+  padding: 0.8rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  border-radius: 0 !important;
+  outline: none; 
+}
+
+.dbEditorTab:hover {
+  color: #f1f5f9;
+  outline: none; 
+}
+
+.dbEditorTab:focus {
+  color: #f1f5f9;
+  outline: none; 
+}
+
+
+.dbEditorTab.active {
+  color: #f1f5f9;
+  border-bottom-color: #1e40af;
+}
+
+.dbEditorContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+}
+
+.dbSqlEditorWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dbSqlEditor {
+  height: 180px;
+  min-height: 120px;
+  border-bottom: 1px solid #475569;
+}
+
+.dbSqlTextarea {
+  width: 100%;
+  height: 100%;
+  background: #1e293b;
+  border: none;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 400;
+  padding: 1rem 1.5rem;
+  resize: none;
+  outline: none;
+  line-height: 1.7;
+  font-weight: 800;
+}
+
+.dbSqlTextarea::placeholder {
+  color: #64748b;
+}
+
+.dbEditorToolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #475569;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.dbRunButton {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border: 1px solid #1e40af;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.dbRunButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.dbRunButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dbShortcutHint {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c1c1c1;
+}
+
+.dbQueryResults {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dbResultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #475569;
+}
+
+.dbResultHeader.success {
+  background: rgba(16, 185, 129, 0.08);
+  border-left: 3px solid #10b981;
+}
+
+.dbResultHeader.error {
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 3px solid #ef4444;
+}
+
+.dbResultStatus {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dbResultActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dbResultTime {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #c1c1c1;
+}
+
+.dbResultAction {
+  background: transparent;
+  border: none;
+  font-weight: 800;
+  color: #c1c1c1;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.dbResultAction:hover {
+  color: #f1f5f9;
+}
+
+.dbResultTable,
+.dbDataTable,
+.dbSchemaTable {
+  flex: 1;
+  overflow: auto;
+}
+
+.dbSchemaTable {
+    border-radius: 6px; 
+}
+
+.dbResultTable table,
+.dbDataTable table,
+.dbSchemaTable table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 0 10px black;
+}
+
+.dbResultTable th,
+.dbDataTable th,
+.dbSchemaTable th {
+  background: rgba(51, 65, 85, 1);
+  color: #e2e8f0;
+  font-weight: 800;
+  text-align: left;
+  padding: 0.6rem 1rem; 
+  border: 2px solid #475569;
+  top: 0;
+  white-space: nowrap;
+}
+
+.dbSortableHeader {
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid #475569;
+}
+
+.dbSortableHeader:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+
+.dbSortIndicator {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.dbResultTable td,
+.dbDataTable td,
+.dbSchemaTable td {
+  padding: 0.6rem 1rem;
+  border: 2px solid #475569;
+  color: #e2e8f0;
+  font-weight: 800;
+  max-width: 600px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.dbSchemaTable td {
+  border: 2px solid #475569;
+}
+
+.dbResultTable tr:hover td,
+.dbDataTable tr:hover td {
+  background: rgba(30, 64, 175, 0.08);
+}
+
+.dbNullValue {
+  color: #64748b;
+  font-style: italic;
+}
+
+.dbIndexDef {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  max-width: 500px !important;
+}
+
+.dbErrorMessage {
+  padding: 1.5rem;
+}
+
+.dbErrorText {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fca5a5;
+  margin-bottom: 0.5rem;
+}
+
+.dbErrorDetail {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #f87171;
+  margin-bottom: 0.5rem;
+}
+
+.dbErrorHint {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.dbDataViewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dbTableStats {
+  display: flex;
+  gap: 2rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #475569;
+  background: rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.dbTableStats strong {
+  color: #e2e8f0;
+  margin-right: 0.25rem;
+}
+
+.dbLoadingData {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dbPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #475569;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.dbPaginationButton {
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border: 1px solid #475569;
+  color: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dbPaginationButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border-color: #1e40af;
+}
+
+.dbPaginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dbPaginationInfo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.dbSchemaViewer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.dbSchemaSection {
+  margin-bottom: 2rem;
+}
+
+.dbSchemaSection h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 1rem 0;
+}
+
+.dbHistoryViewer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.dbHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dbHistoryItem {
+  background: rgba(51, 65, 85, 0.3);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  border-radius: 6px;
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dbHistoryItem:hover {
+  border-color: #1e40af;
+  background: rgba(30, 64, 175, 0.1);
+}
+
+.dbHistoryItem.success {
+  border-left: 3px solid #10b981;
+}
+
+.dbHistoryItem.error {
+  border-left: 3px solid #ef4444;
+}
+
+.dbHistoryQuery {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dbHistoryMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.dbHistoryStatus {
+  font-weight: 800;
+}
+
+.dbHistoryStatus.success {
+  color: #10b981;
+}
+
+.dbHistoryStatus.error {
+  color: #ef4444;
+}
+
+.dbModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dbModal {
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dbModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #475569;
+}
+
+.dbModalTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dbModalClose {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.dbModalClose:hover {
+  color: #ef4444;
+}
+
+.dbModalContent {
+  padding: 1.5rem;
+}
+
+.dbFormGroup {
+  margin-bottom: 1.25rem;
+}
+
+.dbFormGroup label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+  padding: 0 0.2rem;
+}
+
+.dbInput,
+.dbSelect {
+  width: 100%;
+  background: rgba(51, 65, 85, 0.5);
+  border: 2px solid #475569;
+  color: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.dbSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.dbSelect::-ms-expand {
+  display: none;
+}
+
+.dbInput:focus,
+.dbSelect:focus {
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+}
+
+.dbInput::placeholder {
+  color: #64748b;
+}
+
+.dbInputHint {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.375rem;
+}
+
+.dbFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dbFormGroupSmall {
+  max-width: 100px;
+}
+
+.dbConnectionModeToggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.dbModeButton {
+  flex: 1;
+  background: rgba(51, 65, 85, 0.5);
+  border: 1px solid #475569;
+  color: #94a3b8;
+  border-radius: 4px;
+  padding: 0.625rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dbModeButton:hover {
+  color: #f1f5f9;
+  border-color: #64748b;
+}
+
+.dbModeButton.active {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border-color: #1e40af;
+  color: #ffffff;
+}
+
+.dbModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #475569;
+}
+
+.dbButton {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dbButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dbButton.primary {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border: 1px solid #1e40af;
+  color: #ffffff;
+}
+
+.dbButton.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.dbButton.secondary {
+  background: transparent;
+  border: 1px solid #475569;
+  color: #f1f5f9;
+}
+
+.dbButton.secondary:hover:not(:disabled) {
+  border-color: #64748b;
+  background: rgba(71, 85, 105, 0.2);
+}
+
+.dbLoadingState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dbLoadingText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.dbErrorState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dbErrorStateContent {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+  background-color: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.25); 
+  border-radius: 6px; 
+  box-shadow: 0 0 10px black;
+}
+
+.dbErrorStateTitle {
+font-size: 1.5rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.dbErrorStateText {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.dbErrorStateButton {
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border: 1px solid #1e40af;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.dbErrorStateButton:hover {
+  transform: translateY(-1px);
+}
+
+.dbSidebarContent::-webkit-scrollbar,
+.dbTableList::-webkit-scrollbar,
+.dbModal::-webkit-scrollbar,
+.dbResultTable::-webkit-scrollbar,
+.dbDataTable::-webkit-scrollbar,
+.dbSchemaViewer::-webkit-scrollbar,
+.dbHistoryViewer::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dbSidebarContent::-webkit-scrollbar-thumb,
+.dbTableList::-webkit-scrollbar-thumb,
+.dbModal::-webkit-scrollbar-thumb,
+.dbResultTable::-webkit-scrollbar-thumb,
+.dbDataTable::-webkit-scrollbar-thumb,
+.dbSchemaViewer::-webkit-scrollbar-thumb,
+.dbHistoryViewer::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border-radius: 3px;
+}
+
+.dbSidebarContent::-webkit-scrollbar-track,
+.dbTableList::-webkit-scrollbar-track,
+.dbModal::-webkit-scrollbar-track,
+.dbResultTable::-webkit-scrollbar-track,
+.dbDataTable::-webkit-scrollbar-track,
+.dbSchemaViewer::-webkit-scrollbar-track,
+.dbHistoryViewer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (max-width: 1024px) {
+  .dbSidebar {
+    width: 240px;
+    min-width: 240px;
+  }
+  
+  .dbFormRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dbContainer {
+    flex-direction: column;
+  }
+  
+  .dbSidebar {
+    width: 100%;
+    min-width: 100%;
+    max-height: 40vh;
+  }
+  
+  .dbMainContent {
+    flex: 1;
+    min-height: 60vh;
+  }
+  
+  .dbEditorTabs {
+    flex-wrap: wrap;
+  }
+  
+  .dbTableStats {
+    gap: 1rem;
+  }
+  
+  .dbModalActions {
+    flex-direction: column;
+  }
+  
+  .dbModalActions .dbButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dbNewConnectionButton,
+  .dbDisconnectButton,
+  .dbTableItem,
+  .dbSchemaHeader,
+  .dbSavedConnection,
+  .dbEditorTab,
+  .dbRunButton,
+  .dbPaginationButton,
+  .dbHistoryItem,
+  .dbModeButton,
+  .dbButton,
+  .dbWelcomeButton,
+  .dbResultAction,
+  .dbRefreshButton,
+  .dbDeleteButton,
+  .dbModalClose,
+  .dbErrorStateButton {
+    transition: none;
+  }
+}

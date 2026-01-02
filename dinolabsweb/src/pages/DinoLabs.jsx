@@ -25,7 +25,8 @@ import {
   faUserCog,
   faHammer,
   faCalendarDays,
-  faStopwatch
+  faStopwatch,
+  faDatabase
 } from "@fortawesome/free-solid-svg-icons";
 import { openDB } from "idb";
 import { fileTypeMap } from "./DinoLabsFileTypeMap.jsx";
@@ -2686,6 +2687,11 @@ export default function DinoLabs() {
                     <Tippy content="Toolkit" theme="tooltip-light">
                       <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/plugins"); })}>
                         <FontAwesomeIcon icon={faHammer} style={{ color: "" }} />
+                      </button>
+                    </Tippy>
+                    <Tippy content="Database" theme="tooltip-light">
+                      <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/database"); })}>
+                        <FontAwesomeIcon icon={faDatabase} style={{ color: "" }} />
                       </button>
                     </Tippy>
                     <Tippy content="Monitoring" theme="tooltip-light">
