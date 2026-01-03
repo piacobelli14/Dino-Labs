@@ -149,8 +149,8 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
-    border: 1px solid #475569;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
   border-radius: 6px;
   padding: 1rem;
 }
@@ -159,7 +159,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 1rem;;
+  padding-bottom: 1rem;
   font-size: 0.8rem;
   font-weight: 700;
   color: #94a3b8;
@@ -234,7 +234,7 @@
   display: flex;
   flex-direction: column;
   width: 100%; 
-  min-width: 100% ; 
+  min-width: 100%; 
   max-width: 100%; 
 }
 
@@ -265,7 +265,7 @@
   margin-left: auto;
   background: rgba(71, 85, 105, 0.6);
   color: #cbd5e1;
-  padding:  0.2rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   transition: all 0.2s ease;
   background: rgba(255, 255, 255, 0.05); 
   border: 2px solid rgba(255,255,255,0.25); 
@@ -513,7 +513,6 @@
   outline: none; 
 }
 
-
 .dbEditorTab.active {
   color: #f1f5f9;
   border-bottom-color: #1e40af;
@@ -535,28 +534,129 @@
 }
 
 .dbSqlEditor {
-  height: 180px;
-  min-height: 120px;
+  height: 220px;
+  min-height: 160px;
   border-bottom: 1px solid #475569;
+  overflow: hidden;
 }
 
-.dbSqlTextarea {
+.sqlEditorWrapper {
+  display: flex;
   width: 100%;
   height: 100%;
   background: #1e293b;
-  border: none;
-  color: #e2e8f0;
+  font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
   font-size: 13px;
-  font-weight: 400;
-  padding: 1rem 1.5rem;
-  resize: none;
-  outline: none;
   line-height: 1.7;
-  font-weight: 800;
+  overflow: hidden;
 }
 
-.dbSqlTextarea::placeholder {
+.sqlEditorGutter {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to right, #1e293b 0%, #334155 100%);
+  border-right: 1px solid #475569;
+  user-select: none;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  flex-shrink: 0;
+}
+
+.sqlEditorLineNumber {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 22.1px;
+  min-height: 22.1px;
+  max-height: 22.1px;
   color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+
+.sqlEditorLineNumber:hover {
+  background: rgba(30, 64, 175, 0.15);
+}
+
+.sqlEditorLineNumber.collapsed {
+  background: rgba(30, 64, 175, 0.1);
+}
+
+.sqlLineNumText {
+  min-width: 20px;
+  text-align: right;
+}
+
+.sqlFoldChevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 10px;
+  transition: all 0.15s ease;
+  margin-left: 4px;
+}
+
+.sqlFoldChevron:hover {
+  color: #1e40af;
+  transform: scale(1.2);
+}
+
+.sqlFoldIndicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  margin-left: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sqlEditorContent {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.sqlEditorTextarea {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 12px;
+  background: #1e293b;
+  border: none;
+  outline: none;
+  resize: none;
+  color: #e2e8f0;
+  caret-color: #f1f5f9;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 800;
+  line-height: inherit;
+  white-space: pre;
+  overflow: auto;
+}
+
+.sqlEditorTextarea::placeholder {
+  color: #64748b;
+}
+
+.sqlEditorTextarea::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.sqlEditorTextarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sqlEditorTextarea::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  border-radius: 3px;
 }
 
 .dbEditorToolbar {
@@ -663,7 +763,7 @@
 }
 
 .dbSchemaTable {
-    border-radius: 6px; 
+  border-radius: 6px; 
 }
 
 .dbResultTable table,
@@ -717,7 +817,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 
 .dbSchemaTable td {
   border: 2px solid #475569;
@@ -1145,7 +1244,7 @@
 }
 
 .dbErrorStateTitle {
-font-size: 1.5rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #f1f5f9;
   margin-bottom: 0.75rem;
@@ -1227,7 +1326,9 @@ font-size: 1.5rem;
   .dbRefreshButton,
   .dbDeleteButton,
   .dbModalClose,
-  .dbErrorStateButton {
+  .dbErrorStateButton,
+  .sqlEditorLineNumber,
+  .sqlFoldChevron {
     transition: none;
   }
 }

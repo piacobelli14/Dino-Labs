@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -34,6 +34,194 @@ import { showDialog } from "../../helpers/Alert.jsx";
 import "../../styles/mainStyles/DinoLabsAccount/DinoLabsDatabase.css";
 import "../../styles/helperStyles/LoadingSpinner.css";
 import "../../styles/helperStyles/Disconnected.css";
+
+const SQL_FOLD_START = /\b(BEGIN|CASE|CREATE\s+(?:FUNCTION|PROCEDURE|TRIGGER)|DO|LOOP|IF\s+.*\s+THEN)\b/i;
+const SQL_FOLD_END = /\b(END|END\s+CASE|END\s+IF|END\s+LOOP|\$\$;?)\b/i;
+
+const computeFoldableLines = (code) => {
+    if (!code) return new Set();
+    
+    const lines = code.split("\n");
+    const foldable = new Set();
+    const stack = [];
+    
+    lines.forEach((line, index) => {
+        if (SQL_FOLD_START.test(line)) {
+            stack.push(index);
+        }
+        if (SQL_FOLD_END.test(line) && stack.length > 0) {
+            const startLine = stack.pop();
+            if (index > startLine) {
+                foldable.add(startLine);
+            }
+        }
+    });
+    
+    return foldable;
+};
+
+const computeFoldRanges = (code) => {
+    if (!code) return {};
+    
+    const lines = code.split("\n");
+    const ranges = {};
+    const stack = [];
+    
+    lines.forEach((line, index) => {
+        if (SQL_FOLD_START.test(line)) {
+            stack.push(index);
+        }
+        if (SQL_FOLD_END.test(line) && stack.length > 0) {
+            const startLine = stack.pop();
+            if (index > startLine) {
+                ranges[startLine] = index;
+            }
+        }
+    });
+    
+    return ranges;
+};
+
+const SqlEditor = ({ value, onChange, onExecute, disabled }) => {
+    const containerRef = useRef(null);
+    const textareaRef = useRef(null);
+    const gutterRef = useRef(null);
+    const [collapsedLines, setCollapsedLines] = useState(new Set());
+    
+    const lines = useMemo(() => value.split("\n"), [value]);
+    const foldableLines = useMemo(() => computeFoldableLines(value), [value]);
+    const foldRanges = useMemo(() => computeFoldRanges(value), [value]);
+    
+    const visibleLines = useMemo(() => {
+        const visible = [];
+        let i = 0;
+        while (i < lines.length) {
+            const isCollapsed = collapsedLines.has(i);
+            visible.push({
+                lineNumber: i + 1,
+                content: lines[i],
+                isCollapsed,
+                isFoldable: foldableLines.has(i),
+                isHidden: false,
+                originalIndex: i
+            });
+            
+            if (isCollapsed && foldRanges[i] !== undefined) {
+                const endLine = foldRanges[i];
+                for (let j = i + 1; j <= endLine; j++) {
+                    visible.push({
+                        lineNumber: j + 1,
+                        content: lines[j],
+                        isCollapsed: false,
+                        isFoldable: foldableLines.has(j),
+                        isHidden: true,
+                        originalIndex: j
+                    });
+                }
+                i = endLine + 1;
+            } else {
+                i++;
+            }
+        }
+        return visible;
+    }, [lines, collapsedLines, foldableLines, foldRanges]);
+    
+    const displayedLines = useMemo(() => {
+        return visibleLines.filter(l => !l.isHidden);
+    }, [visibleLines]);
+    
+    const displayedContent = useMemo(() => {
+        return displayedLines.map(l => l.content).join("\n");
+    }, [displayedLines]);
+    
+    const toggleFold = useCallback((lineIndex) => {
+        setCollapsedLines(prev => {
+            const next = new Set(prev);
+            if (next.has(lineIndex)) {
+                next.delete(lineIndex);
+            } else {
+                next.add(lineIndex);
+            }
+            return next;
+        });
+    }, []);
+    
+    const handleScroll = useCallback((e) => {
+        if (gutterRef.current) {
+            gutterRef.current.scrollTop = e.target.scrollTop;
+        }
+    }, []);
+    
+    const handleKeyDown = useCallback((e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            if (onExecute) onExecute();
+        }
+        
+        if (e.key === "Tab") {
+            e.preventDefault();
+            const start = e.target.selectionStart;
+            const end = e.target.selectionEnd;
+            const newValue = value.substring(0, start) + "  " + value.substring(end);
+            onChange({ target: { value: newValue } });
+            setTimeout(() => {
+                e.target.selectionStart = e.target.selectionEnd = start + 2;
+            }, 0);
+        }
+    }, [value, onChange, onExecute]);
+    
+    const handleChange = useCallback((e) => {
+        if (collapsedLines.size > 0) {
+            setCollapsedLines(new Set());
+        }
+        onChange(e);
+    }, [collapsedLines, onChange]);
+    
+    const gutterWidth = useMemo(() => {
+        const maxLineNum = lines.length;
+        const digits = String(maxLineNum).length;
+        return Math.max(50, digits * 10 + 40);
+    }, [lines.length]);
+    
+    return (
+        <div className="sqlEditorWrapper" ref={containerRef}>
+            <div className="sqlEditorGutter" ref={gutterRef} style={{ width: gutterWidth }}>
+                {displayedLines.map((line, idx) => (
+                    <div 
+                        key={idx} 
+                        className={`sqlEditorLineNumber ${line.isCollapsed ? "collapsed" : ""}`}
+                    >
+                        <span className="sqlLineNumText">{line.lineNumber}</span>
+                        {line.isFoldable && (
+                            <span 
+                                className="sqlFoldChevron"
+                                onClick={() => toggleFold(line.originalIndex)}
+                            >
+                                <FontAwesomeIcon icon={line.isCollapsed ? faAngleRight : faAngleDown} />
+                            </span>
+                        )}
+                        {line.isCollapsed && (
+                            <span className="sqlFoldIndicator" />
+                        )}
+                    </div>
+                ))}
+            </div>
+            <div className="sqlEditorContent">
+                <textarea
+                    ref={textareaRef}
+                    className="sqlEditorTextarea"
+                    value={displayedContent}
+                    onChange={handleChange}
+                    onScroll={handleScroll}
+                    onKeyDown={handleKeyDown}
+                    spellCheck={false}
+                    disabled={disabled}
+                    placeholder="Enter your SQL query here..."
+                />
+            </div>
+        </div>
+    );
+};
 
 const DinoLabsDatabase = () => {
     const navigate = useNavigate();
@@ -818,7 +1006,12 @@ const DinoLabsDatabase = () => {
                 {activeTab === "editor" && (
                     <div className="dbSqlEditorWrapper">
                         <div className="dbSqlEditor">
-                            <textarea ref={editorRef} className="dbSqlTextarea" value={sqlQuery} onChange={(e) => setSqlQuery(e.target.value)} placeholder="Enter your SQL query here..." spellCheck={false} onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { executeQuery(); } }} />
+                            <SqlEditor
+                                value={sqlQuery}
+                                onChange={(e) => setSqlQuery(e.target.value)}
+                                onExecute={executeQuery}
+                                disabled={isExecuting}
+                            />
                         </div>
                         <div className="dbEditorToolbar">
                             <button className="dbRunButton" onClick={executeQuery} disabled={isExecuting || (!activeConnectionID && !connectionConfig)}>
