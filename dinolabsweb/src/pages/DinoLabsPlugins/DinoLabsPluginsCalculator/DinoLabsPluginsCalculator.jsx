@@ -17,6 +17,17 @@ export default function DinoLabsPluginsCalculator() {
     '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
   };
 
+  const REVERSE_SUPERSCRIPT_DIGIT = {
+    '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+    '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+    '⁻': '-', '⁺': '+', '·': '.'
+  };
+
+  const REVERSE_SUBSCRIPT_DIGIT = {
+    '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+    '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
+  };
+
   const SYMBOL_REPLACEMENTS = [
     { pattern: /sqrt\(/g, replacement: "√(", description: "Square Root" },
     { pattern: /cbrt\(/g, replacement: "∛(", description: "Cube Root" },
@@ -40,7 +51,6 @@ export default function DinoLabsPluginsCalculator() {
     { pattern: /-\+/g, replacement: "∓", description: "Minus-Plus" },
     { pattern: /\*\*/g, replacement: "^", description: "Exponentiation" },
     { pattern: /(?<![a-zA-Z])\*(?![a-zA-Z])/g, replacement: "×", description: "Multiplication" },
-    { pattern: /(?<![a-zA-Z])\/(?![a-zA-Z])/g, replacement: "÷", description: "Division" },
     { pattern: /\binfinity\b/g, replacement: "∞", description: "Infinity" },
     { pattern: /\binf\b/g, replacement: "∞", description: "Infinity" },
     { pattern: /\bsum\(/g, replacement: "∑(", description: "Summation" },
@@ -50,12 +60,12 @@ export default function DinoLabsPluginsCalculator() {
 
   const SYMBOL_TO_FUNCTION = {
     "√": "sqrt",
-    "∛": "cbrt", 
+    "∛": "cbrt",
     "π": "pi",
     "τ": "tau",
     "∞": "Infinity",
     "α": "alpha",
-    "β": "beta", 
+    "β": "beta",
     "γ": "gamma",
     "δ": "delta",
     "ε": "epsilon",
@@ -66,7 +76,7 @@ export default function DinoLabsPluginsCalculator() {
     "φ": "phi",
     "ω": "omega",
     "≤": "<=",
-    "≥": ">=", 
+    "≥": ">=",
     "≠": "!=",
     "±": "+-",
     "∓": "-+",
@@ -75,23 +85,23 @@ export default function DinoLabsPluginsCalculator() {
     "⁻": "-",
     "⁺": "+",
     "·": ".",
-    "½": "0.5",
+    "½": "(1/2)",
     "⅓": "(1/3)",
-    "⅔": "(2/3)", 
-    "¼": "0.25",
-    "¾": "0.75",
-    "⅕": "0.2",
+    "⅔": "(2/3)",
+    "¼": "(1/4)",
+    "¾": "(3/4)",
+    "⅕": "(1/5)",
     "⅙": "(1/6)",
-    "⅛": "0.125",
+    "⅛": "(1/8)",
     "⁰": "^0",
     "¹": "^1",
     "²": "^2",
-    "³": "^3", 
+    "³": "^3",
     "⁴": "^4",
     "⁵": "^5",
     "⁶": "^6",
     "⁷": "^7",
-    "⁸": "^8", 
+    "⁸": "^8",
     "⁹": "^9",
     "∑": "sum",
     "∏": "prod",
@@ -137,7 +147,7 @@ export default function DinoLabsPluginsCalculator() {
     log: { arity: 1, fn: (x) => { if (x <= 0) throw new Error("DOMAIN log"); return Math.log10 ? Math.log10(x) : Math.log(x) / Math.LN10; } },
     logn: { arity: 2, fn: (x, b) => { if (x <= 0 || b <= 0 || b === 1) throw new Error("DOMAIN logn"); return Math.log(x) / Math.log(b); } },
     sqrt: { arity: 1, fn: (x) => { if (x < 0) throw new Error("DOMAIN sqrt"); return Math.sqrt(x); } },
-    cbrt: { arity: 1, fn: (x) => Math.cbrt ? Math.cbrt(x) : (x < 0 ? -Math.pow(-x, 1/3) : Math.pow(x, 1/3)) },
+    cbrt: { arity: 1, fn: (x) => Math.cbrt ? Math.cbrt(x) : (x < 0 ? -Math.pow(-x, 1 / 3) : Math.pow(x, 1 / 3)) },
     pow: { arity: "var", fn: (...xs) => { if (xs.length === 1) return Math.pow(xs[0], 2); if (xs.length === 2) return Math.pow(xs[0], xs[1]); throw new Error("ARITY pow"); } },
     root: { arity: 2, fn: (x, n) => { if (n === 0) throw new Error("DOMAIN root"); if (x < 0 && Math.abs(n % 2) !== 1) throw new Error("DOMAIN root"); const sign = x < 0 ? -1 : 1; return sign * Math.pow(Math.abs(x), 1 / n); } },
     abs: { arity: 1, fn: (x) => Math.abs(x) },
@@ -245,27 +255,124 @@ export default function DinoLabsPluginsCalculator() {
     return createFraction(-fa.num, fa.den);
   };
 
+  const intPow = (base, exp) => {
+    if (!Number.isInteger(exp)) throw new Error("Invalid exponent");
+    if (exp < 0) return 1 / intPow(base, -exp);
+    let r = 1;
+    let b = base;
+    let e = exp;
+    while (e > 0) {
+      if (e & 1) r *= b;
+      b *= b;
+      e >>= 1;
+    }
+    return r;
+  };
+
+  const integerNthRootIfPerfect = (n, k) => {
+    if (!Number.isInteger(n) || !Number.isInteger(k) || k <= 0) return null;
+    if (n < 0) return null;
+    if (n === 0) return 0;
+    if (k === 1) return n;
+    const approx = Math.round(Math.pow(n, 1 / k));
+    const candidates = [approx - 2, approx - 1, approx, approx + 1, approx + 2];
+    for (const c of candidates) {
+      if (c >= 0 && Number.isSafeInteger(c)) {
+        const p = Math.pow(c, k);
+        if (p === n) return c;
+      }
+    }
+    return null;
+  };
+
   const powerFraction = (a, b) => {
     const fa = a.isFraction ? a : numberToFraction(a);
-    const fb = b.isFraction ? b : numberToFraction(b);
-    const expVal = fractionToNumber(fb);
-    if (Number.isInteger(expVal) && expVal >= 0 && expVal <= 100) {
-      let numPow = Math.pow(fa.num, expVal);
-      let denPow = Math.pow(fa.den, expVal);
+    const fb0 = b.isFraction ? b : numberToFraction(b);
+    const fb = createFraction(fb0.num, fb0.den);
+
+    if (fb.den === 1 && Number.isInteger(fb.num) && fb.num >= 0 && fb.num <= 100) {
+      let numPow = Math.pow(fa.num, fb.num);
+      let denPow = Math.pow(fa.den, fb.num);
       if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
         return createFraction(numPow, denPow);
       }
     }
-    if (Number.isInteger(expVal) && expVal < 0 && expVal >= -100) {
-      const posExp = Math.abs(expVal);
+
+    if (fb.den === 1 && Number.isInteger(fb.num) && fb.num < 0 && fb.num >= -100) {
+      const posExp = Math.abs(fb.num);
       let numPow = Math.pow(fa.den, posExp);
       let denPow = Math.pow(fa.num, posExp);
       if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
         return createFraction(numPow, denPow);
       }
     }
+
+    if (fb.den !== 1 && Number.isInteger(fb.num) && Number.isInteger(fb.den) && Math.abs(fb.num) <= 100 && fb.den <= 100) {
+      const p = fb.num;
+      const q = fb.den;
+
+      if (fa.num === 0) {
+        if (p === 0) return createFraction(1, 1);
+        if (p < 0) throw new Error("Division by zero");
+        return createFraction(0, 1);
+      }
+
+      const negBase = fa.num < 0;
+      if (negBase && (q % 2 === 0)) throw new Error("DOMAIN root");
+
+      const absNum = Math.abs(fa.num);
+      const absDen = Math.abs(fa.den);
+
+      const rNum = integerNthRootIfPerfect(absNum, q);
+      const rDen = integerNthRootIfPerfect(absDen, q);
+
+      if (rNum !== null && rDen !== null) {
+        const signedRootNum = negBase ? -rNum : rNum;
+        const rootFrac = createFraction(signedRootNum, rDen);
+
+        const pp = Math.abs(p);
+        const numPow = intPow(rootFrac.num, pp);
+        const denPow = intPow(rootFrac.den, pp);
+        const powered = createFraction(numPow, denPow);
+
+        if (p < 0) {
+          if (powered.num === 0) throw new Error("Division by zero");
+          return createFraction(powered.den, powered.num);
+        }
+        return powered;
+      }
+    }
+
+    const expVal = fractionToNumber(fb);
     const result = Math.pow(fractionToNumber(fa), expVal);
     return numberToFraction(result);
+  };
+
+  const formatResult = (value) => {
+    if (!isFinite(value)) return value.toString();
+
+    if (useScientificNotation) {
+      const absVal = Math.abs(value);
+      if (absVal === 0) return "0";
+      const exp = Math.floor(Math.log10(absVal));
+      if (Math.abs(exp) >= scientificNotationThreshold || (absVal !== 0 && absVal < 1e-6)) {
+        return formatScientificNotation(value);
+      }
+    }
+
+    if (useSignificantFigures) {
+      return parseFloat(value.toPrecision(significantFigures)).toString();
+    } else {
+      if (Number.isInteger(value)) return value.toString();
+      if (Math.abs(value) < 1e-100) return "0";
+      if (Math.abs(value) > 1e12 || Math.abs(value) < 1e-6) {
+        if (useScientificNotation) {
+          return formatScientificNotation(value);
+        }
+        return value.toExponential(decimalPlaces);
+      }
+      return parseFloat(value.toFixed(decimalPlaces)).toString();
+    }
   };
 
   const formatFraction = (f) => {
@@ -295,35 +402,110 @@ export default function DinoLabsPluginsCalculator() {
     return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
   };
 
+  const toSubscript = (str) => {
+    return str.split('').map(c => SUBSCRIPT_MAP[c] || c).join('');
+  };
+
+  const decodeSuperscriptNumber = (s) => {
+    let out = "";
+    for (const ch of s) {
+      const v = REVERSE_SUPERSCRIPT_DIGIT[ch];
+      if (v == null) return null;
+      out += v;
+    }
+    return out;
+  };
+
+  const decodeSubscriptNumber = (s) => {
+    let out = "";
+    for (const ch of s) {
+      const v = REVERSE_SUBSCRIPT_DIGIT[ch];
+      if (v == null) return null;
+      out += v;
+    }
+    return out;
+  };
+
+  const makeUnicodeFraction = (numStr, denStr) => {
+    const n = String(numStr).replace(/\s+/g, "");
+    const d = String(denStr).replace(/\s+/g, "");
+    if (!/^[0-9]+$/.test(n) || !/^[0-9]+$/.test(d)) return null;
+    if (d === "0") return null;
+    const num = toSuperscript(n);
+    const den = toSubscript(d);
+    return num + "⁄" + den;
+  };
+
+  const parseParenFraction = (s) => {
+    const m = s.match(/^\(\s*([0-9]+)\s*([\/÷])\s*([0-9]+)\s*\)$/);
+    if (!m) return null;
+    const uni = makeUnicodeFraction(m[1], m[3]);
+    if (!uni) return null;
+    return uni;
+  };
+
   const formatExponentsInText = (text, cursorPos) => {
     let result = '';
     let newCursorPos = cursorPos;
     let i = 0;
-    
+
     while (i < text.length) {
       if (text[i] === '^') {
-        let expStart = i + 1;
+        const expStart = i + 1;
+
+        if (expStart < text.length && text[expStart] === '(') {
+          let j = expStart;
+          let depth = 0;
+          while (j < text.length) {
+            if (text[j] === '(') depth++;
+            else if (text[j] === ')') {
+              depth--;
+              if (depth === 0) { j++; break; }
+            }
+            j++;
+          }
+
+          if (depth === 0) {
+            const insideWithParens = text.substring(expStart, j);
+            const uni = parseParenFraction(insideWithParens);
+            if (uni) {
+              const originalLen = j - i;
+              const replacementLen = uni.length;
+
+              if (cursorPos > i && cursorPos <= j) {
+                newCursorPos = result.length + Math.min(replacementLen, Math.max(0, cursorPos - i - 1));
+              } else if (cursorPos > j) {
+                newCursorPos -= originalLen - replacementLen;
+              }
+
+              result += uni;
+              i = j;
+              continue;
+            }
+          }
+        }
+
         let expEnd = expStart;
-        
+
         if (expEnd < text.length && (text[expEnd] === '-' || text[expEnd] === '+')) {
           expEnd++;
         }
-        
+
         while (expEnd < text.length && /[0-9.]/.test(text[expEnd])) {
           expEnd++;
         }
-        
-        if (expEnd > expStart && (text[expStart] !== '-' && text[expStart] !== '+' || expEnd > expStart + 1)) {
+
+        if (expEnd > expStart && ((text[expStart] !== '-' && text[expStart] !== '+') || expEnd > expStart + 1)) {
           const exponent = text.substring(expStart, expEnd);
           const superscripted = toSuperscript(exponent);
-          
+
           if (cursorPos > i && cursorPos <= expEnd) {
             const offsetInExp = cursorPos - expStart;
             newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
           } else if (cursorPos > expEnd) {
             newCursorPos -= (expEnd - i) - superscripted.length;
           }
-          
+
           result += superscripted;
           i = expEnd;
           continue;
@@ -332,106 +514,122 @@ export default function DinoLabsPluginsCalculator() {
       result += text[i];
       i++;
     }
-    
+
     return { text: result, cursorPos: Math.max(0, Math.min(newCursorPos, result.length)) };
+  };
+
+  const applyDivisionSymbolForNonFractions = (text, cursorPos) => {
+    if (cursorPos <= 0) return { text, cursorPos };
+    const idx = cursorPos - 1;
+    if (text[idx] !== '/') return { text, cursorPos };
+    const prev = idx - 1 >= 0 ? text[idx - 1] : "";
+    if (/[0-9]/.test(prev)) return { text, cursorPos };
+    const newText = text.slice(0, idx) + "÷" + text.slice(idx + 1);
+    return { text: newText, cursorPos };
   };
 
   const applySymbolFormatting = (text, cursorPos) => {
     let formattedText = text;
     let newCursorPos = cursorPos;
-    
+
+    const beforeCursor0 = formattedText.substring(0, newCursorPos);
+    const afterCursor0 = formattedText.substring(newCursorPos);
+
+    const fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)$/);
+    if (fracMatch) {
+      const full = fracMatch[0];
+      const lead = fracMatch[1] || "";
+      const numStr = fracMatch[2];
+      const denStr = fracMatch[4];
+      const uni = makeUnicodeFraction(numStr, denStr);
+      if (uni) {
+        const prefixLen = beforeCursor0.length - full.length;
+        const newBefore = beforeCursor0.slice(0, prefixLen) + lead + uni;
+        formattedText = newBefore + afterCursor0;
+        newCursorPos = newBefore.length;
+      }
+    }
+
+    const divFixed = applyDivisionSymbolForNonFractions(formattedText, newCursorPos);
+    formattedText = divFixed.text;
+    newCursorPos = divFixed.cursorPos;
+
     for (const { pattern, replacement } of SYMBOL_REPLACEMENTS) {
       const beforeCursor = formattedText.substring(0, newCursorPos);
       const afterCursor = formattedText.substring(newCursorPos);
-      
+
       const match = beforeCursor.match(new RegExp(pattern.source + "$"));
       if (match) {
         const matchStart = beforeCursor.length - match[0].length;
         let newReplacement = replacement;
-        
+
         if (replacement.includes("$1") && match[1]) {
           newReplacement = replacement.replace("$1", match[1]);
         }
-        
+
         const newBeforeCursor = beforeCursor.substring(0, matchStart) + newReplacement;
         formattedText = newBeforeCursor + afterCursor;
         newCursorPos = newBeforeCursor.length;
         break;
       }
     }
-    
+
     const expFormatted = formatExponentsInText(formattedText, newCursorPos);
-    
+
     return { text: expFormatted.text, cursorPos: expFormatted.cursorPos };
   };
 
   const convertSymbolsForEvaluation = (displayExpression) => {
     let evalExpression = displayExpression;
-    
+
+    evalExpression = evalExpression.replace(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, a, b) => {
+      const na = decodeSuperscriptNumber(a);
+      const nb = decodeSubscriptNumber(b);
+      if (na == null || nb == null) return m;
+      if (!/^[0-9]+$/.test(na) || !/^[0-9]+$/.test(nb)) return m;
+      if (nb === "0") return m;
+      return "(" + na + "/" + nb + ")";
+    });
+
     const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]+/g;
-    evalExpression = evalExpression.replace(superscriptPattern, (match) => {
+    evalExpression = evalExpression.replace(superscriptPattern, (match, offset, whole) => {
+      const nextChar = whole && offset + match.length < whole.length ? whole[offset + match.length] : "";
+      if (nextChar === "⁄") return match;
       let converted = '';
       for (const char of match) {
         converted += SYMBOL_TO_FUNCTION[char] || char;
       }
       return converted;
     });
-    
+
     for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
       if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]/.test(symbol)) {
         evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
       }
     }
-    
+
     return evalExpression;
   };
 
   const formatScientificNotation = (value) => {
     if (value === 0) return "0";
-    
+
     const exp = Math.floor(Math.log10(Math.abs(value)));
     const mantissa = value / Math.pow(10, exp);
-    
+
     let mantissaStr;
     if (useSignificantFigures) {
       mantissaStr = parseFloat(mantissa.toPrecision(significantFigures)).toString();
     } else {
       mantissaStr = parseFloat(mantissa.toFixed(decimalPlaces)).toString();
     }
-    
+
     const expStr = exp.toString().split('').map(c => {
       if (c === '-') return '⁻';
       return SUPERSCRIPT_MAP[c] || c;
     }).join('');
-    
-    return mantissaStr + "×10" + expStr;
-  };
 
-  const formatResult = (value) => {
-    if (!isFinite(value)) return value.toString();
-    
-    if (useScientificNotation) {
-      const absVal = Math.abs(value);
-      if (absVal === 0) return "0";
-      const exp = Math.floor(Math.log10(absVal));
-      if (Math.abs(exp) >= scientificNotationThreshold || (absVal !== 0 && absVal < 1e-6)) {
-        return formatScientificNotation(value);
-      }
-    }
-    
-    if (useSignificantFigures) {
-      return parseFloat(value.toPrecision(significantFigures)).toString();
-    } else {
-      if (Number.isInteger(value)) return value.toString();
-      if (Math.abs(value) < 1e-100) return "0";
-      if (Math.abs(value) > 1e12 || Math.abs(value) < 1e-6) {
-        if (useScientificNotation) {
-          return formatScientificNotation(value);
-        }
-        return value.toExponential(decimalPlaces);
-      }
-      return parseFloat(value.toFixed(decimalPlaces)).toString();
-    }
+    return mantissaStr + "×10" + expStr;
   };
 
   const isDigit = (c) => c >= "0" && c <= "9";
@@ -443,14 +641,14 @@ export default function DinoLabsPluginsCalculator() {
     const s = src.trim();
     let i = 0;
     let absOpen = 0;
-    
+
     while (i < s.length) {
       const c = s[i];
       if (/\s/.test(c)) { i++; continue; }
-      
+
       if (isDigit(c) || (c === "." && i + 1 < s.length && isDigit(s[i + 1]))) {
         let num = "";
-        
+
         if (c === ".") {
           num += "0.";
           i++;
@@ -458,7 +656,7 @@ export default function DinoLabsPluginsCalculator() {
         } else {
           while (i < s.length && (isDigit(s[i]) || s[i] === ".")) num += s[i++];
         }
-        
+
         if (i < s.length && (s[i] === "e" || s[i] === "E")) {
           let j = i + 1;
           let hasSign = false;
@@ -472,46 +670,46 @@ export default function DinoLabsPluginsCalculator() {
             while (i < s.length && isDigit(s[i])) num += s[i++];
           }
         }
-        
+
         const parsed = parseFloat(num);
         if (isNaN(parsed)) throw new Error("Invalid number: " + num);
         tokens.push({ type: "number", value: parsed });
         continue;
       }
-      
+
       if (c === ".") {
         i++;
         continue;
       }
-      
+
       if (isAlpha(c)) {
         let id = "";
         while (i < s.length && isAlnum(s[i])) id += s[i++];
         tokens.push({ type: "ident", value: id });
         continue;
       }
-      
+
       if (c === "τ") { tokens.push({ type: "ident", value: "τ" }); i++; continue; }
       if (c === "⁻") { tokens.push({ type: "op", value: "-" }); i++; continue; }
       if ("([{".includes(c)) { tokens.push({ type: "lparen" }); i++; continue; }
       if (")]}".includes(c)) { tokens.push({ type: "rparen" }); i++; continue; }
       if (c === ",") { tokens.push({ type: "comma" }); i++; continue; }
-      
+
       if (c === "|") {
-        if (absOpen % 2 === 0) { 
-          tokens.push({ type: "function", value: "abs" }); 
-          tokens.push({ type: "lparen" }); 
-        } else { 
-          tokens.push({ type: "rparen" }); 
+        if (absOpen % 2 === 0) {
+          tokens.push({ type: "function", value: "abs" });
+          tokens.push({ type: "lparen" });
+        } else {
+          tokens.push({ type: "rparen" });
         }
-        absOpen++; 
-        i++; 
+        absOpen++;
+        i++;
         continue;
       }
-      
+
       if ("+-*/^".includes(c)) { tokens.push({ type: "op", value: c }); i++; continue; }
       if (c === "=") { tokens.push({ type: "equals" }); i++; continue; }
-      
+
       throw new Error("Unexpected character \"" + c + "\"");
     }
     return tokens;
@@ -545,10 +743,10 @@ export default function DinoLabsPluginsCalculator() {
     const allVarNames = Object.keys(variables).sort((a, b) => b.length - a.length);
     const result = [];
     let remaining = str.toLowerCase();
-    
+
     while (remaining.length > 0) {
       let foundMatch = false;
-      
+
       for (const varName of allVarNames) {
         if (remaining.startsWith(varName)) {
           result.push(varName);
@@ -557,7 +755,7 @@ export default function DinoLabsPluginsCalculator() {
           break;
         }
       }
-      
+
       if (!foundMatch) {
         if (/^[a-zA-Z]$/.test(remaining[0])) {
           result.push(remaining[0]);
@@ -567,7 +765,7 @@ export default function DinoLabsPluginsCalculator() {
         }
       }
     }
-    
+
     return result.length > 1 ? result : [str];
   };
 
@@ -588,7 +786,7 @@ export default function DinoLabsPluginsCalculator() {
     const out = [];
     const isValueEnd = (t) => t.type === "number" || t.type === "rparen" || t.type === "ident";
     const isValueStart = (t) => t.type === "number" || t.type === "lparen" || t.type === "ident" || t.type === "function";
-    
+
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i];
       out.push(t);
@@ -613,34 +811,34 @@ export default function DinoLabsPluginsCalculator() {
       if (!prev) return true;
       return prev.type === "op" || prev.type === "lparen" || prev.type === "comma" || prev.type === "equals";
     };
-    
+
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i];
       const prev = tokens[i - 1];
-      
-      if (t.type === "number" || t.type === "ident") { 
-        output.push(t); 
-        continue; 
+
+      if (t.type === "number" || t.type === "ident") {
+        output.push(t);
+        continue;
       }
-      
-      if (t.type === "function") { 
-        stack.push(t); 
-        continue; 
+
+      if (t.type === "function") {
+        stack.push(t);
+        continue;
       }
-      
+
       if (t.type === "comma") {
         while (stack.length && peek(stack).type !== "lparen") output.push(stack.pop());
         if (!stack.length) throw new Error("Misplaced comma or mismatched parentheses");
         if (frames.length) frames[frames.length - 1].argCount++;
         continue;
       }
-      
-      if (t.type === "lparen") { 
-        stack.push(t); 
-        frames.push({ argCount: 1 }); 
-        continue; 
+
+      if (t.type === "lparen") {
+        stack.push(t);
+        frames.push({ argCount: 1 });
+        continue;
       }
-      
+
       if (t.type === "rparen") {
         while (stack.length && peek(stack).type !== "lparen") output.push(stack.pop());
         if (!stack.length) throw new Error("Mismatched parentheses");
@@ -656,7 +854,7 @@ export default function DinoLabsPluginsCalculator() {
         }
         continue;
       }
-      
+
       if (t.type === "op") {
         let op = t.value;
         if (op === "-" && isUnaryPosition(prev)) op = "neg";
@@ -675,15 +873,15 @@ export default function DinoLabsPluginsCalculator() {
         stack.push({ type: "op", value: o1 });
         continue;
       }
-      
-      if (t.type === "equals") { 
-        output.push(t); 
-        continue; 
+
+      if (t.type === "equals") {
+        output.push(t);
+        continue;
       }
-      
+
       throw new Error("Invalid token");
     }
-    
+
     while (stack.length) {
       const top = stack.pop();
       if (top.type === "lparen" || top.type === "rparen") throw new Error("Mismatched parentheses");
@@ -700,16 +898,16 @@ export default function DinoLabsPluginsCalculator() {
     const st = [];
     for (let i = 0; i < rpn.length; i++) {
       const t = rpn[i];
-      
-      if (t.type === "number") { 
+
+      if (t.type === "number") {
         if (fractionMode) {
           st.push(numberToFraction(t.value));
         } else {
           st.push(t.value);
         }
-        continue; 
+        continue;
       }
-      
+
       if (t.type === "ident") {
         if (Object.prototype.hasOwnProperty.call(variables, t.value)) {
           const val = Number(variables[t.value]);
@@ -723,7 +921,7 @@ export default function DinoLabsPluginsCalculator() {
         }
         continue;
       }
-      
+
       if (t.type === "op") {
         if (fractionMode) {
           const def = FRACTION_OPERATORS[t.value];
@@ -758,7 +956,7 @@ export default function DinoLabsPluginsCalculator() {
         }
         continue;
       }
-      
+
       if (t.type === "function") {
         const def = FUNCTIONS[t.value];
         const argc = def.arity === "var" ? t.argc ?? 1 : def.arity;
@@ -781,12 +979,12 @@ export default function DinoLabsPluginsCalculator() {
         }
         continue;
       }
-      
+
       if (t.type === "equals") throw new Error("Unexpected \"=\" In Expression.");
-      
+
       throw new Error("Invalid RPN Token.");
     }
-    
+
     if (st.length !== 1) throw new Error("Invalid Expression.");
     const val = st[0];
     if (fractionMode) {
@@ -803,7 +1001,7 @@ export default function DinoLabsPluginsCalculator() {
   const parseAndEvaluate = (expr, allVariables = {}, fractionMode = false) => {
     try {
       const evalExpr = convertSymbolsForEvaluation(expr);
-      
+
       const tokens = tokenize(evalExpr);
       const splitTokens = splitMultiLetterVariables(tokens);
       const annotatedTokens = annotateIdentifiers(splitTokens);
@@ -857,16 +1055,16 @@ export default function DinoLabsPluginsCalculator() {
   const solveEquation = (equation) => {
     const parts = equation.split("=");
     if (parts.length !== 2) return equation;
-    
+
     const leftStr = parts[0].trim();
     const rightStr = parts[1].trim();
     const vars = detectVariables(equation);
     let variable = null;
-    
+
     if (vars.includes("x")) variable = "x";
     else if (vars.length === 1) variable = vars[0];
     else return "Cannot Determine A Single Variable To Solve For.";
-    
+
     const f = (x) => {
       const allVars = { ...variables, [variable]: x };
       const l = parseAndEvaluate(leftStr, allVars, false);
@@ -876,16 +1074,16 @@ export default function DinoLabsPluginsCalculator() {
       const rVal = r.value && r.value.isFraction ? fractionToNumber(r.value) : r.value;
       return lVal - rVal;
     };
-    
+
     const ranges = [[-1e6, 1e6], [-1e3, 1e3], [-100, 100], [-10, 10], [0, 100], [0, 10], [-5, 5]];
-    
+
     const tryBisection = (a, b, maxIter = 160) => {
       let fa = f(a), fb = f(b);
       if (!isFinite(fa) || !isFinite(fb)) return null;
       if (fa === 0) return a;
       if (fb === 0) return b;
       if (fa * fb > 0) return null;
-      
+
       for (let i = 0; i < maxIter; i++) {
         const m = (a + b) / 2;
         const fm = f(m);
@@ -896,7 +1094,7 @@ export default function DinoLabsPluginsCalculator() {
       }
       return (a + b) / 2;
     };
-    
+
     const tryNewton = (x0, maxIter = 100) => {
       let x = x0;
       for (let i = 0; i < maxIter; i++) {
@@ -913,38 +1111,38 @@ export default function DinoLabsPluginsCalculator() {
       }
       return null;
     };
-    
+
     for (const [a, b] of ranges) {
       const m = tryBisection(a, b);
       if (m !== null && isFinite(m)) return variable + " = " + formatResult(m);
     }
-    
+
     const seeds = [0, 1, -1, 2, -2, 5, -5, 10, -10, 100, -100];
     for (const s of seeds) {
       const r = tryNewton(s);
       if (r !== null && isFinite(r)) return variable + " = " + formatResult(r);
     }
-    
+
     return "No Real Solution Found.";
   };
 
   const handleVariableAssignment = (expr) => {
     const parts = expr.split("=");
     if (parts.length !== 2) return false;
-    
+
     const varName = parts[0].trim().toLowerCase();
     const valueExpr = parts[1].trim();
-    
+
     if (!varName.match(/^[a-z_][a-z0-9_]*$/)) return false;
-    
+
     if (RESERVED.has(varName)) {
       setHistory((prev) => [...prev, { expression: expr, result: "Cannot Override Function \"" + varName + "\"." }]);
       return true;
     }
-    
+
     const result = parseAndEvaluate(valueExpr, variables, false);
     if (result.error) return false;
-    
+
     const numVal = result.value && result.value.isFraction ? fractionToNumber(result.value) : result.value;
     setVariables(prev => ({ ...prev, [varName]: numVal }));
     return true;
@@ -952,10 +1150,10 @@ export default function DinoLabsPluginsCalculator() {
 
   const handleEnter = () => {
     if (!expression.trim()) return;
-    
+
     const originalExpression = expression.trim();
     let result = "";
-    
+
     if (originalExpression.includes("=")) {
       if (handleVariableAssignment(originalExpression)) {
         const parts = originalExpression.split("=");
@@ -978,7 +1176,7 @@ export default function DinoLabsPluginsCalculator() {
         result = error;
       }
     }
-    
+
     setHistory((prev) => [...prev, { expression: originalExpression, result }]);
     setExpression("");
     cursorPositionRef.current = 0;
@@ -996,12 +1194,12 @@ export default function DinoLabsPluginsCalculator() {
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     const cursorPos = e.target.selectionStart;
-    
+
     cursorPositionRef.current = cursorPos;
-    
+
     const formatted = applySymbolFormatting(newValue, cursorPos);
     setExpression(formatted.text);
-    
+
     if (formatted.text !== newValue || formatted.cursorPos !== cursorPos) {
       setTimeout(() => {
         setCursorPosition(formatted.cursorPos);
@@ -1013,10 +1211,10 @@ export default function DinoLabsPluginsCalculator() {
     const currentPos = inputRef.current?.selectionStart || expression.length;
     const newExpression = expression.slice(0, currentPos) + value + expression.slice(currentPos);
     const newCursorPos = currentPos + value.length;
-    
+
     const formatted = applySymbolFormatting(newExpression, newCursorPos);
     setExpression(formatted.text);
-    
+
     setTimeout(() => {
       setCursorPosition(formatted.cursorPos);
     }, 10);
@@ -1048,17 +1246,17 @@ export default function DinoLabsPluginsCalculator() {
       }
       return;
     }
-    
+
     if (e.metaKey || e.ctrlKey || e.altKey) {
       return;
     }
-    
-    if (e.key === "Enter") { 
-      e.preventDefault(); 
-      handleEnter(); 
-    } else if (e.key === "Escape") { 
-      e.preventDefault(); 
-      clearExpression(); 
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleEnter();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      clearExpression();
     } else if (e.key.length === 1) {
       e.preventDefault();
       appendToExpression(e.key);
@@ -1071,8 +1269,8 @@ export default function DinoLabsPluginsCalculator() {
   );
 
   const TTButton = ({ title, children, onClick, className = "" }) => (
-    <button 
-      className={"dinolabsPluginsCalculatorButton " + className} 
+    <button
+      className={"dinolabsPluginsCalculatorButton " + className}
       onClick={onClick}
       title={title}
     >
@@ -1086,12 +1284,12 @@ export default function DinoLabsPluginsCalculator() {
 
       <div className="dinolabsPluginsCalculatorContainer">
         <div className="dinolabsPluginsCalculatorTopBar">
-          <button 
+          <button
             className="dinolabsPluginsCalculatorSettingsGear"
             onClick={() => setShowSettingsModal(true)}
             title="Settings"
           >
-            <FontAwesomeIcon icon={faGear}/>
+            <FontAwesomeIcon icon={faGear} />
           </button>
         </div>
 
@@ -1214,13 +1412,13 @@ export default function DinoLabsPluginsCalculator() {
               <CalcButton onClick={() => appendToExpression("a")} className="dinolabsPluginsCalculatorVariable">a</CalcButton>
               <CalcButton onClick={deleteLast} className="dinolabsPluginsCalculatorControl dinolabsPluginsCalculatorWide">⌫</CalcButton>
             </div>
-            
+
             <div className="dinolabsPluginsCalculatorKeyboardRow">
               <CalcButton onClick={() => appendToExpression("y")} className="dinolabsPluginsCalculatorVariable">y</CalcButton>
               <CalcButton onClick={() => appendToExpression("b")} className="dinolabsPluginsCalculatorVariable">b</CalcButton>
               <CalcButton onClick={clearExpression} className="dinolabsPluginsCalculatorControl dinolabsPluginsCalculatorWide">Clear</CalcButton>
             </div>
-            
+
             <div className="dinolabsPluginsCalculatorKeyboardRow">
               <CalcButton onClick={() => appendToExpression("z")} className="dinolabsPluginsCalculatorVariable">z</CalcButton>
               <CalcButton onClick={() => appendToExpression("c")} className="dinolabsPluginsCalculatorVariable">c</CalcButton>
@@ -1235,25 +1433,25 @@ export default function DinoLabsPluginsCalculator() {
           <div className="dinolabsPluginsCalculatorModal" onClick={(e) => e.stopPropagation()}>
             <div className="dinolabsPluginsCalculatorModalHeader">
               <h3>Calculator Settings</h3>
-              <button 
+              <button
                 className="dinolabsPluginsCalculatorModalCloseButton"
                 onClick={() => setShowSettingsModal(false)}
               >
-                <FontAwesomeIcon icon={faXmarkSquare}/>
+                <FontAwesomeIcon icon={faXmarkSquare} />
               </button>
             </div>
-            
+
             <div className="dinolabsPluginsCalculatorModalContent">
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Fraction Mode:</div>
                 <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${!useFractionMode ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseFractionMode(false)}
                   >
                     Decimal
                   </button>
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${useFractionMode ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseFractionMode(true)}
                   >
@@ -1265,13 +1463,13 @@ export default function DinoLabsPluginsCalculator() {
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Rounding Mode:</div>
                 <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${!useSignificantFigures ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseSignificantFigures(false)}
                   >
                     Decimal Places
                   </button>
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${useSignificantFigures ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseSignificantFigures(true)}
                   >
@@ -1279,7 +1477,7 @@ export default function DinoLabsPluginsCalculator() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">
                   {useSignificantFigures ? `Significant Figures: ${significantFigures}` : `Decimal Places: ${decimalPlaces}`}
@@ -1299,13 +1497,13 @@ export default function DinoLabsPluginsCalculator() {
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Scientific Notation:</div>
                 <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${!useScientificNotation ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseScientificNotation(false)}
                   >
                     Off
                   </button>
-                  <button 
+                  <button
                     className={`dinolabsPluginsCalculatorSettingsButton ${useScientificNotation ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
                     onClick={() => setUseScientificNotation(true)}
                   >
