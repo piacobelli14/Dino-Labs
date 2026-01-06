@@ -9,7 +9,17 @@ export default function DinoLabsPluginsCalculator() {
   const SUPERSCRIPT_MAP = {
     '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
     '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-    '-': '⁻', '+': '⁺', '.': '·'
+    '-': '⁻', '+': '⁺', '.': '·',
+    '(': '⁽', ')': '⁾',
+    'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ',
+    'f': 'ᶠ', 'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'j': 'ʲ',
+    'k': 'ᵏ', 'l': 'ˡ', 'm': 'ᵐ', 'n': 'ⁿ', 'o': 'ᵒ',
+    'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 't': 'ᵗ', 'u': 'ᵘ',
+    'v': 'ᵛ', 'w': 'ʷ', 'x': 'ˣ', 'y': 'ʸ', 'z': 'ᶻ',
+    'A': 'ᴬ', 'B': 'ᴮ', 'D': 'ᴰ', 'E': 'ᴱ', 'G': 'ᴳ',
+    'H': 'ᴴ', 'I': 'ᴵ', 'J': 'ᴶ', 'K': 'ᴷ', 'L': 'ᴸ',
+    'M': 'ᴹ', 'N': 'ᴺ', 'O': 'ᴼ', 'P': 'ᴾ', 'R': 'ᴿ',
+    'T': 'ᵀ', 'U': 'ᵁ', 'V': 'ⱽ', 'W': 'ᵂ'
   };
 
   const SUBSCRIPT_MAP = {
@@ -20,7 +30,17 @@ export default function DinoLabsPluginsCalculator() {
   const REVERSE_SUPERSCRIPT_DIGIT = {
     '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
     '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
-    '⁻': '-', '⁺': '+', '·': '.'
+    '⁻': '-', '⁺': '+', '·': '.',
+    '⁽': '(', '⁾': ')',
+    'ᵃ': 'a', 'ᵇ': 'b', 'ᶜ': 'c', 'ᵈ': 'd', 'ᵉ': 'e',
+    'ᶠ': 'f', 'ᵍ': 'g', 'ʰ': 'h', 'ⁱ': 'i', 'ʲ': 'j',
+    'ᵏ': 'k', 'ˡ': 'l', 'ᵐ': 'm', 'ⁿ': 'n', 'ᵒ': 'o',
+    'ᵖ': 'p', 'ʳ': 'r', 'ˢ': 's', 'ᵗ': 't', 'ᵘ': 'u',
+    'ᵛ': 'v', 'ʷ': 'w', 'ˣ': 'x', 'ʸ': 'y', 'ᶻ': 'z',
+    'ᴬ': 'A', 'ᴮ': 'B', 'ᴰ': 'D', 'ᴱ': 'E', 'ᴳ': 'G',
+    'ᴴ': 'H', 'ᴵ': 'I', 'ᴶ': 'J', 'ᴷ': 'K', 'ᴸ': 'L',
+    'ᴹ': 'M', 'ᴺ': 'N', 'ᴼ': 'O', 'ᴾ': 'P', 'ᴿ': 'R',
+    'ᵀ': 'T', 'ᵁ': 'U', 'ⱽ': 'V', 'ᵂ': 'W'
   };
 
   const REVERSE_SUBSCRIPT_DIGIT = {
@@ -444,10 +464,196 @@ export default function DinoLabsPluginsCalculator() {
     return uni;
   };
 
+  const formatLogBases = (text, cursorPos) => {
+    let result = text;
+    let newCursorPos = cursorPos;
+
+    const subscriptChars = new Set(Object.values(SUBSCRIPT_MAP));
+    const isSubscript = (ch) => subscriptChars.has(ch);
+
+    const logBasePattern = /log_(\d+)\s*\(/g;
+    let match;
+    let offset = 0;
+
+    const tempResult = result;
+    while ((match = logBasePattern.exec(tempResult)) !== null) {
+      const fullMatch = match[0];
+      const baseDigits = match[1];
+      const matchStart = match.index + offset;
+      const matchEnd = matchStart + fullMatch.length;
+
+      if (cursorPos > matchStart + 4 && cursorPos < matchEnd - 1) {
+        continue;
+      }
+
+      const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+      const replacement = 'log' + subscriptBase + '(';
+      const lenDiff = replacement.length - fullMatch.length;
+
+      result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+      if (cursorPos > matchEnd) {
+        newCursorPos += lenDiff;
+      } else if (cursorPos > matchStart) {
+        newCursorPos = matchStart + replacement.length;
+      }
+
+      offset += lenDiff;
+    }
+
+    const logNumPattern = /log(\d+)\s*\(/g;
+    offset = 0;
+    const tempResult2 = result;
+    logNumPattern.lastIndex = 0;
+
+    while ((match = logNumPattern.exec(tempResult2)) !== null) {
+      const fullMatch = match[0];
+      const baseDigits = match[1];
+      const matchStart = match.index + offset;
+      const matchEnd = matchStart + fullMatch.length;
+
+      const cursorAtEnd = newCursorPos === matchStart + 3 + baseDigits.length;
+      if (cursorAtEnd) {
+        continue;
+      }
+
+      const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+      const replacement = 'log' + subscriptBase + '(';
+      const lenDiff = replacement.length - fullMatch.length;
+
+      result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+      if (newCursorPos > matchEnd) {
+        newCursorPos += lenDiff;
+      } else if (newCursorPos > matchStart + 3) {
+        newCursorPos = matchStart + 3 + subscriptBase.length;
+      }
+
+      offset += lenDiff;
+    }
+
+    if (newCursorPos > 0 && newCursorPos <= result.length) {
+      const charBefore = result[newCursorPos - 1];
+      if (!isSubscript(charBefore) && SUBSCRIPT_MAP[charBefore] !== undefined) {
+        const charTwoBefore = newCursorPos >= 2 ? result[newCursorPos - 2] : '';
+        const charAfter = newCursorPos < result.length ? result[newCursorPos] : '';
+
+        let shouldConvert = false;
+
+        if (isSubscript(charAfter)) {
+          shouldConvert = true;
+        }
+
+        if (isSubscript(charTwoBefore)) {
+          shouldConvert = true;
+        }
+
+        let checkPos = newCursorPos - 2;
+        while (checkPos >= 0 && isSubscript(result[checkPos])) {
+          checkPos--;
+        }
+        if (checkPos >= 2 && result.slice(checkPos - 2, checkPos + 1) === 'log') {
+          shouldConvert = true;
+        }
+
+        if (shouldConvert) {
+          const converted = SUBSCRIPT_MAP[charBefore];
+          result = result.slice(0, newCursorPos - 1) + converted + result.slice(newCursorPos);
+        }
+      }
+    }
+
+    return { text: result, cursorPos: newCursorPos };
+  };
+
   const formatExponentsInText = (text, cursorPos) => {
     let result = '';
     let newCursorPos = cursorPos;
     let i = 0;
+
+    const superscriptChars = new Set(Object.values(SUPERSCRIPT_MAP));
+    const allSuperscriptChars = new Set([...superscriptChars, ...Object.keys(REVERSE_SUPERSCRIPT_DIGIT)]);
+
+    const isSuperscript = (ch) => allSuperscriptChars.has(ch);
+
+    const canSuperscript = (str) => {
+      for (const ch of str) {
+        if (SUPERSCRIPT_MAP[ch] === undefined && ch !== ' ') return false;
+      }
+      return true;
+    };
+
+    const toSuperscriptFull = (str) => {
+      return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+    };
+
+    const findSuperscriptBounds = (txt, pos) => {
+      if (pos <= 0 || pos > txt.length) return null;
+      
+      let start = pos - 1;
+      let end = pos - 1;
+      
+      while (start > 0 && isSuperscript(txt[start - 1])) {
+        start--;
+      }
+      while (end < txt.length - 1 && isSuperscript(txt[end + 1])) {
+        end++;
+      }
+      
+      if (!isSuperscript(txt[start])) return null;
+      
+      const seq = txt.substring(start, end + 1);
+      const hasOpenParen = seq.includes('⁽');
+      const hasCloseParen = seq.includes('⁾');
+      
+      if (hasOpenParen && hasCloseParen) {
+        const openIdx = seq.indexOf('⁽');
+        const closeIdx = seq.lastIndexOf('⁾');
+        if (closeIdx > openIdx) {
+          return { start, end: end + 1, isComplete: true };
+        }
+      }
+      
+      if (hasOpenParen && !hasCloseParen) {
+        return { start, end: end + 1, isComplete: false };
+      }
+      
+      return { start, end: end + 1, isComplete: true };
+    };
+
+    let workingText = text;
+    let workingCursor = cursorPos;
+
+    if (workingCursor > 0 && workingCursor <= workingText.length) {
+      const charBeforeCursor = workingText[workingCursor - 1];
+      
+      if (!isSuperscript(charBeforeCursor) && SUPERSCRIPT_MAP[charBeforeCursor] !== undefined) {
+        const charTwoBeforeCursor = workingCursor >= 2 ? workingText[workingCursor - 2] : '';
+        const charAfterCursor = workingCursor < workingText.length ? workingText[workingCursor] : '';
+        
+        let shouldConvert = false;
+        
+        if (isSuperscript(charAfterCursor) && charAfterCursor !== '⁽') {
+          shouldConvert = true;
+        }
+        
+        if (isSuperscript(charTwoBeforeCursor) && charTwoBeforeCursor !== '⁾') {
+          shouldConvert = true;
+        }
+        
+        if (charTwoBeforeCursor === '⁾') {
+          shouldConvert = false;
+        }
+        
+        if (shouldConvert) {
+          const converted = SUPERSCRIPT_MAP[charBeforeCursor];
+          workingText = workingText.slice(0, workingCursor - 1) + converted + workingText.slice(workingCursor);
+        }
+      }
+    }
+
+    text = workingText;
+    cursorPos = workingCursor;
 
     while (i < text.length) {
       if (text[i] === '^') {
@@ -467,20 +673,38 @@ export default function DinoLabsPluginsCalculator() {
 
           if (depth === 0) {
             const insideWithParens = text.substring(expStart, j);
-            const uni = parseParenFraction(insideWithParens);
-            if (uni) {
-              const originalLen = j - i;
-              const replacementLen = uni.length;
+            const cursorInside = cursorPos > expStart && cursorPos < j;
+            const cursorAtEnd = cursorPos === j;
+            
+            if (!cursorInside && !cursorAtEnd) {
+              const uni = parseParenFraction(insideWithParens);
+              if (uni) {
+                const originalLen = j - i;
+                const replacementLen = uni.length;
 
-              if (cursorPos > i && cursorPos <= j) {
-                newCursorPos = result.length + Math.min(replacementLen, Math.max(0, cursorPos - i - 1));
-              } else if (cursorPos > j) {
-                newCursorPos -= originalLen - replacementLen;
+                if (cursorPos > j) {
+                  newCursorPos -= originalLen - replacementLen;
+                }
+
+                result += uni;
+                i = j;
+                continue;
               }
 
-              result += uni;
-              i = j;
-              continue;
+              const innerContent = insideWithParens.slice(1, -1);
+              if (canSuperscript(innerContent)) {
+                const superscripted = '⁽' + toSuperscriptFull(innerContent) + '⁾';
+                const originalLen = j - i;
+                const replacementLen = superscripted.length;
+
+                if (cursorPos > j) {
+                  newCursorPos -= originalLen - replacementLen;
+                }
+
+                result += superscripted;
+                i = j;
+                continue;
+              }
             }
           }
         }
@@ -496,19 +720,25 @@ export default function DinoLabsPluginsCalculator() {
         }
 
         if (expEnd > expStart && ((text[expStart] !== '-' && text[expStart] !== '+') || expEnd > expStart + 1)) {
-          const exponent = text.substring(expStart, expEnd);
-          const superscripted = toSuperscript(exponent);
+          const nextChar = expEnd < text.length ? text[expEnd] : '';
+          const cursorAtEnd = cursorPos === expEnd;
+          const shouldConvert = !cursorAtEnd || (nextChar !== '' && !/[0-9.]/.test(nextChar));
 
-          if (cursorPos > i && cursorPos <= expEnd) {
-            const offsetInExp = cursorPos - expStart;
-            newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
-          } else if (cursorPos > expEnd) {
-            newCursorPos -= (expEnd - i) - superscripted.length;
+          if (shouldConvert) {
+            const exponent = text.substring(expStart, expEnd);
+            const superscripted = toSuperscript(exponent);
+
+            if (cursorPos > i && cursorPos <= expEnd) {
+              const offsetInExp = cursorPos - expStart;
+              newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
+            } else if (cursorPos > expEnd) {
+              newCursorPos -= (expEnd - i) - superscripted.length;
+            }
+
+            result += superscripted;
+            i = expEnd;
+            continue;
           }
-
-          result += superscripted;
-          i = expEnd;
-          continue;
         }
       }
       result += text[i];
@@ -535,7 +765,15 @@ export default function DinoLabsPluginsCalculator() {
     const beforeCursor0 = formattedText.substring(0, newCursorPos);
     const afterCursor0 = formattedText.substring(newCursorPos);
 
-    const fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)$/);
+    const afterChar = afterCursor0.length > 0 ? afterCursor0[0] : '';
+    const hasNonDigitAfter = afterChar !== '' && !/[0-9]/.test(afterChar);
+
+    let fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)(?=[^0-9])/);
+    
+    if (!fracMatch && hasNonDigitAfter) {
+      fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)$/);
+    }
+
     if (fracMatch) {
       const full = fracMatch[0];
       const lead = fracMatch[1] || "";
@@ -543,8 +781,11 @@ export default function DinoLabsPluginsCalculator() {
       const denStr = fracMatch[4];
       const uni = makeUnicodeFraction(numStr, denStr);
       if (uni) {
-        const prefixLen = beforeCursor0.length - full.length;
-        const newBefore = beforeCursor0.slice(0, prefixLen) + lead + uni;
+        const matchStart = fracMatch.index;
+        const matchEnd = matchStart + full.length;
+        const prefix = beforeCursor0.slice(0, matchStart);
+        const suffix = beforeCursor0.slice(matchEnd);
+        const newBefore = prefix + lead + uni + suffix;
         formattedText = newBefore + afterCursor0;
         newCursorPos = newBefore.length;
       }
@@ -575,8 +816,9 @@ export default function DinoLabsPluginsCalculator() {
     }
 
     const expFormatted = formatExponentsInText(formattedText, newCursorPos);
+    const logFormatted = formatLogBases(expFormatted.text, expFormatted.cursorPos);
 
-    return { text: expFormatted.text, cursorPos: expFormatted.cursorPos };
+    return { text: logFormatted.text, cursorPos: logFormatted.cursorPos };
   };
 
   const convertSymbolsForEvaluation = (displayExpression) => {
@@ -591,19 +833,26 @@ export default function DinoLabsPluginsCalculator() {
       return "(" + na + "/" + nb + ")";
     });
 
-    const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]+/g;
+    evalExpression = evalExpression.replace(/log([₀₁₂₃₄₅₆₇₈₉]+)\s*\(([^)]+)\)/g, (m, subscriptBase, arg) => {
+      const base = decodeSubscriptNumber(subscriptBase);
+      if (base == null) return m;
+      return "logn(" + arg + ", " + base + ")";
+    });
+
+    const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]+/g;
     evalExpression = evalExpression.replace(superscriptPattern, (match, offset, whole) => {
       const nextChar = whole && offset + match.length < whole.length ? whole[offset + match.length] : "";
       if (nextChar === "⁄") return match;
-      let converted = '';
+      let converted = '^(';
       for (const char of match) {
-        converted += SYMBOL_TO_FUNCTION[char] || char;
+        converted += REVERSE_SUPERSCRIPT_DIGIT[char] || char;
       }
+      converted += ')';
       return converted;
     });
 
     for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
-      if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·]/.test(symbol)) {
+      if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]/.test(symbol)) {
         evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
       }
     }

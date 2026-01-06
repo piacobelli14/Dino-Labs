@@ -9,6 +9,49 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash, faHouse, faKeyboard, faLineChart, faMinus, faPlus, faRotate, faXmark, faPaintBrush } from "@fortawesome/free-solid-svg-icons";
 
 export default function DinoLabsPluginsPlot() {
+
+  const SUPERSCRIPT_MAP = {
+    '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+    '-': '⁻', '+': '⁺', '.': '·',
+    '(': '⁽', ')': '⁾',
+    'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ',
+    'f': 'ᶠ', 'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'j': 'ʲ',
+    'k': 'ᵏ', 'l': 'ˡ', 'm': 'ᵐ', 'n': 'ⁿ', 'o': 'ᵒ',
+    'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 't': 'ᵗ', 'u': 'ᵘ',
+    'v': 'ᵛ', 'w': 'ʷ', 'x': 'ˣ', 'y': 'ʸ', 'z': 'ᶻ',
+    'A': 'ᴬ', 'B': 'ᴮ', 'D': 'ᴰ', 'E': 'ᴱ', 'G': 'ᴳ',
+    'H': 'ᴴ', 'I': 'ᴵ', 'J': 'ᴶ', 'K': 'ᴷ', 'L': 'ᴸ',
+    'M': 'ᴹ', 'N': 'ᴺ', 'O': 'ᴼ', 'P': 'ᴾ', 'R': 'ᴿ',
+    'T': 'ᵀ', 'U': 'ᵁ', 'V': 'ⱽ', 'W': 'ᵂ'
+  };
+
+  const SUBSCRIPT_MAP = {
+    '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+    '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
+  };
+
+  const REVERSE_SUPERSCRIPT_DIGIT = {
+    '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+    '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+    '⁻': '-', '⁺': '+', '·': '.',
+    '⁽': '(', '⁾': ')',
+    'ᵃ': 'a', 'ᵇ': 'b', 'ᶜ': 'c', 'ᵈ': 'd', 'ᵉ': 'e',
+    'ᶠ': 'f', 'ᵍ': 'g', 'ʰ': 'h', 'ⁱ': 'i', 'ʲ': 'j',
+    'ᵏ': 'k', 'ˡ': 'l', 'ᵐ': 'm', 'ⁿ': 'n', 'ᵒ': 'o',
+    'ᵖ': 'p', 'ʳ': 'r', 'ˢ': 's', 'ᵗ': 't', 'ᵘ': 'u',
+    'ᵛ': 'v', 'ʷ': 'w', 'ˣ': 'x', 'ʸ': 'y', 'ᶻ': 'z',
+    'ᴬ': 'A', 'ᴮ': 'B', 'ᴰ': 'D', 'ᴱ': 'E', 'ᴳ': 'G',
+    'ᴴ': 'H', 'ᴵ': 'I', 'ᴶ': 'J', 'ᴷ': 'K', 'ᴸ': 'L',
+    'ᴹ': 'M', 'ᴺ': 'N', 'ᴼ': 'O', 'ᴾ': 'P', 'ᴿ': 'R',
+    'ᵀ': 'T', 'ᵁ': 'U', 'ⱽ': 'V', 'ᵂ': 'W'
+  };
+
+  const REVERSE_SUBSCRIPT_DIGIT = {
+    '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+    '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
+  };
+
   const SYMBOL_REPLACEMENTS = [
     { pattern: /sqrt\(/g, replacement: "√(", description: "Square Root" },
     { pattern: /cbrt\(/g, replacement: "∛(", description: "Cube Root" },
@@ -31,21 +74,9 @@ export default function DinoLabsPluginsPlot() {
     { pattern: /\+\-/g, replacement: "±", description: "Plus-Minus" },
     { pattern: /-\+/g, replacement: "∓", description: "Minus-Plus" },
     { pattern: /\*\*/g, replacement: "^", description: "Exponentiation" },
-    { pattern: /\^-(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g, replacement: "^⁻$1", description: "Negative Exponent" },
     { pattern: /(?<![a-zA-Z])\*(?![a-zA-Z])/g, replacement: "×", description: "Multiplication" },
-    { pattern: /(?<![a-zA-Z])\/(?![a-zA-Z])/g, replacement: "÷", description: "Division" },
     { pattern: /\binfinity\b/g, replacement: "∞", description: "Infinity" },
     { pattern: /\binf\b/g, replacement: "∞", description: "Infinity" },
-    { pattern: /\b1\/2\b/g, replacement: "½", description: "One Half" },
-    { pattern: /\b1\/3\b/g, replacement: "⅓", description: "One Third" },
-    { pattern: /\b2\/3\b/g, replacement: "⅔", description: "Two Thirds" },
-    { pattern: /\b1\/4\b/g, replacement: "¼", description: "One Quarter" },
-    { pattern: /\b3\/4\b/g, replacement: "¾", description: "Three Quarters" },
-    { pattern: /\b1\/5\b/g, replacement: "⅕", description: "One Fifth" },
-    { pattern: /\b1\/6\b/g, replacement: "⅙", description: "One Sixth" },
-    { pattern: /\b1\/8\b/g, replacement: "⅛", description: "One Eighth" },
-    { pattern: /\^2(?!\d)/g, replacement: "²", description: "Squared" },
-    { pattern: /\^3(?!\d)/g, replacement: "³", description: "Cubed" },
     { pattern: /\bsum\(/g, replacement: "∑(", description: "Summation" },
     { pattern: /\bprod\(/g, replacement: "∏(", description: "Product" },
     { pattern: /\bintegral\(/g, replacement: "∫(", description: "Integral" }
@@ -76,6 +107,8 @@ export default function DinoLabsPluginsPlot() {
     "×": "*",
     "÷": "/",
     "⁻": "-",
+    "⁺": "+",
+    "·": ".",
     "½": "0.5",
     "⅓": "(1/3)",
     "⅔": "(2/3)", 
@@ -144,45 +177,416 @@ export default function DinoLabsPluginsPlot() {
     }
   };
 
+  const escapeRegExp = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  };
+
+  const toSuperscript = (str) => {
+    return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+  };
+
+  const toSubscript = (str) => {
+    return str.split('').map(c => SUBSCRIPT_MAP[c] || c).join('');
+  };
+
+  const decodeSuperscriptNumber = (s) => {
+    let out = "";
+    for (const ch of s) {
+      const v = REVERSE_SUPERSCRIPT_DIGIT[ch];
+      if (v == null) return null;
+      out += v;
+    }
+    return out;
+  };
+
+  const decodeSubscriptNumber = (s) => {
+    let out = "";
+    for (const ch of s) {
+      const v = REVERSE_SUBSCRIPT_DIGIT[ch];
+      if (v == null) return null;
+      out += v;
+    }
+    return out;
+  };
+
+  const makeUnicodeFraction = (numStr, denStr) => {
+    const n = String(numStr).replace(/\s+/g, "");
+    const d = String(denStr).replace(/\s+/g, "");
+    if (!/^[0-9]+$/.test(n) || !/^[0-9]+$/.test(d)) return null;
+    if (d === "0") return null;
+    const num = toSuperscript(n);
+    const den = toSubscript(d);
+    return num + "⁄" + den;
+  };
+
+  const parseParenFraction = (s) => {
+    const m = s.match(/^\(\s*([0-9]+)\s*([\/÷])\s*([0-9]+)\s*\)$/);
+    if (!m) return null;
+    const uni = makeUnicodeFraction(m[1], m[3]);
+    if (!uni) return null;
+    return uni;
+  };
+
+  const formatLogBases = (text, cursorPos) => {
+    let result = text;
+    let newCursorPos = cursorPos;
+
+    const subscriptChars = new Set(Object.values(SUBSCRIPT_MAP));
+    const isSubscript = (ch) => subscriptChars.has(ch);
+
+    const logBasePattern = /log_(\d+)\s*\(/g;
+    let match;
+    let offset = 0;
+
+    const tempResult = result;
+    while ((match = logBasePattern.exec(tempResult)) !== null) {
+      const fullMatch = match[0];
+      const baseDigits = match[1];
+      const matchStart = match.index + offset;
+      const matchEnd = matchStart + fullMatch.length;
+
+      if (cursorPos > matchStart + 4 && cursorPos < matchEnd - 1) {
+        continue;
+      }
+
+      const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+      const replacement = 'log' + subscriptBase + '(';
+      const lenDiff = replacement.length - fullMatch.length;
+
+      result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+      if (cursorPos > matchEnd) {
+        newCursorPos += lenDiff;
+      } else if (cursorPos > matchStart) {
+        newCursorPos = matchStart + replacement.length;
+      }
+
+      offset += lenDiff;
+    }
+
+    const logNumPattern = /log(\d+)\s*\(/g;
+    offset = 0;
+    const tempResult2 = result;
+    logNumPattern.lastIndex = 0;
+
+    while ((match = logNumPattern.exec(tempResult2)) !== null) {
+      const fullMatch = match[0];
+      const baseDigits = match[1];
+      const matchStart = match.index + offset;
+      const matchEnd = matchStart + fullMatch.length;
+
+      const cursorAtEnd = newCursorPos === matchStart + 3 + baseDigits.length;
+      if (cursorAtEnd) {
+        continue;
+      }
+
+      const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+      const replacement = 'log' + subscriptBase + '(';
+      const lenDiff = replacement.length - fullMatch.length;
+
+      result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+      if (newCursorPos > matchEnd) {
+        newCursorPos += lenDiff;
+      } else if (newCursorPos > matchStart + 3) {
+        newCursorPos = matchStart + 3 + subscriptBase.length;
+      }
+
+      offset += lenDiff;
+    }
+
+    if (newCursorPos > 0 && newCursorPos <= result.length) {
+      const charBefore = result[newCursorPos - 1];
+      if (!isSubscript(charBefore) && SUBSCRIPT_MAP[charBefore] !== undefined) {
+        const charTwoBefore = newCursorPos >= 2 ? result[newCursorPos - 2] : '';
+        const charAfter = newCursorPos < result.length ? result[newCursorPos] : '';
+
+        let shouldConvert = false;
+
+        if (isSubscript(charAfter)) {
+          shouldConvert = true;
+        }
+
+        if (isSubscript(charTwoBefore)) {
+          shouldConvert = true;
+        }
+
+        let checkPos = newCursorPos - 2;
+        while (checkPos >= 0 && isSubscript(result[checkPos])) {
+          checkPos--;
+        }
+        if (checkPos >= 2 && result.slice(checkPos - 2, checkPos + 1) === 'log') {
+          shouldConvert = true;
+        }
+
+        if (shouldConvert) {
+          const converted = SUBSCRIPT_MAP[charBefore];
+          result = result.slice(0, newCursorPos - 1) + converted + result.slice(newCursorPos);
+        }
+      }
+    }
+
+    return { text: result, cursorPos: newCursorPos };
+  };
+
+  const formatExponentsInText = (text, cursorPos) => {
+    let result = '';
+    let newCursorPos = cursorPos;
+    let i = 0;
+
+    const superscriptChars = new Set(Object.values(SUPERSCRIPT_MAP));
+    const allSuperscriptChars = new Set([...superscriptChars, ...Object.keys(REVERSE_SUPERSCRIPT_DIGIT)]);
+
+    const isSuperscript = (ch) => allSuperscriptChars.has(ch);
+
+    const canSuperscript = (str) => {
+      for (const ch of str) {
+        if (SUPERSCRIPT_MAP[ch] === undefined && ch !== ' ') return false;
+      }
+      return true;
+    };
+
+    const toSuperscriptFull = (str) => {
+      return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+    };
+
+    let workingText = text;
+    let workingCursor = cursorPos;
+
+    if (workingCursor > 0 && workingCursor <= workingText.length) {
+      const charBeforeCursor = workingText[workingCursor - 1];
+      
+      if (!isSuperscript(charBeforeCursor) && SUPERSCRIPT_MAP[charBeforeCursor] !== undefined) {
+        const charTwoBeforeCursor = workingCursor >= 2 ? workingText[workingCursor - 2] : '';
+        const charAfterCursor = workingCursor < workingText.length ? workingText[workingCursor] : '';
+        
+        let shouldConvert = false;
+        
+        if (isSuperscript(charAfterCursor) && charAfterCursor !== '⁽') {
+          shouldConvert = true;
+        }
+        
+        if (isSuperscript(charTwoBeforeCursor) && charTwoBeforeCursor !== '⁾') {
+          shouldConvert = true;
+        }
+        
+        if (charTwoBeforeCursor === '⁾') {
+          shouldConvert = false;
+        }
+        
+        if (shouldConvert) {
+          const converted = SUPERSCRIPT_MAP[charBeforeCursor];
+          workingText = workingText.slice(0, workingCursor - 1) + converted + workingText.slice(workingCursor);
+        }
+      }
+    }
+
+    text = workingText;
+    cursorPos = workingCursor;
+
+    while (i < text.length) {
+      if (text[i] === '^') {
+        const expStart = i + 1;
+
+        if (expStart < text.length && text[expStart] === '(') {
+          let j = expStart;
+          let depth = 0;
+          while (j < text.length) {
+            if (text[j] === '(') depth++;
+            else if (text[j] === ')') {
+              depth--;
+              if (depth === 0) { j++; break; }
+            }
+            j++;
+          }
+
+          if (depth === 0) {
+            const insideWithParens = text.substring(expStart, j);
+            const cursorInside = cursorPos > expStart && cursorPos < j;
+            const cursorAtEnd = cursorPos === j;
+            
+            if (!cursorInside && !cursorAtEnd) {
+              const uni = parseParenFraction(insideWithParens);
+              if (uni) {
+                const originalLen = j - i;
+                const replacementLen = uni.length;
+
+                if (cursorPos > j) {
+                  newCursorPos -= originalLen - replacementLen;
+                }
+
+                result += uni;
+                i = j;
+                continue;
+              }
+
+              const innerContent = insideWithParens.slice(1, -1);
+              if (canSuperscript(innerContent)) {
+                const superscripted = '⁽' + toSuperscriptFull(innerContent) + '⁾';
+                const originalLen = j - i;
+                const replacementLen = superscripted.length;
+
+                if (cursorPos > j) {
+                  newCursorPos -= originalLen - replacementLen;
+                }
+
+                result += superscripted;
+                i = j;
+                continue;
+              }
+            }
+          }
+        }
+
+        let expEnd = expStart;
+
+        if (expEnd < text.length && (text[expEnd] === '-' || text[expEnd] === '+')) {
+          expEnd++;
+        }
+
+        while (expEnd < text.length && /[0-9.]/.test(text[expEnd])) {
+          expEnd++;
+        }
+
+        if (expEnd > expStart && ((text[expStart] !== '-' && text[expStart] !== '+') || expEnd > expStart + 1)) {
+          const nextChar = expEnd < text.length ? text[expEnd] : '';
+          const cursorAtEnd = cursorPos === expEnd;
+          const shouldConvert = !cursorAtEnd || (nextChar !== '' && !/[0-9.]/.test(nextChar));
+
+          if (shouldConvert) {
+            const exponent = text.substring(expStart, expEnd);
+            const superscripted = toSuperscript(exponent);
+
+            if (cursorPos > i && cursorPos <= expEnd) {
+              const offsetInExp = cursorPos - expStart;
+              newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
+            } else if (cursorPos > expEnd) {
+              newCursorPos -= (expEnd - i) - superscripted.length;
+            }
+
+            result += superscripted;
+            i = expEnd;
+            continue;
+          }
+        }
+      }
+      result += text[i];
+      i++;
+    }
+
+    return { text: result, cursorPos: Math.max(0, Math.min(newCursorPos, result.length)) };
+  };
+
+  const applyDivisionSymbolForNonFractions = (text, cursorPos) => {
+    if (cursorPos <= 0) return { text, cursorPos };
+    const idx = cursorPos - 1;
+    if (text[idx] !== '/') return { text, cursorPos };
+    const prev = idx - 1 >= 0 ? text[idx - 1] : "";
+    if (/[0-9]/.test(prev)) return { text, cursorPos };
+    const newText = text.slice(0, idx) + "÷" + text.slice(idx + 1);
+    return { text: newText, cursorPos };
+  };
+
   const applySymbolFormatting = (text, cursorPos) => {
     let formattedText = text;
     let newCursorPos = cursorPos;
+
+    const beforeCursor0 = formattedText.substring(0, newCursorPos);
+    const afterCursor0 = formattedText.substring(newCursorPos);
+
+    const afterChar = afterCursor0.length > 0 ? afterCursor0[0] : '';
+    const hasNonDigitAfter = afterChar !== '' && !/[0-9]/.test(afterChar);
+
+    let fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)(?=[^0-9])/);
     
+    if (!fracMatch && hasNonDigitAfter) {
+      fracMatch = beforeCursor0.match(/(^|[^A-Za-z0-9_⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])(\d+)\s*([\/÷])\s*(\d+)$/);
+    }
+
+    if (fracMatch) {
+      const full = fracMatch[0];
+      const lead = fracMatch[1] || "";
+      const numStr = fracMatch[2];
+      const denStr = fracMatch[4];
+      const uni = makeUnicodeFraction(numStr, denStr);
+      if (uni) {
+        const matchStart = fracMatch.index;
+        const matchEnd = matchStart + full.length;
+        const prefix = beforeCursor0.slice(0, matchStart);
+        const suffix = beforeCursor0.slice(matchEnd);
+        const newBefore = prefix + lead + uni + suffix;
+        formattedText = newBefore + afterCursor0;
+        newCursorPos = newBefore.length;
+      }
+    }
+
+    const divFixed = applyDivisionSymbolForNonFractions(formattedText, newCursorPos);
+    formattedText = divFixed.text;
+    newCursorPos = divFixed.cursorPos;
+
     for (const { pattern, replacement } of SYMBOL_REPLACEMENTS) {
       const beforeCursor = formattedText.substring(0, newCursorPos);
       const afterCursor = formattedText.substring(newCursorPos);
-      
+
       const match = beforeCursor.match(new RegExp(pattern.source + "$"));
       if (match) {
         const matchStart = beforeCursor.length - match[0].length;
         let newReplacement = replacement;
-        
+
         if (replacement.includes("$1") && match[1]) {
           newReplacement = replacement.replace("$1", match[1]);
         }
-        
+
         const newBeforeCursor = beforeCursor.substring(0, matchStart) + newReplacement;
         formattedText = newBeforeCursor + afterCursor;
         newCursorPos = newBeforeCursor.length;
         break;
       }
     }
-    
-    return { text: formattedText, cursorPos: newCursorPos };
+
+    const expFormatted = formatExponentsInText(formattedText, newCursorPos);
+    const logFormatted = formatLogBases(expFormatted.text, expFormatted.cursorPos);
+
+    return { text: logFormatted.text, cursorPos: logFormatted.cursorPos };
   };
 
   const convertSymbolsForEvaluation = (displayExpression) => {
     let evalExpression = displayExpression;
-    
-    for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
-      evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
-    }
-    
-    return evalExpression;
-  };
 
-  const escapeRegExp = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    evalExpression = evalExpression.replace(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, a, b) => {
+      const na = decodeSuperscriptNumber(a);
+      const nb = decodeSubscriptNumber(b);
+      if (na == null || nb == null) return m;
+      if (!/^[0-9]+$/.test(na) || !/^[0-9]+$/.test(nb)) return m;
+      if (nb === "0") return m;
+      return "(" + na + "/" + nb + ")";
+    });
+
+    evalExpression = evalExpression.replace(/log([₀₁₂₃₄₅₆₇₈₉]+)\s*\(([^)]+)\)/g, (m, subscriptBase, arg) => {
+      const base = decodeSubscriptNumber(subscriptBase);
+      if (base == null) return m;
+      return "logn(" + arg + ", " + base + ")";
+    });
+
+    const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]+/g;
+    evalExpression = evalExpression.replace(superscriptPattern, (match, offset, whole) => {
+      const nextChar = whole && offset + match.length < whole.length ? whole[offset + match.length] : "";
+      if (nextChar === "⁄") return match;
+      let converted = '^(';
+      for (const char of match) {
+        converted += REVERSE_SUPERSCRIPT_DIGIT[char] || char;
+      }
+      converted += ')';
+      return converted;
+    });
+
+    for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
+      if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]/.test(symbol)) {
+        evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
+      }
+    }
+
+    return evalExpression;
   };
 
   const formatResult = (value, decimalPlaces = 6) => {
@@ -507,23 +911,18 @@ export default function DinoLabsPluginsPlot() {
   };
 
   const updateFormula = (id, newText, cursorPos) => {
-    suppressFormattingRef.current = true;
-    const newCursorPos = cursorPos || newText.length;
+    const newCursorPos = cursorPos !== undefined ? cursorPos : newText.length;
     
-    cursorPositionRef.current = newCursorPos;
-    setFormulas(formulas.map(f => f.id === id ? { ...f, text: newText } : f));
+    const formatted = applySymbolFormatting(newText, newCursorPos);
+    
+    setFormulas(prev => prev.map(f => f.id === id ? { ...f, text: formatted.text } : f));
     setIntercepts([]);
     
-    requestAnimationFrame(() => {
-      const formatted = applySymbolFormatting(newText, newCursorPos);
-      suppressFormattingRef.current = false;
-      cursorPositionRef.current = formatted.cursorPos;
-      setFormulas(formulas.map(f => f.id === id ? { ...f, text: formatted.text } : f));
-      
-      if (inputRefs.current[id] && typeof formatted.cursorPos === "number") {
+    setTimeout(() => {
+      if (inputRefs.current[id]) {
         inputRefs.current[id].setSelectionRange(formatted.cursorPos, formatted.cursorPos);
       }
-    });
+    }, 0);
   };
 
   const updateFormulaColor = (id, newColor) => {
@@ -1191,26 +1590,9 @@ export default function DinoLabsPluginsPlot() {
                       className="dinolabsPluginsPlotFormulaInput"
                       value={formula.text}
                       onChange={(e) => {
-                        suppressFormattingRef.current = true;
                         const newValue = e.target.value;
                         const cursorPos = e.target.selectionStart;
-                        
-                        cursorPositionRef.current = cursorPos;
-                        setFormulas(formulas.map(f => f.id === formula.id ? { ...f, text: newValue } : f));
-                        
-                        requestAnimationFrame(() => {
-                          const formatted = applySymbolFormatting(newValue, cursorPos);
-                          if (formatted.text !== newValue) {
-                            suppressFormattingRef.current = false;
-                            cursorPositionRef.current = formatted.cursorPos;
-                            setFormulas(formulas.map(f => f.id === formula.id ? { ...f, text: formatted.text } : f));
-                            if (inputRefs.current[formula.id]) {
-                              inputRefs.current[formula.id].setSelectionRange(formatted.cursorPos, formatted.cursorPos);
-                            }
-                          } else {
-                            suppressFormattingRef.current = false;
-                          }
-                        });
+                        updateFormula(formula.id, newValue, cursorPos);
                       }}
                       onSelect={(e) => cursorPositionRef.current = e.target.selectionStart}
                       placeholder="Enter formula... Try: sin(x), x^2, sqrt(x)"
