@@ -4,42 +4,31 @@
   box-sizing: border-box;
 }
 
-.dinolabsMatrixApp,
-.dinolabsMatrixApp * ,
-.dinolabsMatrixApp *::before,
-.dinolabsMatrixApp *::after {
-  box-sizing: border-box;
-}
-
-.dinolabsMatrixApp button {
-  padding: 0.6rem 0.8rem;
-}
-
 .dinolabsMatrixApp {
   width: 100%;
   height: 100vh;
-  height: 100dvh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-weight: 600;
+  min-height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  color: #f1f5f9;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
 .dinolabsMatrixContainer {
   flex: 1;
   display: grid;
-  grid-template-columns: 290px 1fr;
-  border-top: 1px solid #475569;
+  grid-template-columns: 320px 1fr;
   min-height: 0;
   height: auto;
   align-items: start;
 }
 
 .dinolabsMatrixSidebar {
-  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
   border-right: 1px solid #475569;
   padding: 20px;
   min-height: 0;
@@ -61,12 +50,18 @@
 }
 
 .dinolabsMatrixSection {
-  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
   border: 1px solid #475569;
   border-radius: 6px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.dinolabsMatrixSection:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
 }
 
 .dinolabsMatrixSectionTitle {
@@ -74,43 +69,43 @@
   align-items: center;
   gap: 8px;
   font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 24px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
   color: #f1f5f9;
 }
 
 .dinolabsMatrixSectionTitle svg {
-  font-size: 0.9rem; 
-  margin-right: 0.4rem;
+  font-size: 0.85rem;
+  color: #3b82f6;
 }
 
 .dinolabsMatrixRow {
   display: flex;
-  gap: 8px !important;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
 .dinolabsMatrixBtnRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .dinolabsMatrixDimCol {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
-  min-width: 120px;
+  min-width: 60px;
 }
 
 .dinolabsMatrixDimLabel {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #94a3b8;
-  margin-left: 4px;
+  margin-left: 2px;
 }
 
 .dinolabsMatrixNum {
@@ -122,6 +117,7 @@
   padding: 0.6rem 0.8rem;
   outline: none;
   font-weight: 700;
+  font-size: 0.8rem;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -132,9 +128,16 @@
   transform: translateY(-1px);
 }
 
+.dinolabsMatrixNum:hover {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
 .dinolabsMatrixNum::placeholder {
   color: #94a3b8;
   font-weight: 700;
+  font-style: italic;
 }
 
 .dinolabsMatrixBtn {
@@ -142,27 +145,28 @@
   border: 1px solid #2563eb;
   color: #ffffff;
   border-radius: 6px;
-  padding: 0.6rem 0.8rem; 
+  padding: 0.6rem 0.8rem;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   cursor: pointer;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 34px;
+  gap: 6px;
+  min-height: 36px;
   line-height: 1.2;
   text-align: center;
-  word-break: break-word;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dinolabsMatrixBtn:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   border-color: #1d4ed8;
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
 }
 
 .dinolabsMatrixBtn:active {
@@ -170,40 +174,115 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
-.dinolabsMatrixBtn.subtle {
-  background: linear-gradient(145deg, #334155 0%, #475569 100%);
-  border-color: #475569;
-  color: #f1f5f9;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+.dinolabsMatrixBtn:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.dinolabsMatrixBtn.subtle:hover {
+.dinolabsMatrixBtnNumber {
+  background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.dinolabsMatrixBtnNumber:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsMatrixBtnOperator {
+  background: linear-gradient(145deg, #64748b 0%, #475569 100%);
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.dinolabsMatrixBtnOperator:hover {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-color: #3b82f6;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
-.dinolabsMatrixBtn.tiny {
-  padding: 0.6rem 0.8rem;
-  font-size: 11px;
-  min-height: 0;
+.dinolabsMatrixBtnFunction {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.dinolabsMatrixBtnFunction:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.dinolabsMatrixBtnVariable {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border-color: #7c3aed;
+}
+
+.dinolabsMatrixBtnVariable:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border-color: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+}
+
+.dinolabsMatrixBtnControl {
+  background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+  color: #f9fafb;
+  border-color: #1f2937;
+}
+
+.dinolabsMatrixBtnControl:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.dinolabsMatrixBtnEnter {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.dinolabsMatrixBtnEnter:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-color: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.dinolabsMatrixBtnTiny {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.7rem;
+  min-height: 28px;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.dinolabsMatrixBtnTiny:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #3b82f6;
 }
 
 .dinolabsMatrixPillGroup {
   display: inline-flex;
   gap: 8px;
   flex-wrap: wrap;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
   justify-content: flex-end;
-  padding: 16px 24px; 
-  width: 100%; 
 }
 
 .dinolabsMatrixTextArea {
   width: 100%;
-  min-height: 120px;
+  min-height: 100px;
   resize: vertical;
   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
   border: 1px solid #475569;
@@ -211,7 +290,8 @@
   border-radius: 6px;
   padding: 0.6rem 0.8rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.2s ease;
 }
@@ -219,12 +299,17 @@
 .dinolabsMatrixTextArea:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  outline: none;
+}
+
+.dinolabsMatrixTextArea:hover {
+  border-color: #3b82f6;
 }
 
 .dinolabsMatrixTextArea::placeholder {
   color: #94a3b8;
   font-weight: 700;
+  font-style: italic;
 }
 
 .dinolabsMatrixGrids {
@@ -238,10 +323,11 @@
   height: auto;
   min-height: auto;
   align-items: start;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
 }
 
 .dinolabsMatrixMatrixBox {
-  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
   border: 1px solid #475569;
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -253,16 +339,23 @@
   min-height: auto;
   max-height: 300px;
   overflow: hidden;
-  padding: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.dinolabsMatrixMatrixBox:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
 }
 
 .dinolabsMatrixMatrixHeader {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0.6rem 0.8rem;
+  padding: 0.8rem 1rem;
   border-bottom: 1px solid #475569;
   flex-shrink: 0;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
 }
 
 .dinolabsMatrixMatrixTitle {
@@ -272,9 +365,13 @@
 }
 
 .dinolabsMatrixMatrixDims {
-  color: #94a3b8;
-  font-size: 0.8rem;
+  color: #3b82f6;
+  font-size: 0.75rem;
   font-weight: 700;
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .dinolabsMatrixMatrixGrid {
@@ -304,7 +401,7 @@
   outline: none;
   color: #f1f5f9;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   background: linear-gradient(145deg, #334155 0%, #475569 100%);
   transition: all 0.2s ease;
@@ -321,6 +418,7 @@
 .dinolabsMatrixCellInput:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
 }
 
 .dinolabsMatrixCellInput::placeholder {
@@ -330,26 +428,31 @@
 
 .dinolabsMatrixResultPanel {
   padding: 20px;
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  width: 100%; 
+  width: 100%;
   max-width: 100%;
   min-width: 0;
   gap: 20px;
   box-sizing: border-box;
+  background: linear-gradient(145deg, #334155 0%, #475569 100%);
 }
 
 .dinolabsMatrixResultHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: -2px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .dinolabsMatrixResultTitle {
@@ -357,7 +460,7 @@
   align-items: center;
   gap: 10px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   color: #f1f5f9;
   min-width: 0;
   flex: 1;
@@ -366,7 +469,7 @@
 .dinolabsMatrixLastOp {
   color: #94a3b8;
   font-weight: 700;
-  margin-left: 6px;
+  font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -390,7 +493,7 @@
   border: 1px solid #475569;
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 14px;
+  padding: 16px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -399,11 +502,16 @@
 
 .dinolabsMatrixOpsTitle {
   font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
   color: #f1f5f9;
+}
+
+.dinolabsMatrixOpsTitle svg {
+  color: #3b82f6;
 }
 
 .dinolabsMatrixOpsList {
@@ -417,11 +525,18 @@
   border: 1px solid #475569;
   border-radius: 6px;
   padding: 0.6rem 0.8rem;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   word-break: break-word;
   color: #f1f5f9;
   font-weight: 700;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.dinolabsMatrixOpsItem:hover {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
 .dinolabsMatrixHistory {
@@ -430,7 +545,6 @@
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 20px;
-  margin-top: 20px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -441,22 +555,32 @@
   font-weight: 700;
   margin-bottom: 16px;
   color: #f1f5f9;
-  font-size: 16px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dinolabsMatrixHistoryList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .dinolabsMatrixHistoryItem {
   border: 1px solid #475569;
   border-radius: 6px;
-  padding: 16px;
+  padding: 14px;
   background: linear-gradient(145deg, #334155 0%, #475569 100%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   width: 100%;
+  transition: all 0.2s ease;
+}
+
+.dinolabsMatrixHistoryItem:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .dinolabsMatrixHistoryHead {
@@ -468,22 +592,26 @@
 
 .dinolabsMatrixHistoryLabel {
   font-weight: 700;
-  color: #f1f5f9;
-  font-size: 14px;
+  color: #8b5cf6;
+  font-size: 13px;
   white-space: nowrap;
-  margin-right: 2rem;
+  margin-right: 1rem;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .dinolabsMatrixHistoryGrid {
   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
   border: 1px solid #475569;
   border-radius: 6px;
-  padding: 12px;
+  padding: 10px;
   overflow: auto;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
-.dinolabsMatrixMatrixGrid.mini {
+.dinolabsMatrixMatrixGridMini {
   gap: 6px;
   display: grid;
   width: 100%;
@@ -491,15 +619,15 @@
 }
 
 .dinolabsMatrixCellMini {
-  height: 40px;
-  min-width: 60px;
+  height: 32px;
+  min-width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, #334155 0%, #475569 100%);
   border: 1px solid #475569;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #f1f5f9;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -509,13 +637,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.dinolabsMatrixCellMini:hover {
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 }
 
 .dinolabsMatrixHistoryEmpty {
   color: #94a3b8;
   font-style: italic;
-  padding: 8px;
+  padding: 1rem;
   font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+  border-radius: 6px;
+  border: 1px solid #475569;
 }
 
 .dinolabsMatrixSidebar::-webkit-scrollbar,
@@ -523,7 +663,8 @@
 .dinolabsMatrixHistory::-webkit-scrollbar,
 .dinolabsMatrixHistoryGrid::-webkit-scrollbar,
 .dinolabsMatrixMatrixGrid::-webkit-scrollbar,
-.dinolabsMatrixResultGridWrap::-webkit-scrollbar {
+.dinolabsMatrixResultGridWrap::-webkit-scrollbar,
+.dinolabsMatrixMain::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
@@ -533,7 +674,8 @@
 .dinolabsMatrixHistory::-webkit-scrollbar-thumb,
 .dinolabsMatrixHistoryGrid::-webkit-scrollbar-thumb,
 .dinolabsMatrixMatrixGrid::-webkit-scrollbar-thumb,
-.dinolabsMatrixResultGridWrap::-webkit-scrollbar-thumb {
+.dinolabsMatrixResultGridWrap::-webkit-scrollbar-thumb,
+.dinolabsMatrixMain::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-radius: 6px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -544,7 +686,8 @@
 .dinolabsMatrixHistory::-webkit-scrollbar-thumb:hover,
 .dinolabsMatrixHistoryGrid::-webkit-scrollbar-thumb:hover,
 .dinolabsMatrixMatrixGrid::-webkit-scrollbar-thumb:hover,
-.dinolabsMatrixResultGridWrap::-webkit-scrollbar-thumb:hover {
+.dinolabsMatrixResultGridWrap::-webkit-scrollbar-thumb:hover,
+.dinolabsMatrixMain::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
@@ -553,83 +696,254 @@
 .dinolabsMatrixHistory::-webkit-scrollbar-track,
 .dinolabsMatrixHistoryGrid::-webkit-scrollbar-track,
 .dinolabsMatrixMatrixGrid::-webkit-scrollbar-track,
-.dinolabsMatrixResultGridWrap::-webkit-scrollbar-track {
+.dinolabsMatrixResultGridWrap::-webkit-scrollbar-track,
+.dinolabsMatrixMain::-webkit-scrollbar-track {
   background: linear-gradient(145deg, #1e293b 0%, #334155 100%);
 }
 
+.dinolabsMatrixSection {
+  animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.dinolabsMatrixHistoryItem {
+  animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1280px) {
-  .dinolabsMatrixContainer { grid-template-columns: 250px 1fr; }
-  .dinolabsMatrixResultPanel { grid-template-columns: 1fr; }
+  .dinolabsMatrixContainer {
+    grid-template-columns: 280px 1fr;
+  }
 }
 
 @media (max-width: 1024px) {
-  .dinolabsMatrixGrids { grid-template-columns: 1fr; }
-  .dinolabsMatrixHistoryList { grid-template-columns: 1fr; }
+  .dinolabsMatrixContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .dinolabsMatrixSidebar {
+    border-right: none;
+    border-bottom: 1px solid #475569;
+    max-height: 40vh;
+  }
+  
+  .dinolabsMatrixGrids {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dinolabsMatrixGrids {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .dinolabsMatrixBtnRow {
+    gap: 8px;
+  }
+  
+  .dinolabsMatrixSection {
+    padding: 14px;
+  }
+  
+  .dinolabsMatrixResultPanel {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .dinolabsMatrixSidebar {
+    padding: 12px;
+  }
 }
 
 @media (max-width: 480px) {
-  .dinolabsMatrixBtnRow { grid-template-columns: 1fr; gap: 14px; }
-  .dinolabsMatrixSection { padding: 12px; }
-  .dinolabsMatrixGrids { padding: 12px; gap: 14px; }
-  .dinolabsMatrixResultTitle { font-size: 15px; }
-  .dinolabsMatrixSidebar { padding: 12px; }
-  .dinolabsMatrixResultPanel { padding: 12px; }
-  .dinolabsMatrixRow { gap: 14px; }
-  .dinolabsMatrixBtnRow { gap: 14px; }
+  .dinolabsMatrixBtnRow {
+    gap: 8px;
+  }
+  
+  .dinolabsMatrixSection {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .dinolabsMatrixGrids {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .dinolabsMatrixResultTitle {
+    font-size: 13px;
+  }
+  
+  .dinolabsMatrixSidebar {
+    padding: 12px;
+  }
+  
+  .dinolabsMatrixResultPanel {
+    padding: 12px;
+  }
+  
+  .dinolabsMatrixRow {
+    gap: 8px;
+  }
   
   .dinolabsMatrixMatrixBox {
-    max-height: 400px;
+    max-height: 250px;
   }
   
   .dinolabsMatrixResultGridWrap {
-    max-height: 300px;
+    max-height: 250px;
   }
   
   .dinolabsMatrixNum,
   .dinolabsMatrixTextArea {
     font-size: 16px;
-    padding: 8px 12px;
+    padding: 10px 12px;
+  }
+  
+  .dinolabsMatrixBtn {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 32px;
   }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
-  .dinolabsMatrixSection { padding: 16px; }
-  .dinolabsMatrixGrids { padding: 16px; gap: 16px; }
-  .dinolabsMatrixSidebar { padding: 16px; }
-  .dinolabsMatrixResultPanel { padding: 16px; }
-  .dinolabsMatrixRow { gap: 16px; }
-  .dinolabsMatrixBtnRow { gap: 16px; }
+  .dinolabsMatrixSection {
+    padding: 16px;
+  }
+  
+  .dinolabsMatrixGrids {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .dinolabsMatrixSidebar {
+    padding: 16px;
+  }
+  
+  .dinolabsMatrixResultPanel {
+    padding: 16px;
+  }
+  
+  .dinolabsMatrixRow {
+    gap: 12px;
+  }
+  
+  .dinolabsMatrixBtnRow {
+    gap: 10px;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  .dinolabsMatrixSection { padding: 18px; }
-  .dinolabsMatrixGrids { padding: 18px; gap: 18px; }
-  .dinolabsMatrixSidebar { padding: 18px; }
-  .dinolabsMatrixResultPanel { padding: 18px; }
-  .dinolabsMatrixRow { gap: 18px; }
-  .dinolabsMatrixBtnRow { gap: 18px; }
+  .dinolabsMatrixSection {
+    padding: 18px;
+  }
+  
+  .dinolabsMatrixGrids {
+    padding: 18px;
+    gap: 18px;
+  }
+  
+  .dinolabsMatrixSidebar {
+    padding: 18px;
+  }
+  
+  .dinolabsMatrixResultPanel {
+    padding: 18px;
+  }
+  
+  .dinolabsMatrixRow {
+    gap: 14px;
+  }
+  
+  .dinolabsMatrixBtnRow {
+    gap: 12px;
+  }
 }
 
 @media (min-width: 1025px) {
-  .dinolabsMatrixSection { padding: 22px; }
-  .dinolabsMatrixGrids { padding: 22px; gap: 22px; }
-  .dinolabsMatrixSidebar { padding: 22px; }
-  .dinolabsMatrixResultPanel { padding: 22px; }
-  .dinolabsMatrixRow { gap: 22px; }
-  .dinolabsMatrixBtnRow { gap: 22px; }
+  .dinolabsMatrixSection {
+    padding: 20px;
+  }
+  
+  .dinolabsMatrixGrids {
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .dinolabsMatrixSidebar {
+    padding: 20px;
+  }
+  
+  .dinolabsMatrixResultPanel {
+    padding: 20px;
+  }
+  
+  .dinolabsMatrixRow {
+    gap: 16px;
+  }
+  
+  .dinolabsMatrixBtnRow {
+    gap: 12px;
+  }
 }
 
 @media (prefers-contrast: high) {
-  .dinolabsMatrixCellInput { border-width: 2px; }
+  .dinolabsMatrixCellInput {
+    border-width: 2px;
+  }
+  
   .dinolabsMatrixHistoryItem,
   .dinolabsMatrixSection,
   .dinolabsMatrixResultGridWrap,
-  .dinolabsMatrixOpsLog { border-width: 2px; }
+  .dinolabsMatrixOpsLog,
+  .dinolabsMatrixMatrixBox {
+    border-width: 2px;
+  }
+  
+  .dinolabsMatrixBtn {
+    border-width: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dinolabsMatrixBtn,
   .dinolabsMatrixCellInput,
   .dinolabsMatrixNum,
-  .dinolabsMatrixTextArea { transition: none; }
+  .dinolabsMatrixTextArea,
+  .dinolabsMatrixSection,
+  .dinolabsMatrixHistoryItem,
+  .dinolabsMatrixMatrixBox,
+  .dinolabsMatrixCellMini,
+  .dinolabsMatrixOpsItem {
+    transition: none;
+  }
+  
+  .dinolabsMatrixSection,
+  .dinolabsMatrixHistoryItem {
+    animation: none;
+  }
 }

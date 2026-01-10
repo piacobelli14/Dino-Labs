@@ -292,7 +292,7 @@ export default function DinoLabsPluginsMatrix() {
     if (!isFinite(v)) return "var(--mx-cell-bg)";
     const span = Math.max(Math.abs(minV), Math.abs(maxV)) || 1;
     const t = Math.max(-1, Math.min(1, v / span));
-    if (Math.abs(t) < 0.15) return "hsl(210 20% 30%)";
+    if (Math.abs(t) < 0.15) return "linear-gradient(145deg, #334155 0%, #475569 100%)";
     const intensity = Math.abs(t);
     const hue = t < 0 ? 210 : 0;
     const sat = 35 + intensity * 45;
@@ -336,7 +336,7 @@ export default function DinoLabsPluginsMatrix() {
                 value={Number.isFinite(v) ? String(v) : ""}
                 onChange={(e) => editable && onChange(i, j, e.target.value)}
                 readOnly={!editable}
-                style={{ backgroundColor: valueToHeat(v, minV, maxV) }}
+                style={{ background: valueToHeat(v, minV, maxV) }}
               />
             ))
           )}
@@ -718,12 +718,12 @@ export default function DinoLabsPluginsMatrix() {
               <span>Templates</span>
             </div>
             <div className="dinolabsMatrixBtnRow">
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillZeroA}><FontAwesomeIcon icon={faTrashCan} /> Zero A</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillZeroB}><FontAwesomeIcon icon={faTrashCan} /> Zero B</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillIdA}><FontAwesomeIcon icon={faVectorSquare} /> I (A)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillIdB}><FontAwesomeIcon icon={faVectorSquare} /> I (B)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillRandomA}><FontAwesomeIcon icon={faRandom} /> Random A</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={fillRandomB}><FontAwesomeIcon icon={faRandom} /> Random B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnControl" onClick={fillZeroA}><FontAwesomeIcon icon={faTrashCan} /> Zero A</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnControl" onClick={fillZeroB}><FontAwesomeIcon icon={faTrashCan} /> Zero B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnVariable" onClick={fillIdA}><FontAwesomeIcon icon={faVectorSquare} /> I (A)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnVariable" onClick={fillIdB}><FontAwesomeIcon icon={faVectorSquare} /> I (B)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={fillRandomA}><FontAwesomeIcon icon={faRandom} /> Random A</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={fillRandomB}><FontAwesomeIcon icon={faRandom} /> Random B</button>
             </div>
           </div>
 
@@ -733,10 +733,10 @@ export default function DinoLabsPluginsMatrix() {
               <span>Ops (Binary)</span>
             </div>
             <div className="dinolabsMatrixBtnRow">
-              <button type="button" className="dinolabsMatrixBtn" onClick={doAdd}>A + B</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doSub}>A − B</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doMulAB}>A × B</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doMulBA}>B × A</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={doAdd}>A + B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={doSub}>A − B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={doMulAB}>A × B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={doMulBA}>B × A</button>
             </div>
           </div>
 
@@ -747,8 +747,8 @@ export default function DinoLabsPluginsMatrix() {
             </div>
             <div className="dinolabsMatrixBtnRow">
               <input className="dinolabsMatrixNum" type="number" step="0.1" value={scalar} onChange={(e) => setScalar(e.target.value)} />
-              <button type="button" className="dinolabsMatrixBtn" onClick={doScalarA}>k·A</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doScalarB}>k·B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnNumber" onClick={doScalarA}>k·A</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnNumber" onClick={doScalarB}>k·B</button>
             </div>
           </div>
 
@@ -758,8 +758,8 @@ export default function DinoLabsPluginsMatrix() {
               <span>Transpose</span>
             </div>
             <div className="dinolabsMatrixBtnRow">
-              <button type="button" className="dinolabsMatrixBtn" onClick={doTransposeA}>Aᵀ</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doTransposeB}>Bᵀ</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doTransposeA}>Aᵀ</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doTransposeB}>Bᵀ</button>
             </div>
           </div>
 
@@ -769,16 +769,16 @@ export default function DinoLabsPluginsMatrix() {
               <span>Advanced</span>
             </div>
             <div className="dinolabsMatrixBtnRow">
-              <button type="button" className="dinolabsMatrixBtn" onClick={doDetA}>det(A)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doDetB}>det(B)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doInverseA}>A⁻¹</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doInverseB}>B⁻¹</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doRrefA}>RREF(A)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doRrefB}>RREF(B)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doRankA}>rank(A)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doRankB}>rank(B)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doSolveAxEqB}>Solve A x = b (b = B)</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={doEigenA}>eig(A) (approx)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doDetA}>det(A)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doDetB}>det(B)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doInverseA}>A⁻¹</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doInverseB}>B⁻¹</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doRrefA}>RREF(A)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doRrefB}>RREF(B)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doRankA}>rank(A)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnFunction" onClick={doRankB}>rank(B)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnEnter" onClick={doSolveAxEqB}>Solve A x = b (b = B)</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnEnter" onClick={doEigenA}>eig(A) (approx)</button>
             </div>
           </div>
 
@@ -794,12 +794,12 @@ export default function DinoLabsPluginsMatrix() {
               onChange={(e) => setImportText(e.target.value)}
             />
             <div className="dinolabsMatrixBtnRow">
-              <button type="button" className="dinolabsMatrixBtn" onClick={importToA}><FontAwesomeIcon icon={faPaste} /> To A</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={importToB}><FontAwesomeIcon icon={faPaste} /> To B</button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={() => copyToClipboard("csv", Result)}>CSV <FontAwesomeIcon icon={faCopy} /></button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={() => copyToClipboard("json", Result)}>JSON <FontAwesomeIcon icon={faCopy} /></button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={() => copyToClipboard("tex", Result)}>LaTeX <FontAwesomeIcon icon={faCopy} /></button>
-              <button type="button" className="dinolabsMatrixBtn" onClick={() => downloadText("matrix_result.csv", matrixToCSV(Result))}><FontAwesomeIcon icon={faDownload} /> Download CSV</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnVariable" onClick={importToA}><FontAwesomeIcon icon={faPaste} /> To A</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnVariable" onClick={importToB}><FontAwesomeIcon icon={faPaste} /> To B</button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={() => copyToClipboard("csv", Result)}>CSV <FontAwesomeIcon icon={faCopy} /></button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={() => copyToClipboard("json", Result)}>JSON <FontAwesomeIcon icon={faCopy} /></button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnOperator" onClick={() => copyToClipboard("tex", Result)}>LaTeX <FontAwesomeIcon icon={faCopy} /></button>
+              <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnEnter" onClick={() => downloadText("matrix_result.csv", matrixToCSV(Result))}><FontAwesomeIcon icon={faDownload} /> Download CSV</button>
             </div>
           </div>
         </aside>
@@ -813,10 +813,10 @@ export default function DinoLabsPluginsMatrix() {
           <div className="dinolabsMatrixResultPanel">
             <div className="dinolabsMatrixResultHeader" aria-live="polite">
               <div className="dinolabsMatrixResultTitle">
-                {lastOp ? <em className="dinolabsMatrixLastOp">({lastOp})</em> : null}
+                {lastOp ? <em className="dinolabsMatrixLastOp">{lastOp}</em> : null}
               </div>
               <div className="dinolabsMatrixPillGroup">
-                <button type="button" className="dinolabsMatrixBtn subtle" onClick={() => setResult(zeros(1, 1))}><FontAwesomeIcon icon={faDeleteLeft} /> Clear</button>
+                <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnControl" onClick={() => setResult(zeros(1, 1))}><FontAwesomeIcon icon={faDeleteLeft} /> Clear</button>
               </div>
             </div>
 
@@ -843,14 +843,14 @@ export default function DinoLabsPluginsMatrix() {
                     <div className="dinolabsMatrixHistoryHead">
                       <span className="dinolabsMatrixHistoryLabel">{h.label}</span>
                       <div className="dinolabsMatrixPillGroup">
-                        <button type="button" className="dinolabsMatrixBtn tiny" onClick={() => setResult(deepClone(h.out))}>Preview</button>
-                        <button type="button" className="dinolabsMatrixBtn tiny" onClick={() => setA(deepClone(h.out))}>→ A</button>
-                        <button type="button" className="dinolabsMatrixBtn tiny" onClick={() => setB(deepClone(h.out))}>→ B</button>
+                        <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnTiny" onClick={() => setResult(deepClone(h.out))}>Preview</button>
+                        <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnTiny" onClick={() => setA(deepClone(h.out))}>→ A</button>
+                        <button type="button" className="dinolabsMatrixBtn dinolabsMatrixBtnTiny" onClick={() => setB(deepClone(h.out))}>→ B</button>
                       </div>
                     </div>
                     <div className="dinolabsMatrixHistoryGrid">
                       <div
-                        className="dinolabsMatrixMatrixGrid mini"
+                        className="dinolabsMatrixMatrixGrid dinolabsMatrixMatrixGridMini"
                         style={{ gridTemplateColumns: `repeat(${(h.out[0] || []).length}, minmax(24px, 1fr))` }}
                       >
                         {h.out.map((row, i) =>
