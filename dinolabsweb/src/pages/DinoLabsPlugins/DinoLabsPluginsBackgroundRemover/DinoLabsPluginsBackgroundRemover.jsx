@@ -146,57 +146,275 @@ const DinoLabsPluginsBackgroundRemover = () => {
         
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
+        const width = canvas.width;
+        const height = canvas.height;
         
-        let targetColor;
+        const mask = new Uint8Array(width * height);
+        const visited = new Uint8Array(width * height);
+        
+        const getPixelIndex = (x, y) => y * width + x;
+        
+        const getPixelColor = (pixelIdx) => {
+          const i = pixelIdx * 4;
+          return { r: data[i], g: data[i + 1], b: data[i + 2] };
+        };
+        
+        let targetColors = [];
         
         switch (removalMode) {
           case "color":
-            targetColor = hexToRgb(backgroundColor);
+            targetColors = [hexToRgb(backgroundColor)];
             break;
           case "corner":
-            const corners = [
-              {r: data[0], g: data[1], b: data[2]},
-              {r: data[(canvas.width - 1) * 4], g: data[(canvas.width - 1) * 4 + 1], b: data[(canvas.width - 1) * 4 + 2]}, 
-              {r: data[(canvas.height - 1) * canvas.width * 4], g: data[(canvas.height - 1) * canvas.width * 4 + 1], b: data[(canvas.height - 1) * canvas.width * 4 + 2]}, 
+            const cornerIndices = [
+              0,
+              width - 1,
+              (height - 1) * width,
+              (height - 1) * width + width - 1
             ];
-            targetColor = corners[0]; 
+            targetColors = cornerIndices.map(idx => getPixelColor(idx));
             break;
           case "edge":
-            const edgePixels = [];
-            for (let i = 0; i < canvas.width; i++) {
-              edgePixels.push({r: data[i * 4], g: data[i * 4 + 1], b: data[i * 4 + 2]});
+            const edgeSamples = [];
+            const sampleStep = Math.max(1, Math.floor(width / 20));
+            for (let x = 0; x < width; x += sampleStep) {
+              edgeSamples.push(getPixelColor(getPixelIndex(x, 0)));
+              edgeSamples.push(getPixelColor(getPixelIndex(x, height - 1)));
             }
-            targetColor = edgePixels[0];
+            for (let y = 0; y < height; y += sampleStep) {
+              edgeSamples.push(getPixelColor(getPixelIndex(0, y)));
+              edgeSamples.push(getPixelColor(getPixelIndex(width - 1, y)));
+            }
+            targetColors = edgeSamples;
             break;
-          default: 
-            targetColor = {r: data[0], g: data[1], b: data[2]};
+          default:
+            const smartCorners = [
+              0,
+              width - 1,
+              (height - 1) * width,
+              (height - 1) * width + width - 1
+            ];
+            const smartSamples = [];
+            for (const cornerIdx of smartCorners) {
+              const cx = cornerIdx % width;
+              const cy = Math.floor(cornerIdx / width);
+              for (let dx = 0; dx < Math.min(10, width); dx++) {
+                for (let dy = 0; dy < Math.min(10, height); dy++) {
+                  let sx = cx + (cx === 0 ? dx : -dx);
+                  let sy = cy + (cy === 0 ? dy : -dy);
+                  if (sx >= 0 && sx < width && sy >= 0 && sy < height) {
+                    smartSamples.push(getPixelColor(getPixelIndex(sx, sy)));
+                  }
+                }
+              }
+            }
+            targetColors = smartSamples;
             break;
         }
-
-        for (let i = 0; i < data.length; i += 4) {
-          const pixel = {r: data[i], g: data[i + 1], b: data[i + 2]};
-          const distance = colorDistance(pixel, targetColor);
-          
-          if (distance <= tolerance) {
-            if (replaceBackground) {
-              const replacement = hexToRgb(replacementColor);
-              data[i] = replacement.r;
-              data[i + 1] = replacement.g;
-              data[i + 2] = replacement.b;
-              data[i + 3] = 255;
-            } else {
-              data[i + 3] = 0; 
+        
+        const matchesAnyTarget = (pixelIdx) => {
+          const pixel = getPixelColor(pixelIdx);
+          for (const target of targetColors) {
+            if (colorDistance(pixel, target) <= tolerance) {
+              return true;
             }
-          } else if (featherEdge && distance <= tolerance + smoothing) {
-            const alpha = 1 - ((distance - tolerance) / smoothing);
-            if (replaceBackground) {
-              const replacement = hexToRgb(replacementColor);
-              data[i] = Math.round(pixel.r * (1 - alpha) + replacement.r * alpha);
-              data[i + 1] = Math.round(pixel.g * (1 - alpha) + replacement.g * alpha);
-              data[i + 2] = Math.round(pixel.b * (1 - alpha) + replacement.b * alpha);
-              data[i + 3] = 255;
+          }
+          return false;
+        };
+        
+        const getMinDistanceToTargets = (pixelIdx) => {
+          const pixel = getPixelColor(pixelIdx);
+          let minDist = Infinity;
+          for (const target of targetColors) {
+            const dist = colorDistance(pixel, target);
+            if (dist < minDist) {
+              minDist = dist;
+            }
+          }
+          return minDist;
+        };
+        
+        if (removalMode === "color") {
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const idx = getPixelIndex(x, y);
+              if (matchesAnyTarget(idx)) {
+                mask[idx] = 255;
+              }
+            }
+          }
+        } else {
+          const queue = new Int32Array(width * height);
+          let queueStart = 0;
+          let queueEnd = 0;
+          
+          for (let x = 0; x < width; x++) {
+            const topIdx = getPixelIndex(x, 0);
+            const bottomIdx = getPixelIndex(x, height - 1);
+            
+            if (matchesAnyTarget(topIdx) && !visited[topIdx]) {
+              queue[queueEnd++] = topIdx;
+              visited[topIdx] = 1;
+            }
+            if (matchesAnyTarget(bottomIdx) && !visited[bottomIdx]) {
+              queue[queueEnd++] = bottomIdx;
+              visited[bottomIdx] = 1;
+            }
+          }
+          
+          for (let y = 1; y < height - 1; y++) {
+            const leftIdx = getPixelIndex(0, y);
+            const rightIdx = getPixelIndex(width - 1, y);
+            
+            if (matchesAnyTarget(leftIdx) && !visited[leftIdx]) {
+              queue[queueEnd++] = leftIdx;
+              visited[leftIdx] = 1;
+            }
+            if (matchesAnyTarget(rightIdx) && !visited[rightIdx]) {
+              queue[queueEnd++] = rightIdx;
+              visited[rightIdx] = 1;
+            }
+          }
+          
+          while (queueStart < queueEnd) {
+            const pixelIdx = queue[queueStart++];
+            mask[pixelIdx] = 255;
+            
+            const x = pixelIdx % width;
+            const y = Math.floor(pixelIdx / width);
+            
+            if (x > 0) {
+              const neighborIdx = pixelIdx - 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (x < width - 1) {
+              const neighborIdx = pixelIdx + 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (y > 0) {
+              const neighborIdx = pixelIdx - width;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (y < height - 1) {
+              const neighborIdx = pixelIdx + width;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            
+            if (x > 0 && y > 0) {
+              const neighborIdx = pixelIdx - width - 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (x < width - 1 && y > 0) {
+              const neighborIdx = pixelIdx - width + 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (x > 0 && y < height - 1) {
+              const neighborIdx = pixelIdx + width - 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+            if (x < width - 1 && y < height - 1) {
+              const neighborIdx = pixelIdx + width + 1;
+              if (!visited[neighborIdx] && matchesAnyTarget(neighborIdx)) {
+                visited[neighborIdx] = 1;
+                queue[queueEnd++] = neighborIdx;
+              }
+            }
+          }
+        }
+        
+        if (featherEdge && smoothing > 0) {
+          const distanceField = new Float32Array(width * height);
+          distanceField.fill(Infinity);
+          
+          const edgeQueue = new Int32Array(width * height);
+          let edgeStart = 0;
+          let edgeEnd = 0;
+          
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const idx = getPixelIndex(x, y);
+              if (mask[idx] === 0) continue;
+              
+              let isEdge = false;
+              if (x > 0 && mask[idx - 1] === 0) isEdge = true;
+              else if (x < width - 1 && mask[idx + 1] === 0) isEdge = true;
+              else if (y > 0 && mask[idx - width] === 0) isEdge = true;
+              else if (y < height - 1 && mask[idx + width] === 0) isEdge = true;
+              
+              if (isEdge) {
+                distanceField[idx] = 0;
+                edgeQueue[edgeEnd++] = idx;
+              }
+            }
+          }
+          
+          while (edgeStart < edgeEnd) {
+            const idx = edgeQueue[edgeStart++];
+            const currentDist = distanceField[idx];
+            
+            if (currentDist >= smoothing) continue;
+            
+            const x = idx % width;
+            const y = Math.floor(idx / width);
+            
+            const checkNeighbor = (neighborIdx) => {
+              if (mask[neighborIdx] === 255 && distanceField[neighborIdx] > currentDist + 1) {
+                distanceField[neighborIdx] = currentDist + 1;
+                edgeQueue[edgeEnd++] = neighborIdx;
+              }
+            };
+            
+            if (x > 0) checkNeighbor(idx - 1);
+            if (x < width - 1) checkNeighbor(idx + 1);
+            if (y > 0) checkNeighbor(idx - width);
+            if (y < height - 1) checkNeighbor(idx + width);
+          }
+          
+          for (let i = 0; i < mask.length; i++) {
+            if (mask[i] === 255 && distanceField[i] < smoothing) {
+              const featherAlpha = distanceField[i] / smoothing;
+              mask[i] = Math.round(255 * (1 - featherAlpha * featherAlpha));
+            }
+          }
+        }
+        
+        const replacementRgb = replaceBackground ? hexToRgb(replacementColor) : null;
+        
+        for (let i = 0; i < mask.length; i++) {
+          const dataIdx = i * 4;
+          const maskValue = mask[i];
+          
+          if (maskValue > 0) {
+            const alpha = maskValue / 255;
+            
+            if (replaceBackground && replacementRgb) {
+              data[dataIdx] = Math.round(data[dataIdx] * (1 - alpha) + replacementRgb.r * alpha);
+              data[dataIdx + 1] = Math.round(data[dataIdx + 1] * (1 - alpha) + replacementRgb.g * alpha);
+              data[dataIdx + 2] = Math.round(data[dataIdx + 2] * (1 - alpha) + replacementRgb.b * alpha);
+              data[dataIdx + 3] = 255;
             } else {
-              data[i + 3] = Math.round(255 * alpha);
+              data[dataIdx + 3] = Math.round(255 * (1 - alpha));
             }
           }
         }

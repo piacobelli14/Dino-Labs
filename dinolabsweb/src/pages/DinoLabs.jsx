@@ -299,6 +299,17 @@ export default function DinoLabs() {
   const insertFileAtParent = insertNodeIntoTree;
   const deleteNodeFromTree = (nodes, targetPath) => removeNodeFromTree(nodes, targetPath).nextTree;
 
+  const insertNodeAtRoot = (nodes, nodeToInsert) => {
+    return [...nodes, nodeToInsert];
+  };
+
+  const insertNodeAtPath = (nodes, parentPath, nodeToInsert, rootName) => {
+    if (parentPath === rootName) {
+      return insertNodeAtRoot(nodes, nodeToInsert);
+    }
+    return insertNodeIntoTree(nodes, parentPath, nodeToInsert);
+  };
+
   const loadDirectoryContents = async (directoryHandle, parentPath) => {
     const results = [];
     for await (const [name, entry] of directoryHandle.entries()) {
@@ -608,6 +619,15 @@ export default function DinoLabs() {
     let didFull = false;
     for (const p of unique) {
       if (didFull) break;
+      if (p === rootDirectoryName) {
+        try {
+          const full = await loadDirectoryContents(rootDirectoryHandle, rootDirectoryName);
+          repositoryFilesRef.current = full;
+          setRepositoryFiles(full);
+        } catch { }
+        didFull = true;
+        break;
+      }
       const node = findDirNode(tree, p);
       if (!node || !node.handle) {
         try {
@@ -657,69 +677,200 @@ export default function DinoLabs() {
 
   const rescanAndSync = async (affected) => rescanPaths(Array.isArray(affected) ? affected : [affected].filter(Boolean));
 
+  const getFileSystemHandlesFromDataTransfer = async (dataTransfer) => {
+    const items = Array.from(dataTransfer.items);
+    const handles = [];
+    for (const item of items) {
+      if (item.kind === "file" && typeof item.getAsFileSystemHandle === "function") {
+        try {
+          const handle = await item.getAsFileSystemHandle();
+          if (handle) {
+            handles.push(handle);
+          }
+        } catch { }
+      }
+    }
+    return handles;
+  };
+
   const handleExternalFileDrop = async (e, targetPath) => {
     e.preventDefault();
     e.stopPropagation();
     setExternalDragOver(null);
     setIsExternalDragOverNavigator(false);
 
-    if (fsOpLoading || !rootDirectoryHandle) return;
+    if (fsOpLoading) return;
 
-    const files = Array.from(e.dataTransfer.files);
-    if (!files.length) return;
+    const handles = await getFileSystemHandlesFromDataTransfer(e.dataTransfer);
+    const legacyFiles = Array.from(e.dataTransfer.files);
+
+    if (!rootDirectoryHandle) {
+      if (handles.length > 0) {
+        const dirHandle = handles.find(h => h.kind === "directory");
+        if (dirHandle) {
+          try {
+            setIsNavigatorLoading(true);
+            const rootName = dirHandle.name;
+            setPanes([{ openedTabs: [], activeTabId: null }]);
+            setActivePaneIndex(0);
+            setUnsavedChanges({});
+            setOriginalContents({});
+            setModifiedContents({});
+            setPaneWidths({ pane1: 50, pane2: 50 });
+            setRootDirectoryHandle(dirHandle);
+            setRootDirectoryName(rootName);
+            setRepositoryFiles(await loadDirectoryContents(dirHandle, rootName));
+            setIsRootOpen(true);
+            setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
+            setPageState("dinolabside");
+            setHasSeenStartup(true);
+          } catch { } finally {
+            setIsNavigatorLoading(false);
+          }
+          return;
+        }
+        for (const handle of handles) {
+          if (handle.kind === "file") {
+            openFile(handle, handle.name);
+            setPageState("dinolabside");
+            setHasSeenStartup(true);
+          }
+        }
+        return;
+      }
+      return;
+    }
+
+    if (handles.length === 0 && legacyFiles.length === 0) return;
 
     const targetDirHandle = await getDirectoryHandleByPath(targetPath);
     if (!targetDirHandle) return;
 
-    const existingFiles = [];
-    for (const file of files) {
-      const exists = await fsEntryExists(targetDirHandle, file.name, "file");
-      if (exists) {
-        existingFiles.push(file.name);
-      }
-    }
-
-    let overwrite = false;
-    if (existingFiles.length > 0) {
-      const message = existingFiles.length === 1 
-        ? `A file named "${existingFiles[0]}" already exists. Do you want to overwrite it?`
-        : `${existingFiles.length} files already exist. Do you want to overwrite them?`;
-      const result = await guardedShowDialog({
-        title: "Overwrite Files?",
-        message: message,
-        showCancel: true
-      });
-      if (result === null) return;
-      overwrite = true;
-    }
-
-    await withFsOverlay(async () => {
-      try {
-        for (const file of files) {
-          const fullPath = normalizePath(`${targetPath}/${file.name}`);
-          const newNode = { name: file.name, type: "file", handle: null, fullPath };
-          
-          if (overwrite && existingFiles.includes(file.name)) {
-            setRepositoryFiles((prev) => {
-              const withoutOld = deleteNodeFromTree(prev, fullPath);
-              return insertFileAtParent(withoutOld, targetPath, newNode);
-            });
-          } else {
-            setRepositoryFiles((prev) => insertFileAtParent(prev, targetPath, newNode));
-          }
-
-          await overwriteFileAtomic(targetDirHandle, file.name, file);
+    if (handles.length > 0) {
+      const existingItems = [];
+      for (const handle of handles) {
+        const itemType = handle.kind === "directory" ? "directory" : "file";
+        const exists = await fsEntryExists(targetDirHandle, handle.name, itemType);
+        if (exists) {
+          existingItems.push(handle.name);
         }
-      } catch (error) {
-        await guardedShowDialog({
-          title: "System Alert",
-          message: "An error occurred while adding the files. Please try again.",
-          showCancel: false
-        });
-      } finally {
-        await rescanAndSync([targetPath]);
       }
-    });
+
+      let overwrite = false;
+      if (existingItems.length > 0) {
+        const message = existingItems.length === 1
+          ? `An item named "${existingItems[0]}" already exists. Do you want to overwrite it?`
+          : `${existingItems.length} items already exist. Do you want to overwrite them?`;
+        const result = await guardedShowDialog({
+          title: "Overwrite Items?",
+          message: message,
+          showCancel: true
+        });
+        if (result === null) return;
+        overwrite = true;
+      }
+
+      await withFsOverlay(async () => {
+        try {
+          for (const handle of handles) {
+            const itemName = handle.name;
+            const fullPath = normalizePath(`${targetPath}/${itemName}`);
+
+            if (handle.kind === "file") {
+              const file = await handle.getFile();
+              const newNode = { name: itemName, type: "file", handle: null, fullPath };
+
+              setRepositoryFiles((prev) => {
+                let working = prev;
+                if (overwrite && existingItems.includes(itemName)) {
+                  working = deleteNodeFromTree(working, fullPath);
+                }
+                return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+              });
+
+              await overwriteFileAtomic(targetDirHandle, itemName, file);
+            } else if (handle.kind === "directory") {
+              const newNode = { name: itemName, type: "directory", handle: null, fullPath, files: [] };
+
+              setRepositoryFiles((prev) => {
+                let working = prev;
+                if (overwrite && existingItems.includes(itemName)) {
+                  working = deleteNodeFromTree(working, fullPath);
+                }
+                return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+              });
+
+              if (overwrite) {
+                await overwriteDirectoryAtomic(targetDirHandle, itemName, handle);
+              } else {
+                const newDirHandle = await targetDirHandle.getDirectoryHandle(itemName, { create: true });
+                await deepCopyDirectoryFast(handle, newDirHandle);
+              }
+            }
+          }
+        } catch (error) {
+          await guardedShowDialog({
+            title: "System Alert",
+            message: "An error occurred while adding the items. Please try again.",
+            showCancel: false
+          });
+        } finally {
+          await rescanAndSync([targetPath]);
+        }
+      });
+      return;
+    }
+
+    if (legacyFiles.length > 0) {
+      const existingFiles = [];
+      for (const file of legacyFiles) {
+        const exists = await fsEntryExists(targetDirHandle, file.name, "file");
+        if (exists) {
+          existingFiles.push(file.name);
+        }
+      }
+
+      let overwrite = false;
+      if (existingFiles.length > 0) {
+        const message = existingFiles.length === 1
+          ? `A file named "${existingFiles[0]}" already exists. Do you want to overwrite it?`
+          : `${existingFiles.length} files already exist. Do you want to overwrite them?`;
+        const result = await guardedShowDialog({
+          title: "Overwrite Files?",
+          message: message,
+          showCancel: true
+        });
+        if (result === null) return;
+        overwrite = true;
+      }
+
+      await withFsOverlay(async () => {
+        try {
+          for (const file of legacyFiles) {
+            const fullPath = normalizePath(`${targetPath}/${file.name}`);
+            const newNode = { name: file.name, type: "file", handle: null, fullPath };
+
+            setRepositoryFiles((prev) => {
+              let working = prev;
+              if (overwrite && existingFiles.includes(file.name)) {
+                working = deleteNodeFromTree(working, fullPath);
+              }
+              return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+            });
+
+            await overwriteFileAtomic(targetDirHandle, file.name, file);
+          }
+        } catch (error) {
+          await guardedShowDialog({
+            title: "System Alert",
+            message: "An error occurred while adding the files. Please try again.",
+            showCancel: false
+          });
+        } finally {
+          await rescanAndSync([targetPath]);
+        }
+      });
+    }
   };
 
   const handleExternalDragOver = (e) => {
@@ -767,6 +918,53 @@ export default function DinoLabs() {
     if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
       setIsExternalDragOverNavigator(false);
     }
+  };
+
+  const handleStartupAreaDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (fsOpLoading) return;
+
+    const handles = await getFileSystemHandlesFromDataTransfer(e.dataTransfer);
+
+    if (handles.length > 0) {
+      const dirHandle = handles.find(h => h.kind === "directory");
+      if (dirHandle) {
+        try {
+          setIsNavigatorLoading(true);
+          const rootName = dirHandle.name;
+          setPanes([{ openedTabs: [], activeTabId: null }]);
+          setActivePaneIndex(0);
+          setUnsavedChanges({});
+          setOriginalContents({});
+          setModifiedContents({});
+          setPaneWidths({ pane1: 50, pane2: 50 });
+          setRootDirectoryHandle(dirHandle);
+          setRootDirectoryName(rootName);
+          setRepositoryFiles(await loadDirectoryContents(dirHandle, rootName));
+          setIsRootOpen(true);
+          setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
+          setPageState("dinolabside");
+          setHasSeenStartup(true);
+        } catch { } finally {
+          setIsNavigatorLoading(false);
+        }
+        return;
+      }
+      for (const handle of handles) {
+        if (handle.kind === "file") {
+          openFile(handle, handle.name);
+          setPageState("dinolabside");
+          setHasSeenStartup(true);
+        }
+      }
+    }
+  };
+
+  const handleStartupAreaDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const flattenTree = (files, parentPath = "", level = 0, isParentVisible = true) => {
@@ -1529,8 +1727,7 @@ export default function DinoLabs() {
       const newNode = type === "file"
         ? updateSingleFileNodePath(sourceNode, toPath)
         : cloneNodeWithNewPrefix(sourceNode, from, toPath);
-      const inserter = type === "file" ? insertFileAtParent : insertNodeIntoTree;
-      let updatedTree = inserter(working, toParent, newNode);
+      let updatedTree = insertNodeAtPath(working, toParent, newNode, rootDirectoryName);
       if (isMove) {
         updatedTree = removeNodeFromTree(updatedTree, from).nextTree;
       }
@@ -1654,7 +1851,7 @@ export default function DinoLabs() {
       await withFsOverlay(async () => {
         const fullPath = normalizePath(`${targetDirPath}/${fileName}`);
         const newNode = { name: fileName, type: "file", handle: null, fullPath };
-        setRepositoryFiles((prev) => insertFileAtParent(prev, targetDirPath, newNode));
+        setRepositoryFiles((prev) => insertNodeAtPath(prev, targetDirPath, newNode, rootDirectoryName));
         await dirHandle.getFileHandle(fileName, { create: true });
         await rescanAndSync([targetDirPath]);
         setContextMenuVisible(false);
@@ -1688,7 +1885,7 @@ export default function DinoLabs() {
       await withFsOverlay(async () => {
         const fp = normalizePath(`${targetDirPath}/${folderName}`);
         const newNode = { name: folderName, type: "directory", handle: null, fullPath: fp, files: [] };
-        setRepositoryFiles((prev) => insertNodeIntoTree(prev, targetDirPath, newNode));
+        setRepositoryFiles((prev) => insertNodeAtPath(prev, targetDirPath, newNode, rootDirectoryName));
         await dirHandle.getDirectoryHandle(folderName, { create: true });
         await rescanAndSync([targetDirPath]);
         setContextMenuVisible(false);
@@ -1729,11 +1926,11 @@ export default function DinoLabs() {
       if (itemType === "file") {
         const { nextTree, removedNode } = removeNodeFromTree(w, path);
         if (!removedNode) return w;
-        return insertFileAtParent(nextTree, parent, updateSingleFileNodePath(removedNode, newFullPath));
+        return insertNodeAtPath(nextTree, parent, updateSingleFileNodePath(removedNode, newFullPath), rootDirectoryName);
       }
       const { nextTree, removedNode } = removeNodeFromTree(w, path);
       if (!removedNode) return w;
-      return insertNodeIntoTree(nextTree, parent, cloneNodeWithNewPrefix(removedNode, path, newFullPath));
+      return insertNodeAtPath(nextTree, parent, cloneNodeWithNewPrefix(removedNode, path, newFullPath), rootDirectoryName);
     });
     if (overwrite) removeOpenedForPath(newFullPath);
     remapOpenedDirectories(path, newFullPath, false);
@@ -1968,7 +2165,7 @@ export default function DinoLabs() {
           }}
           onDrop={(e) => {
             setDragOverId(null);
-            if (e.dataTransfer.files.length > 0) {
+            if (e.dataTransfer.types.includes("Files")) {
               handleExternalFileDrop(e, item.id);
             } else {
               handleItemDrop(e, item);
@@ -2440,7 +2637,7 @@ export default function DinoLabs() {
                 onDragEnter={handleNavigatorDragEnter}
                 onDragLeave={handleNavigatorDragLeave}
                 onDrop={(e) => {
-                  if (e.dataTransfer.files.length > 0) {
+                  if (e.dataTransfer.types.includes("Files")) {
                     handleExternalFileDrop(e, rootDirectoryName);
                   }
                 }}
@@ -2529,7 +2726,7 @@ export default function DinoLabs() {
                                 className="directoryListItemRoot"
                                 onDragOver={handleExternalDragOver}
                                 onDrop={(e) => {
-                                  if (e.dataTransfer.files.length > 0) {
+                                  if (e.dataTransfer.types.includes("Files")) {
                                     handleExternalFileDrop(e, rootDirectoryName);
                                   } else {
                                     handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
@@ -2562,7 +2759,7 @@ export default function DinoLabs() {
                                   className="nestedDirectoryFileStack"
                                   onDragOver={handleExternalDragOver}
                                   onDrop={(e) => {
-                                    if (e.dataTransfer.files.length > 0) {
+                                    if (e.dataTransfer.types.includes("Files")) {
                                       handleExternalFileDrop(e, rootDirectoryName);
                                     } else {
                                       handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
@@ -2892,7 +3089,11 @@ export default function DinoLabs() {
               </div>
             </div>
           ) : !hasSeenStartup ? (
-            <div className="dinolabsControlFlex">
+            <div 
+              className="dinolabsControlFlex"
+              onDrop={handleStartupAreaDrop}
+              onDragOver={handleStartupAreaDragOver}
+            >
               <div className="mainCellScrollContainer">
                 <div className="mainCellGridContainer">
                   <div className="mainCellGrid">
@@ -2971,13 +3172,19 @@ export default function DinoLabs() {
               </div>
             </div>
           ) : (
-            <DinoLabsNoFileSelected
-              handleLoadRepository={handleLoadRepository}
-              handleLoadFile={handleLoadFile}
-              isPlotRendered={isPlotRendered}
-              personalUsageByDay={personalUsageByDay}
-              usageLanguages={usageLanguages}
-            />
+            <div
+              onDrop={handleStartupAreaDrop}
+              onDragOver={handleStartupAreaDragOver}
+              style={{ width: "100%", height: "100%" }}
+            >
+              <DinoLabsNoFileSelected
+                handleLoadRepository={handleLoadRepository}
+                handleLoadFile={handleLoadFile}
+                isPlotRendered={isPlotRendered}
+                personalUsageByDay={personalUsageByDay}
+                usageLanguages={usageLanguages}
+              />
+            </div>
           )}
         </div>
       ) : !isLoaded ? (
