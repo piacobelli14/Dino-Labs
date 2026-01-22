@@ -6,7 +6,7 @@ import DinoLabsColorPicker from "../../../helpers/ColorPicker.jsx";
 import "../../../styles/mainStyles/DinoLabsPlugins/DinoLabsPluginsPlot/DinoLabsPluginsPlot.css";
 import "../../../styles/helperStyles/Slider.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faHouse, faKeyboard, faLineChart, faMinus, faPlus, faRotate, faXmark, faPaintBrush } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faKeyboard, faLineChart, faMinus, faPlus, faRotate, faXmark, faPaintBrush, faCircle, faDrawPolygon, faSquare, faCaretDown, faShapes } from "@fortawesome/free-solid-svg-icons";
 
 export default function DinoLabsPluginsPlot() {
 
@@ -153,16 +153,39 @@ export default function DinoLabsPluginsPlot() {
   const cursorPositionRef = useRef(0);
 
   const [formulas, setFormulas] = useState([]);
+  const [circles, setCircles] = useState([]);
+  const [triangles, setTriangles] = useState([]);
+  const [rectangles, setRectangles] = useState([]);
+  const [polygons, setPolygons] = useState([]);
   const [variables, setVariables] = useState([]);
   const [intercepts, setIntercepts] = useState([]);
   const [isKeyboardView, setIsKeyboardView] = useState(false);
   const [functionMode, setFunctionMode] = useState("fx");
   const [colorPickerOpen, setColorPickerOpen] = useState({});
+  const [circleColorPickerOpen, setCircleColorPickerOpen] = useState({});
+  const [triangleColorPickerOpen, setTriangleColorPickerOpen] = useState({});
+  const [rectangleColorPickerOpen, setRectangleColorPickerOpen] = useState({});
+  const [polygonColorPickerOpen, setPolygonColorPickerOpen] = useState({});
+  const [circleShadingMenuOpen, setCircleShadingMenuOpen] = useState({});
+  const [triangleShadingMenuOpen, setTriangleShadingMenuOpen] = useState({});
+  const [rectangleShadingMenuOpen, setRectangleShadingMenuOpen] = useState({});
+  const [polygonShadingMenuOpen, setPolygonShadingMenuOpen] = useState({});
   const [shadingMenuOpen, setShadingMenuOpen] = useState({});
+  const [shapeMenuOpen, setShapeMenuOpen] = useState(false);
   const [mathMinX, setMathMinX] = useState(-10);
   const [mathMaxX, setMathMaxX] = useState(10);
   const [mathMinY, setMathMinY] = useState(-10);
   const [mathMaxY, setMathMaxY] = useState(10);
+
+  const [draggingCircle, setDraggingCircle] = useState(null);
+  const [draggingRadiusHandle, setDraggingRadiusHandle] = useState(null);
+  const [draggingTriangle, setDraggingTriangle] = useState(null);
+  const [draggingTriangleVertex, setDraggingTriangleVertex] = useState(null);
+  const [draggingRectangle, setDraggingRectangle] = useState(null);
+  const [draggingRectangleHandle, setDraggingRectangleHandle] = useState(null);
+  const [draggingPolygon, setDraggingPolygon] = useState(null);
+  const [draggingPolygonVertex, setDraggingPolygonVertex] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const randomColor = () => {
     const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57", "#ff9ff3", "#54a0ff", "#5f27cd", "#00d2d3", "#ff9f43", "#10ac84", "#ee5253"];
@@ -989,6 +1012,303 @@ export default function DinoLabsPluginsPlot() {
     setIntercepts([]);
   };
 
+  const addCircle = () => {
+    const newCircle = {
+      id: Date.now(),
+      centerX: 0,
+      centerY: 0,
+      radius: 2,
+      color: randomColor(),
+      isHidden: false,
+      shading: {
+        filled: false
+      }
+    };
+    setCircles([...circles, newCircle]);
+    setShapeMenuOpen(false);
+  };
+
+  const updateCircle = (id, updates) => {
+    setCircles(circles.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  const updateCircleColor = (id, newColor) => {
+    setCircles(circles.map(c => c.id === id ? { ...c, color: newColor } : c));
+  };
+
+  const removeCircle = (id) => {
+    setCircles(circles.filter(c => c.id !== id));
+    const newColorPickerOpen = { ...circleColorPickerOpen };
+    delete newColorPickerOpen[id];
+    setCircleColorPickerOpen(newColorPickerOpen);
+    const newShadingMenuOpen = { ...circleShadingMenuOpen };
+    delete newShadingMenuOpen[id];
+    setCircleShadingMenuOpen(newShadingMenuOpen);
+  };
+
+  const toggleCircleVisibility = (id) => {
+    setCircles(circles.map(c => c.id === id ? { ...c, isHidden: !c.isHidden } : c));
+  };
+
+  const toggleCircleColorPicker = (id) => {
+    setCircleColorPickerOpen(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const closeCircleColorPicker = (id) => {
+    setCircleColorPickerOpen(prev => ({
+      ...prev,
+      [id]: false
+    }));
+  };
+
+  const toggleCircleShadingMenu = (id) => {
+    setCircleShadingMenuOpen(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const closeCircleShadingMenu = (id) => {
+    setCircleShadingMenuOpen(prev => ({
+      ...prev,
+      [id]: false
+    }));
+  };
+
+  const updateCircleShading = (id, shadingType, value) => {
+    setCircles(circles.map(c => 
+      c.id === id 
+        ? { 
+            ...c, 
+            shading: {
+              ...c.shading,
+              [shadingType]: value
+            }
+          } 
+        : c
+    ));
+  };
+
+  const addTriangle = () => {
+    const newTriangle = {
+      id: Date.now(),
+      x1: -2, y1: -2,
+      x2: 2, y2: -2,
+      x3: 0, y3: 2,
+      color: randomColor(),
+      isHidden: false,
+      shading: {
+        filled: false
+      }
+    };
+    setTriangles([...triangles, newTriangle]);
+    setShapeMenuOpen(false);
+  };
+
+  const updateTriangle = (id, updates) => {
+    setTriangles(triangles.map(t => t.id === id ? { ...t, ...updates } : t));
+  };
+
+  const updateTriangleColor = (id, newColor) => {
+    setTriangles(triangles.map(t => t.id === id ? { ...t, color: newColor } : t));
+  };
+
+  const removeTriangle = (id) => {
+    setTriangles(triangles.filter(t => t.id !== id));
+    const newColorPickerOpen = { ...triangleColorPickerOpen };
+    delete newColorPickerOpen[id];
+    setTriangleColorPickerOpen(newColorPickerOpen);
+    const newShadingMenuOpen = { ...triangleShadingMenuOpen };
+    delete newShadingMenuOpen[id];
+    setTriangleShadingMenuOpen(newShadingMenuOpen);
+  };
+
+  const toggleTriangleVisibility = (id) => {
+    setTriangles(triangles.map(t => t.id === id ? { ...t, isHidden: !t.isHidden } : t));
+  };
+
+  const toggleTriangleColorPicker = (id) => {
+    setTriangleColorPickerOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closeTriangleColorPicker = (id) => {
+    setTriangleColorPickerOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const toggleTriangleShadingMenu = (id) => {
+    setTriangleShadingMenuOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closeTriangleShadingMenu = (id) => {
+    setTriangleShadingMenuOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const updateTriangleShading = (id, shadingType, value) => {
+    setTriangles(triangles.map(t => 
+      t.id === id ? { ...t, shading: { ...t.shading, [shadingType]: value } } : t
+    ));
+  };
+
+  const addRectangle = () => {
+    const newRectangle = {
+      id: Date.now(),
+      x: -2,
+      y: -1,
+      width: 4,
+      height: 2,
+      color: randomColor(),
+      isHidden: false,
+      shading: {
+        filled: false
+      }
+    };
+    setRectangles([...rectangles, newRectangle]);
+    setShapeMenuOpen(false);
+  };
+
+  const updateRectangle = (id, updates) => {
+    setRectangles(rectangles.map(r => r.id === id ? { ...r, ...updates } : r));
+  };
+
+  const updateRectangleColor = (id, newColor) => {
+    setRectangles(rectangles.map(r => r.id === id ? { ...r, color: newColor } : r));
+  };
+
+  const removeRectangle = (id) => {
+    setRectangles(rectangles.filter(r => r.id !== id));
+    const newColorPickerOpen = { ...rectangleColorPickerOpen };
+    delete newColorPickerOpen[id];
+    setRectangleColorPickerOpen(newColorPickerOpen);
+    const newShadingMenuOpen = { ...rectangleShadingMenuOpen };
+    delete newShadingMenuOpen[id];
+    setRectangleShadingMenuOpen(newShadingMenuOpen);
+  };
+
+  const toggleRectangleVisibility = (id) => {
+    setRectangles(rectangles.map(r => r.id === id ? { ...r, isHidden: !r.isHidden } : r));
+  };
+
+  const toggleRectangleColorPicker = (id) => {
+    setRectangleColorPickerOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closeRectangleColorPicker = (id) => {
+    setRectangleColorPickerOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const toggleRectangleShadingMenu = (id) => {
+    setRectangleShadingMenuOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closeRectangleShadingMenu = (id) => {
+    setRectangleShadingMenuOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const updateRectangleShading = (id, shadingType, value) => {
+    setRectangles(rectangles.map(r => 
+      r.id === id ? { ...r, shading: { ...r.shading, [shadingType]: value } } : r
+    ));
+  };
+
+  const addPolygon = () => {
+    const newPolygon = {
+      id: Date.now(),
+      vertices: [
+        { x: 0, y: 3 },
+        { x: 2.5, y: 1 },
+        { x: 1.5, y: -2 },
+        { x: -1.5, y: -2 },
+        { x: -2.5, y: 1 }
+      ],
+      color: randomColor(),
+      isHidden: false,
+      shading: {
+        filled: false
+      }
+    };
+    setPolygons([...polygons, newPolygon]);
+    setShapeMenuOpen(false);
+  };
+
+  const updatePolygon = (id, updates) => {
+    setPolygons(polygons.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const updatePolygonVertex = (id, vertexIndex, x, y) => {
+    setPolygons(polygons.map(p => {
+      if (p.id === id) {
+        const newVertices = [...p.vertices];
+        newVertices[vertexIndex] = { x, y };
+        return { ...p, vertices: newVertices };
+      }
+      return p;
+    }));
+  };
+
+  const addPolygonVertex = (id) => {
+    setPolygons(polygons.map(p => {
+      if (p.id === id) {
+        const lastVertex = p.vertices[p.vertices.length - 1];
+        const newVertex = { x: lastVertex.x + 1, y: lastVertex.y };
+        return { ...p, vertices: [...p.vertices, newVertex] };
+      }
+      return p;
+    }));
+  };
+
+  const removePolygonVertex = (id, vertexIndex) => {
+    setPolygons(polygons.map(p => {
+      if (p.id === id && p.vertices.length > 3) {
+        const newVertices = p.vertices.filter((_, i) => i !== vertexIndex);
+        return { ...p, vertices: newVertices };
+      }
+      return p;
+    }));
+  };
+
+  const updatePolygonColor = (id, newColor) => {
+    setPolygons(polygons.map(p => p.id === id ? { ...p, color: newColor } : p));
+  };
+
+  const removePolygon = (id) => {
+    setPolygons(polygons.filter(p => p.id !== id));
+    const newColorPickerOpen = { ...polygonColorPickerOpen };
+    delete newColorPickerOpen[id];
+    setPolygonColorPickerOpen(newColorPickerOpen);
+    const newShadingMenuOpen = { ...polygonShadingMenuOpen };
+    delete newShadingMenuOpen[id];
+    setPolygonShadingMenuOpen(newShadingMenuOpen);
+  };
+
+  const togglePolygonVisibility = (id) => {
+    setPolygons(polygons.map(p => p.id === id ? { ...p, isHidden: !p.isHidden } : p));
+  };
+
+  const togglePolygonColorPicker = (id) => {
+    setPolygonColorPickerOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closePolygonColorPicker = (id) => {
+    setPolygonColorPickerOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const togglePolygonShadingMenu = (id) => {
+    setPolygonShadingMenuOpen(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const closePolygonShadingMenu = (id) => {
+    setPolygonShadingMenuOpen(prev => ({ ...prev, [id]: false }));
+  };
+
+  const updatePolygonShading = (id, shadingType, value) => {
+    setPolygons(polygons.map(p => 
+      p.id === id ? { ...p, shading: { ...p.shading, [shadingType]: value } } : p
+    ));
+  };
+
   const addVariable = (name) => {
     if (!variables.find(v => v.name === name)) {
       setVariables([...variables, { id: Date.now(), name, value: 0 }]);
@@ -1116,6 +1436,293 @@ export default function DinoLabsPluginsPlot() {
     
     setIntercepts(uniqueIntercepts);
   };
+
+  const screenToMath = useCallback((screenX, screenY) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    const mathX = mathMinX + (screenX / width) * (mathMaxX - mathMinX);
+    const mathY = mathMaxY - (screenY / height) * (mathMaxY - mathMinY);
+    
+    return { x: mathX, y: mathY };
+  }, [mathMinX, mathMaxX, mathMinY, mathMaxY]);
+
+  const mathToScreen = useCallback((mathX, mathY) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    const screenX = ((mathX - mathMinX) / (mathMaxX - mathMinX)) * width;
+    const screenY = height - ((mathY - mathMinY) / (mathMaxY - mathMinY)) * height;
+    
+    return { x: screenX, y: screenY };
+  }, [mathMinX, mathMaxX, mathMinY, mathMaxY]);
+
+  const getShapeAtPoint = useCallback((screenX, screenY) => {
+    for (let i = polygons.length - 1; i >= 0; i--) {
+      const polygon = polygons[i];
+      if (polygon.isHidden) continue;
+      
+      for (let vi = 0; vi < polygon.vertices.length; vi++) {
+        const v = polygon.vertices[vi];
+        const vScreen = mathToScreen(v.x, v.y);
+        const dist = Math.sqrt(Math.pow(screenX - vScreen.x, 2) + Math.pow(screenY - vScreen.y, 2));
+        if (dist <= 10) {
+          return { type: 'polygon', shape: polygon, subType: 'vertex', vertexIndex: vi };
+        }
+      }
+      
+      let centroidX = 0, centroidY = 0;
+      for (const v of polygon.vertices) {
+        centroidX += v.x;
+        centroidY += v.y;
+      }
+      centroidX /= polygon.vertices.length;
+      centroidY /= polygon.vertices.length;
+      const centroidScreen = mathToScreen(centroidX, centroidY);
+      const centroidDist = Math.sqrt(Math.pow(screenX - centroidScreen.x, 2) + Math.pow(screenY - centroidScreen.y, 2));
+      if (centroidDist <= 10) {
+        return { type: 'polygon', shape: polygon, subType: 'center' };
+      }
+    }
+
+    for (let i = rectangles.length - 1; i >= 0; i--) {
+      const rect = rectangles[i];
+      if (rect.isHidden) continue;
+      
+      const handleScreen = mathToScreen(rect.x + rect.width, rect.y + rect.height);
+      const handleDist = Math.sqrt(Math.pow(screenX - handleScreen.x, 2) + Math.pow(screenY - handleScreen.y, 2));
+      if (handleDist <= 10) {
+        return { type: 'rectangle', shape: rect, subType: 'handle' };
+      }
+      
+      const centerScreen = mathToScreen(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      const centerDist = Math.sqrt(Math.pow(screenX - centerScreen.x, 2) + Math.pow(screenY - centerScreen.y, 2));
+      if (centerDist <= 10) {
+        return { type: 'rectangle', shape: rect, subType: 'center' };
+      }
+    }
+
+    for (let i = triangles.length - 1; i >= 0; i--) {
+      const triangle = triangles[i];
+      if (triangle.isHidden) continue;
+      
+      const vertices = [
+        { x: triangle.x1, y: triangle.y1 },
+        { x: triangle.x2, y: triangle.y2 },
+        { x: triangle.x3, y: triangle.y3 }
+      ];
+      
+      for (let vi = 0; vi < 3; vi++) {
+        const vScreen = mathToScreen(vertices[vi].x, vertices[vi].y);
+        const dist = Math.sqrt(Math.pow(screenX - vScreen.x, 2) + Math.pow(screenY - vScreen.y, 2));
+        if (dist <= 10) {
+          return { type: 'triangle', shape: triangle, subType: 'vertex', vertexIndex: vi };
+        }
+      }
+      
+      const centroidX = (triangle.x1 + triangle.x2 + triangle.x3) / 3;
+      const centroidY = (triangle.y1 + triangle.y2 + triangle.y3) / 3;
+      const centroidScreen = mathToScreen(centroidX, centroidY);
+      const centroidDist = Math.sqrt(Math.pow(screenX - centroidScreen.x, 2) + Math.pow(screenY - centroidScreen.y, 2));
+      if (centroidDist <= 10) {
+        return { type: 'triangle', shape: triangle, subType: 'center' };
+      }
+    }
+
+    for (let i = circles.length - 1; i >= 0; i--) {
+      const circle = circles[i];
+      if (circle.isHidden) continue;
+      
+      const centerScreen = mathToScreen(circle.centerX, circle.centerY);
+      const radiusHandleScreen = mathToScreen(circle.centerX + circle.radius, circle.centerY);
+      const radiusPixels = radiusHandleScreen.x - centerScreen.x;
+      
+      const handleX = centerScreen.x + radiusPixels;
+      const handleY = centerScreen.y;
+      const handleDist = Math.sqrt(Math.pow(screenX - handleX, 2) + Math.pow(screenY - handleY, 2));
+      
+      if (handleDist <= 10) {
+        return { type: 'circle', shape: circle, subType: 'radius' };
+      }
+      
+      const centerDist = Math.sqrt(Math.pow(screenX - centerScreen.x, 2) + Math.pow(screenY - centerScreen.y, 2));
+      
+      if (centerDist <= 10) {
+        return { type: 'circle', shape: circle, subType: 'center' };
+      }
+      
+      if (Math.abs(centerDist - radiusPixels) <= 5) {
+        return { type: 'circle', shape: circle, subType: 'center' };
+      }
+    }
+
+    return null;
+  }, [circles, triangles, rectangles, polygons, mathToScreen]);
+
+  const handleCanvasMouseDown = useCallback((e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    
+    const hit = getShapeAtPoint(screenX, screenY);
+    
+    if (hit) {
+      setIsDragging(true);
+      if (hit.type === 'circle') {
+        if (hit.subType === 'center') {
+          setDraggingCircle(hit.shape.id);
+        } else if (hit.subType === 'radius') {
+          setDraggingRadiusHandle(hit.shape.id);
+        }
+      } else if (hit.type === 'triangle') {
+        if (hit.subType === 'center') {
+          setDraggingTriangle(hit.shape.id);
+        } else if (hit.subType === 'vertex') {
+          setDraggingTriangleVertex({ id: hit.shape.id, vertexIndex: hit.vertexIndex });
+        }
+      } else if (hit.type === 'rectangle') {
+        if (hit.subType === 'center') {
+          setDraggingRectangle(hit.shape.id);
+        } else if (hit.subType === 'handle') {
+          setDraggingRectangleHandle(hit.shape.id);
+        }
+      } else if (hit.type === 'polygon') {
+        if (hit.subType === 'center') {
+          setDraggingPolygon(hit.shape.id);
+        } else if (hit.subType === 'vertex') {
+          setDraggingPolygonVertex({ id: hit.shape.id, vertexIndex: hit.vertexIndex });
+        }
+      }
+      e.preventDefault();
+    }
+  }, [getShapeAtPoint]);
+
+  const handleCanvasMouseMove = useCallback((e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    const mathPos = screenToMath(screenX, screenY);
+
+    if (draggingCircle) {
+      updateCircle(draggingCircle, { centerX: mathPos.x, centerY: mathPos.y });
+    } else if (draggingRadiusHandle) {
+      const circle = circles.find(c => c.id === draggingRadiusHandle);
+      if (circle) {
+        const newRadius = Math.sqrt(
+          Math.pow(mathPos.x - circle.centerX, 2) + 
+          Math.pow(mathPos.y - circle.centerY, 2)
+        );
+        updateCircle(draggingRadiusHandle, { radius: Math.max(0.1, newRadius) });
+      }
+    } else if (draggingTriangle) {
+      const triangle = triangles.find(t => t.id === draggingTriangle);
+      if (triangle) {
+        const centroidX = (triangle.x1 + triangle.x2 + triangle.x3) / 3;
+        const centroidY = (triangle.y1 + triangle.y2 + triangle.y3) / 3;
+        const dx = mathPos.x - centroidX;
+        const dy = mathPos.y - centroidY;
+        updateTriangle(draggingTriangle, {
+          x1: triangle.x1 + dx, y1: triangle.y1 + dy,
+          x2: triangle.x2 + dx, y2: triangle.y2 + dy,
+          x3: triangle.x3 + dx, y3: triangle.y3 + dy
+        });
+      }
+    } else if (draggingTriangleVertex) {
+      const keys = ['x1', 'y1', 'x2', 'y2', 'x3', 'y3'];
+      const xKey = keys[draggingTriangleVertex.vertexIndex * 2];
+      const yKey = keys[draggingTriangleVertex.vertexIndex * 2 + 1];
+      updateTriangle(draggingTriangleVertex.id, { [xKey]: mathPos.x, [yKey]: mathPos.y });
+    } else if (draggingRectangle) {
+      const rectangle = rectangles.find(r => r.id === draggingRectangle);
+      if (rectangle) {
+        const centerX = rectangle.x + rectangle.width / 2;
+        const centerY = rectangle.y + rectangle.height / 2;
+        const dx = mathPos.x - centerX;
+        const dy = mathPos.y - centerY;
+        updateRectangle(draggingRectangle, { x: rectangle.x + dx, y: rectangle.y + dy });
+      }
+    } else if (draggingRectangleHandle) {
+      const rectangle = rectangles.find(r => r.id === draggingRectangleHandle);
+      if (rectangle) {
+        const newWidth = Math.max(0.1, mathPos.x - rectangle.x);
+        const newHeight = Math.max(0.1, mathPos.y - rectangle.y);
+        updateRectangle(draggingRectangleHandle, { width: newWidth, height: newHeight });
+      }
+    } else if (draggingPolygon) {
+      const polygon = polygons.find(p => p.id === draggingPolygon);
+      if (polygon) {
+        let centroidX = 0, centroidY = 0;
+        for (const v of polygon.vertices) {
+          centroidX += v.x;
+          centroidY += v.y;
+        }
+        centroidX /= polygon.vertices.length;
+        centroidY /= polygon.vertices.length;
+        const dx = mathPos.x - centroidX;
+        const dy = mathPos.y - centroidY;
+        const newVertices = polygon.vertices.map(v => ({ x: v.x + dx, y: v.y + dy }));
+        updatePolygon(draggingPolygon, { vertices: newVertices });
+      }
+    } else if (draggingPolygonVertex) {
+      updatePolygonVertex(draggingPolygonVertex.id, draggingPolygonVertex.vertexIndex, mathPos.x, mathPos.y);
+    } else {
+      const hit = getShapeAtPoint(screenX, screenY);
+      if (hit) {
+        if (hit.subType === 'radius' || hit.subType === 'handle') {
+          canvas.style.cursor = 'ew-resize';
+        } else if (hit.subType === 'vertex') {
+          canvas.style.cursor = 'move';
+        } else {
+          canvas.style.cursor = 'move';
+        }
+      } else {
+        canvas.style.cursor = 'crosshair';
+      }
+    }
+  }, [draggingCircle, draggingRadiusHandle, draggingTriangle, draggingTriangleVertex, 
+      draggingRectangle, draggingRectangleHandle, draggingPolygon, draggingPolygonVertex,
+      circles, triangles, rectangles, polygons, screenToMath, getShapeAtPoint, 
+      updateCircle, updateTriangle, updateRectangle, updatePolygon, updatePolygonVertex]);
+
+  const handleCanvasMouseUp = useCallback(() => {
+    setDraggingCircle(null);
+    setDraggingRadiusHandle(null);
+    setDraggingTriangle(null);
+    setDraggingTriangleVertex(null);
+    setDraggingRectangle(null);
+    setDraggingRectangleHandle(null);
+    setDraggingPolygon(null);
+    setDraggingPolygonVertex(null);
+    setIsDragging(false);
+  }, []);
+
+  const handleCanvasMouseLeave = useCallback(() => {
+    if (isDragging) {
+      setDraggingCircle(null);
+      setDraggingRadiusHandle(null);
+      setDraggingTriangle(null);
+      setDraggingTriangleVertex(null);
+      setDraggingRectangle(null);
+      setDraggingRectangleHandle(null);
+      setDraggingPolygon(null);
+      setDraggingPolygonVertex(null);
+      setIsDragging(false);
+    }
+  }, [isDragging]);
 
   const drawGraph = useCallback(() => {
     const canvas = canvasRef.current;
@@ -1377,6 +1984,192 @@ export default function DinoLabsPluginsPlot() {
       }
       ctx.stroke();
     });
+
+    circles.forEach(circle => {
+      if (circle.isHidden) return;
+      
+      const centerScreen = transform(circle.centerX, circle.centerY);
+      const edgePoint = transform(circle.centerX + circle.radius, circle.centerY);
+      const radiusPixels = edgePoint.x - centerScreen.x;
+      
+      if (circle.shading?.filled) {
+        ctx.fillStyle = circle.color + '26';
+        ctx.beginPath();
+        ctx.arc(centerScreen.x, centerScreen.y, Math.abs(radiusPixels), 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      
+      ctx.strokeStyle = circle.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerScreen.x, centerScreen.y, Math.abs(radiusPixels), 0, 2 * Math.PI);
+      ctx.stroke();
+      
+      ctx.fillStyle = circle.color;
+      ctx.beginPath();
+      ctx.arc(centerScreen.x, centerScreen.y, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      const handleX = centerScreen.x + radiusPixels;
+      const handleY = centerScreen.y;
+      
+      ctx.fillStyle = circle.color;
+      ctx.beginPath();
+      ctx.arc(handleX, handleY, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = circle.color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerScreen.x, centerScreen.y);
+      ctx.lineTo(handleX, handleY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    triangles.forEach(triangle => {
+      if (triangle.isHidden) return;
+      
+      const p1 = transform(triangle.x1, triangle.y1);
+      const p2 = transform(triangle.x2, triangle.y2);
+      const p3 = transform(triangle.x3, triangle.y3);
+      
+      if (triangle.shading?.filled) {
+        ctx.fillStyle = triangle.color + '26';
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p3.x, p3.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      ctx.strokeStyle = triangle.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.closePath();
+      ctx.stroke();
+      
+      [p1, p2, p3].forEach(p => {
+        ctx.fillStyle = triangle.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      
+      const centroidX = (triangle.x1 + triangle.x2 + triangle.x3) / 3;
+      const centroidY = (triangle.y1 + triangle.y2 + triangle.y3) / 3;
+      const centroid = transform(centroidX, centroidY);
+      ctx.fillStyle = triangle.color;
+      ctx.beginPath();
+      ctx.arc(centroid.x, centroid.y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    rectangles.forEach(rectangle => {
+      if (rectangle.isHidden) return;
+      
+      const topLeft = transform(rectangle.x, rectangle.y + rectangle.height);
+      const bottomRight = transform(rectangle.x + rectangle.width, rectangle.y);
+      const rectWidth = bottomRight.x - topLeft.x;
+      const rectHeight = bottomRight.y - topLeft.y;
+      
+      if (rectangle.shading?.filled) {
+        ctx.fillStyle = rectangle.color + '26';
+        ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+      }
+      
+      ctx.strokeStyle = rectangle.color;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+      
+      const centerScreen = transform(rectangle.x + rectangle.width / 2, rectangle.y + rectangle.height / 2);
+      ctx.fillStyle = rectangle.color;
+      ctx.beginPath();
+      ctx.arc(centerScreen.x, centerScreen.y, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      const handleScreen = transform(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
+      ctx.fillStyle = rectangle.color;
+      ctx.beginPath();
+      ctx.arc(handleScreen.x, handleScreen.y, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    polygons.forEach(polygon => {
+      if (polygon.isHidden) return;
+      
+      const screenVertices = polygon.vertices.map(v => transform(v.x, v.y));
+      
+      if (polygon.shading?.filled) {
+        ctx.fillStyle = polygon.color + '26';
+        ctx.beginPath();
+        ctx.moveTo(screenVertices[0].x, screenVertices[0].y);
+        for (let i = 1; i < screenVertices.length; i++) {
+          ctx.lineTo(screenVertices[i].x, screenVertices[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      ctx.strokeStyle = polygon.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(screenVertices[0].x, screenVertices[0].y);
+      for (let i = 1; i < screenVertices.length; i++) {
+        ctx.lineTo(screenVertices[i].x, screenVertices[i].y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      
+      screenVertices.forEach(p => {
+        ctx.fillStyle = polygon.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      
+      let centroidX = 0, centroidY = 0;
+      for (const v of polygon.vertices) {
+        centroidX += v.x;
+        centroidY += v.y;
+      }
+      centroidX /= polygon.vertices.length;
+      centroidY /= polygon.vertices.length;
+      const centroid = transform(centroidX, centroidY);
+      ctx.fillStyle = polygon.color;
+      ctx.beginPath();
+      ctx.arc(centroid.x, centroid.y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
     
     intercepts.forEach(intercept => {
       const point = transform(intercept.x, intercept.y);
@@ -1413,7 +2206,7 @@ export default function DinoLabsPluginsPlot() {
         ctx.fillText(text, point.x, point.y - 22);
       }
     });
-  }, [formulas, variables, intercepts, mathMinX, mathMaxX, mathMinY, mathMaxY]);
+  }, [formulas, circles, triangles, rectangles, polygons, variables, intercepts, mathMinX, mathMaxX, mathMinY, mathMaxY]);
 
   const extractMissingVariables = (text) => {
     if (!text) return [];
@@ -1461,6 +2254,23 @@ export default function DinoLabsPluginsPlot() {
     return () => window.removeEventListener("resize", handleResize);
   }, [drawGraph]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    canvas.addEventListener('mousedown', handleCanvasMouseDown);
+    canvas.addEventListener('mousemove', handleCanvasMouseMove);
+    canvas.addEventListener('mouseup', handleCanvasMouseUp);
+    canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
+    
+    return () => {
+      canvas.removeEventListener('mousedown', handleCanvasMouseDown);
+      canvas.removeEventListener('mousemove', handleCanvasMouseMove);
+      canvas.removeEventListener('mouseup', handleCanvasMouseUp);
+      canvas.removeEventListener('mouseleave', handleCanvasMouseLeave);
+    };
+  }, [handleCanvasMouseDown, handleCanvasMouseMove, handleCanvasMouseUp, handleCanvasMouseLeave]);
+
   return (
     <div className="dinolabsPluginsPlotApp" tabIndex={0}>
       <DinoLabsNav activePage="plugins" />
@@ -1468,39 +2278,81 @@ export default function DinoLabsPluginsPlot() {
       <div className="dinolabsPluginsPlotContainer">
         <div className="dinolabsPluginsPlotLeftPanel">
           <div className="dinolabsPluginsPlotHeader">
-            <button 
-              className="dinolabsPluginsPlotAddButton" 
-              onClick={addFormula}
-              title="Add New Formula"
-            >
-              <FontAwesomeIcon icon={faPlus}/>
-            </button>
-
-            <div className="dinolabsPluginsPlotModeSelector">
+            <div className="dinolabsPluginsPlotHeaderRow">
               <button 
-                className={`dinolabsPluginsPlotModeButton ${functionMode === "fx" ? "active" : ""}`}
-                onClick={() => setFunctionMode("fx")}
-                title="Function Mode"
+                className="dinolabsPluginsPlotAddButton" 
+                onClick={addFormula}
+                title="Add New Formula"
               >
-                f(x)
+                <FontAwesomeIcon icon={faPlus}/>
               </button>
 
-              <button 
-                className={`dinolabsPluginsPlotModeButton ${functionMode === "derv" ? "active" : ""}`}
-                onClick={() => setFunctionMode("derv")}
-                title="Derivative Mode"
-              >
-                d/dx
-              </button>
+              <div className="dinolabsPluginsPlotModeSelector">
+                <button 
+                  className={`dinolabsPluginsPlotModeButton ${functionMode === "fx" ? "active" : ""}`}
+                  onClick={() => setFunctionMode("fx")}
+                  title="Function Mode"
+                >
+                  f(x)
+                </button>
 
-              <button 
-                className={`dinolabsPluginsPlotModeButton ${functionMode === "integ" ? "active" : ""}`}
-                onClick={() => setFunctionMode("integ")}
-                title="Integral Mode"
-              >
-                ∫f
-              </button>
+                <button 
+                  className={`dinolabsPluginsPlotModeButton ${functionMode === "derv" ? "active" : ""}`}
+                  onClick={() => setFunctionMode("derv")}
+                  title="Derivative Mode"
+                >
+                  d/dx
+                </button>
+
+                <button 
+                  className={`dinolabsPluginsPlotModeButton ${functionMode === "integ" ? "active" : ""}`}
+                  onClick={() => setFunctionMode("integ")}
+                  title="Integral Mode"
+                >
+                  ∫f
+                </button>
+              </div>
             </div>
+
+            <Tippy
+              content={
+                <div className="dinolabsPluginsPlotShapeMenu">
+                  <button className="dinolabsPluginsPlotShapeMenuItem" onClick={addCircle}>
+                    <FontAwesomeIcon icon={faCircle}/>
+                    <span>Circle</span>
+                  </button>
+                  <button className="dinolabsPluginsPlotShapeMenuItem" onClick={addTriangle}>
+                    <span className="triangleIcon">△</span>
+                    <span>Triangle</span>
+                  </button>
+                  <button className="dinolabsPluginsPlotShapeMenuItem" onClick={addRectangle}>
+                    <FontAwesomeIcon icon={faSquare}/>
+                    <span>Rectangle</span>
+                  </button>
+                  <button className="dinolabsPluginsPlotShapeMenuItem" onClick={addPolygon}>
+                    <FontAwesomeIcon icon={faDrawPolygon}/>
+                    <span>Polygon</span>
+                  </button>
+                </div>
+              }
+              visible={shapeMenuOpen}
+              onClickOutside={() => setShapeMenuOpen(false)}
+              interactive={true}
+              placement="bottom"
+              offset={[0, 5]}
+              appendTo={document.body}
+              className="shape-menu-tippy"
+            >
+              <button 
+                className="dinolabsPluginsPlotAddShapeButton" 
+                onClick={() => setShapeMenuOpen(!shapeMenuOpen)}
+                title="Add Shape"
+              >
+                <FontAwesomeIcon icon={faShapes}/>
+                <span>Add Shape</span>
+                <FontAwesomeIcon icon={faCaretDown} className="caretIcon"/>
+              </button>
+            </Tippy>
           </div>
 
           <div className="dinolabsPluginsPlotFormulasList">
@@ -1540,6 +2392,7 @@ export default function DinoLabsPluginsPlot() {
                               <label>
                                 <input
                                   type="checkbox"
+                                  className="dinolabsSettingsCheckbox"
                                   checked={formula.shading?.toXAxis || false}
                                   onChange={(e) => updateFormulaShading(formula.id, 'toXAxis', e.target.checked)}
                                 />
@@ -1550,6 +2403,7 @@ export default function DinoLabsPluginsPlot() {
                               <label>
                                 <input
                                   type="checkbox"
+                                  className="dinolabsSettingsCheckbox"
                                   checked={formula.shading?.toYAxis || false}
                                   onChange={(e) => updateFormulaShading(formula.id, 'toYAxis', e.target.checked)}
                                 />
@@ -1625,6 +2479,538 @@ export default function DinoLabsPluginsPlot() {
                 </div>
               );
             })}
+
+            {circles.map(circle => (
+              <div key={circle.id} className="dinolabsPluginsPlotShapeItem dinolabsPluginsPlotCircleItem">
+                <div className="dinolabsPluginsPlotShapeHeader">
+                  <Tippy 
+                    content={
+                      <DinoLabsColorPicker 
+                        color={circle.color} 
+                        onChange={(newColor) => updateCircleColor(circle.id, newColor)} 
+                      />
+                    } 
+                    visible={circleColorPickerOpen[circle.id]} 
+                    onClickOutside={() => closeCircleColorPicker(circle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="color-picker-tippy"
+                  >
+                    <button
+                      className="dinolabsPluginsPlotColorIndicator"
+                      style={{ backgroundColor: circle.color }}
+                      onClick={() => toggleCircleColorPicker(circle.id)}
+                      title="Change Color"
+                    />
+                  </Tippy>
+
+                  <Tippy 
+                    content={
+                      <div className="dinolabsPluginsPlotShadingMenu">
+                        <div className="dinolabsPluginsPlotShadingOption">
+                          <label>
+                            <input
+                              type="checkbox"
+                              className="dinolabsSettingsCheckbox"
+                              checked={circle.shading?.filled || false}
+                              onChange={(e) => updateCircleShading(circle.id, 'filled', e.target.checked)}
+                            />
+                            Fill Circle
+                          </label>
+                        </div>
+                      </div>
+                    } 
+                    visible={circleShadingMenuOpen[circle.id]} 
+                    onClickOutside={() => closeCircleShadingMenu(circle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="shading-menu-tippy"
+                  >
+                    <button
+                      className={`dinolabsPluginsPlotShadingButton ${circle.shading?.filled ? 'active' : ''}`}
+                      onClick={() => toggleCircleShadingMenu(circle.id)}
+                      title="Shading Options"
+                    >
+                      <FontAwesomeIcon icon={faPaintBrush}/>
+                    </button>
+                  </Tippy>
+
+                  <button
+                    className={`dinolabsPluginsPlotVisibilityToggle ${circle.isHidden ? "hidden" : "visible"}`}
+                    onClick={() => toggleCircleVisibility(circle.id)}
+                    title={circle.isHidden ? "Show Circle" : "Hide Circle"}
+                  >
+                    <FontAwesomeIcon icon={circle.isHidden ? faEye : faEyeSlash}/>
+                  </button>
+
+                  <div className="dinolabsPluginsPlotShapeLabel">
+                    <FontAwesomeIcon icon={faCircle} className="dinolabsPluginsPlotShapeIcon"/>
+                    <span>Circle</span>
+                  </div>
+
+                  <button 
+                    className="dinolabsPluginsPlotRemoveButton"
+                    onClick={() => removeCircle(circle.id)}
+                    title="Remove Circle"
+                  >
+                    <FontAwesomeIcon icon={faXmark}/>
+                  </button>
+                </div>
+
+                <div className="dinolabsPluginsPlotShapeControls">
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>X</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(circle.centerX.toFixed(2))}
+                        onChange={(e) => updateCircle(circle.id, { centerX: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>Y</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(circle.centerY.toFixed(2))}
+                        onChange={(e) => updateCircle(circle.id, { centerY: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>R</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={parseFloat(circle.radius.toFixed(2))}
+                        onChange={(e) => updateCircle(circle.id, { radius: Math.max(0.1, parseFloat(e.target.value) || 0.1) })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {triangles.map(triangle => (
+              <div key={triangle.id} className="dinolabsPluginsPlotShapeItem dinolabsPluginsPlotTriangleItem">
+                <div className="dinolabsPluginsPlotShapeHeader">
+                  <Tippy 
+                    content={
+                      <DinoLabsColorPicker 
+                        color={triangle.color} 
+                        onChange={(newColor) => updateTriangleColor(triangle.id, newColor)} 
+                      />
+                    } 
+                    visible={triangleColorPickerOpen[triangle.id]} 
+                    onClickOutside={() => closeTriangleColorPicker(triangle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="color-picker-tippy"
+                  >
+                    <button
+                      className="dinolabsPluginsPlotColorIndicator"
+                      style={{ backgroundColor: triangle.color }}
+                      onClick={() => toggleTriangleColorPicker(triangle.id)}
+                      title="Change Color"
+                    />
+                  </Tippy>
+
+                  <Tippy 
+                    content={
+                      <div className="dinolabsPluginsPlotShadingMenu">
+                        <div className="dinolabsPluginsPlotShadingOption">
+                          <label>
+                            <input
+                              type="checkbox"
+                              className="dinolabsSettingsCheckbox"
+                              checked={triangle.shading?.filled || false}
+                              onChange={(e) => updateTriangleShading(triangle.id, 'filled', e.target.checked)}
+                            />
+                            Fill Triangle
+                          </label>
+                        </div>
+                      </div>
+                    } 
+                    visible={triangleShadingMenuOpen[triangle.id]} 
+                    onClickOutside={() => closeTriangleShadingMenu(triangle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="shading-menu-tippy"
+                  >
+                    <button
+                      className={`dinolabsPluginsPlotShadingButton ${triangle.shading?.filled ? 'active' : ''}`}
+                      onClick={() => toggleTriangleShadingMenu(triangle.id)}
+                      title="Shading Options"
+                    >
+                      <FontAwesomeIcon icon={faPaintBrush}/>
+                    </button>
+                  </Tippy>
+
+                  <button
+                    className={`dinolabsPluginsPlotVisibilityToggle ${triangle.isHidden ? "hidden" : "visible"}`}
+                    onClick={() => toggleTriangleVisibility(triangle.id)}
+                    title={triangle.isHidden ? "Show Triangle" : "Hide Triangle"}
+                  >
+                    <FontAwesomeIcon icon={triangle.isHidden ? faEye : faEyeSlash}/>
+                  </button>
+
+                  <div className="dinolabsPluginsPlotShapeLabel">
+                    <span className="dinolabsPluginsPlotShapeIcon triangleIcon">△</span>
+                    <span>Triangle</span>
+                  </div>
+
+                  <button 
+                    className="dinolabsPluginsPlotRemoveButton"
+                    onClick={() => removeTriangle(triangle.id)}
+                    title="Remove Triangle"
+                  >
+                    <FontAwesomeIcon icon={faXmark}/>
+                  </button>
+                </div>
+
+                <div className="dinolabsPluginsPlotShapeControls">
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>X₁</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.x1.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { x1: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>Y₁</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.y1.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { y1: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>X₂</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.x2.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { x2: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>Y₂</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.y2.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { y2: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>X₃</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.x3.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { x3: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>Y₃</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(triangle.y3.toFixed(2))}
+                        onChange={(e) => updateTriangle(triangle.id, { y3: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {rectangles.map(rectangle => (
+              <div key={rectangle.id} className="dinolabsPluginsPlotShapeItem dinolabsPluginsPlotRectangleItem">
+                <div className="dinolabsPluginsPlotShapeHeader">
+                  <Tippy 
+                    content={
+                      <DinoLabsColorPicker 
+                        color={rectangle.color} 
+                        onChange={(newColor) => updateRectangleColor(rectangle.id, newColor)} 
+                      />
+                    } 
+                    visible={rectangleColorPickerOpen[rectangle.id]} 
+                    onClickOutside={() => closeRectangleColorPicker(rectangle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="color-picker-tippy"
+                  >
+                    <button
+                      className="dinolabsPluginsPlotColorIndicator"
+                      style={{ backgroundColor: rectangle.color }}
+                      onClick={() => toggleRectangleColorPicker(rectangle.id)}
+                      title="Change Color"
+                    />
+                  </Tippy>
+
+                  <Tippy 
+                    content={
+                      <div className="dinolabsPluginsPlotShadingMenu">
+                        <div className="dinolabsPluginsPlotShadingOption">
+                          <label>
+                            <input
+                              type="checkbox"
+                              className="dinolabsSettingsCheckbox"
+                              checked={rectangle.shading?.filled || false}
+                              onChange={(e) => updateRectangleShading(rectangle.id, 'filled', e.target.checked)}
+                            />
+                            Fill Rectangle
+                          </label>
+                        </div>
+                      </div>
+                    } 
+                    visible={rectangleShadingMenuOpen[rectangle.id]} 
+                    onClickOutside={() => closeRectangleShadingMenu(rectangle.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="shading-menu-tippy"
+                  >
+                    <button
+                      className={`dinolabsPluginsPlotShadingButton ${rectangle.shading?.filled ? 'active' : ''}`}
+                      onClick={() => toggleRectangleShadingMenu(rectangle.id)}
+                      title="Shading Options"
+                    >
+                      <FontAwesomeIcon icon={faPaintBrush}/>
+                    </button>
+                  </Tippy>
+
+                  <button
+                    className={`dinolabsPluginsPlotVisibilityToggle ${rectangle.isHidden ? "hidden" : "visible"}`}
+                    onClick={() => toggleRectangleVisibility(rectangle.id)}
+                    title={rectangle.isHidden ? "Show Rectangle" : "Hide Rectangle"}
+                  >
+                    <FontAwesomeIcon icon={rectangle.isHidden ? faEye : faEyeSlash}/>
+                  </button>
+
+                  <div className="dinolabsPluginsPlotShapeLabel">
+                    <FontAwesomeIcon icon={faSquare} className="dinolabsPluginsPlotShapeIcon"/>
+                    <span>Rectangle</span>
+                  </div>
+
+                  <button 
+                    className="dinolabsPluginsPlotRemoveButton"
+                    onClick={() => removeRectangle(rectangle.id)}
+                    title="Remove Rectangle"
+                  >
+                    <FontAwesomeIcon icon={faXmark}/>
+                  </button>
+                </div>
+
+                <div className="dinolabsPluginsPlotShapeControls">
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>X</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(rectangle.x.toFixed(2))}
+                        onChange={(e) => updateRectangle(rectangle.id, { x: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>Y</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={parseFloat(rectangle.y.toFixed(2))}
+                        onChange={(e) => updateRectangle(rectangle.id, { y: parseFloat(e.target.value) || 0 })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                  <div className="dinolabsPluginsPlotShapeInputRow">
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>W</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={parseFloat(rectangle.width.toFixed(2))}
+                        onChange={(e) => updateRectangle(rectangle.id, { width: Math.max(0.1, parseFloat(e.target.value) || 0.1) })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                    <div className="dinolabsPluginsPlotShapeInputGroup">
+                      <label>H</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={parseFloat(rectangle.height.toFixed(2))}
+                        onChange={(e) => updateRectangle(rectangle.id, { height: Math.max(0.1, parseFloat(e.target.value) || 0.1) })}
+                        className="dinolabsPluginsPlotShapeInput"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {polygons.map(polygon => (
+              <div key={polygon.id} className="dinolabsPluginsPlotShapeItem dinolabsPluginsPlotPolygonItem">
+                <div className="dinolabsPluginsPlotShapeHeader">
+                  <Tippy 
+                    content={
+                      <DinoLabsColorPicker 
+                        color={polygon.color} 
+                        onChange={(newColor) => updatePolygonColor(polygon.id, newColor)} 
+                      />
+                    } 
+                    visible={polygonColorPickerOpen[polygon.id]} 
+                    onClickOutside={() => closePolygonColorPicker(polygon.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="color-picker-tippy"
+                  >
+                    <button
+                      className="dinolabsPluginsPlotColorIndicator"
+                      style={{ backgroundColor: polygon.color }}
+                      onClick={() => togglePolygonColorPicker(polygon.id)}
+                      title="Change Color"
+                    />
+                  </Tippy>
+
+                  <Tippy 
+                    content={
+                      <div className="dinolabsPluginsPlotShadingMenu">
+                        <div className="dinolabsPluginsPlotShadingOption">
+                          <label>
+                            <input
+                              type="checkbox"
+                              className="dinolabsSettingsCheckbox"
+                              checked={polygon.shading?.filled || false}
+                              onChange={(e) => updatePolygonShading(polygon.id, 'filled', e.target.checked)}
+                            />
+                            Fill Polygon
+                          </label>
+                        </div>
+                      </div>
+                    } 
+                    visible={polygonShadingMenuOpen[polygon.id]} 
+                    onClickOutside={() => closePolygonShadingMenu(polygon.id)} 
+                    interactive={true} 
+                    placement="left-start"
+                    offset={[0, 10]}
+                    appendTo={document.body}
+                    className="shading-menu-tippy"
+                  >
+                    <button
+                      className={`dinolabsPluginsPlotShadingButton ${polygon.shading?.filled ? 'active' : ''}`}
+                      onClick={() => togglePolygonShadingMenu(polygon.id)}
+                      title="Shading Options"
+                    >
+                      <FontAwesomeIcon icon={faPaintBrush}/>
+                    </button>
+                  </Tippy>
+
+                  <button
+                    className={`dinolabsPluginsPlotVisibilityToggle ${polygon.isHidden ? "hidden" : "visible"}`}
+                    onClick={() => togglePolygonVisibility(polygon.id)}
+                    title={polygon.isHidden ? "Show Polygon" : "Hide Polygon"}
+                  >
+                    <FontAwesomeIcon icon={polygon.isHidden ? faEye : faEyeSlash}/>
+                  </button>
+
+                  <div className="dinolabsPluginsPlotShapeLabel">
+                    <FontAwesomeIcon icon={faDrawPolygon} className="dinolabsPluginsPlotShapeIcon"/>
+                    <span>Polygon ({polygon.vertices.length})</span>
+                  </div>
+
+                  <button 
+                    className="dinolabsPluginsPlotRemoveButton"
+                    onClick={() => removePolygon(polygon.id)}
+                    title="Remove Polygon"
+                  >
+                    <FontAwesomeIcon icon={faXmark}/>
+                  </button>
+                </div>
+
+                <div className="dinolabsPluginsPlotShapeControls">
+                  <div className="dinolabsPluginsPlotPolygonVertices">
+                    {polygon.vertices.map((vertex, idx) => (
+                      <div key={idx} className="dinolabsPluginsPlotShapeInputRow dinolabsPluginsPlotVertexRow">
+                        <div className="dinolabsPluginsPlotShapeInputGroup">
+                          <label>X{idx + 1}</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={parseFloat(vertex.x.toFixed(2))}
+                            onChange={(e) => updatePolygonVertex(polygon.id, idx, parseFloat(e.target.value) || 0, vertex.y)}
+                            className="dinolabsPluginsPlotShapeInput"
+                          />
+                        </div>
+                        <div className="dinolabsPluginsPlotShapeInputGroup">
+                          <label>Y{idx + 1}</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={parseFloat(vertex.y.toFixed(2))}
+                            onChange={(e) => updatePolygonVertex(polygon.id, idx, vertex.x, parseFloat(e.target.value) || 0)}
+                            className="dinolabsPluginsPlotShapeInput"
+                          />
+                        </div>
+                        {polygon.vertices.length > 3 && (
+                          <button
+                            className="dinolabsPluginsPlotVertexRemoveButton"
+                            onClick={() => removePolygonVertex(polygon.id, idx)}
+                            title="Remove Vertex"
+                          >
+                            <FontAwesomeIcon icon={faMinus}/>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="dinolabsPluginsPlotAddVertexButton"
+                    onClick={() => addPolygonVertex(polygon.id)}
+                    title="Add Vertex"
+                  >
+                    <FontAwesomeIcon icon={faPlus}/>
+                    <span>Add Vertex</span>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="dinolabsPluginsPlotVariablesList">
@@ -1752,28 +3138,24 @@ export default function DinoLabsPluginsPlot() {
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("pi")} title="Mathematical constant Pi">π</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("tau")} title="Mathematical constant Tau">τ</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("infinity")} title="Infinity">∞</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("sin(")} title="Sine function">sin</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("cos(")} title="Cosine function">cos</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("tan(")} title="Tangent function">tan</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("sec(")} title="Secant function">sec</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("csc(")} title="Cosecant function">csc</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("cot(")} title="Cotangent function">cot</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("asin(")} title="Arcsine function">asin</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("acos(")} title="Arccosine function">acos</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("atan(")} title="Arctangent function">atan</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("asec(")} title="Arcsecant function">asec</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("acsc(")} title="Arccosecant function">acsc</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("acot(")} title="Arccotangent function">acot</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("sinh(")} title="Hyperbolic sine">sinh</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("cosh(")} title="Hyperbolic cosine">cosh</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("tanh(")} title="Hyperbolic tangent">tanh</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("asinh(")} title="Inverse hyperbolic sine">asinh</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("acosh(")} title="Inverse hyperbolic cosine">acosh</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("atanh(")} title="Inverse hyperbolic tangent">atanh</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("exp(")} title="Exponential function">exp</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("ln(")} title="Natural logarithm">ln</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("log(")} title="Base-10 logarithm">log</button>
@@ -1785,7 +3167,6 @@ export default function DinoLabsPluginsPlot() {
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("ceil(")} title="Ceiling function">ceil</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("round(")} title="Round function">round</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("sign(")} title="Sign function">sign</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("alpha")} title="Greek letter alpha">α</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("beta")} title="Greek letter beta">β</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("gamma")} title="Greek letter gamma">γ</button>
@@ -1797,20 +3178,16 @@ export default function DinoLabsPluginsPlot() {
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("sigma")} title="Greek letter sigma">σ</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("phi")} title="Greek letter phi">φ</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("omega")} title="Greek letter omega">ω</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("1/2")} title="One half">½</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("1/3")} title="One third">⅓</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("1/4")} title="One quarter">¼</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("2/3")} title="Two thirds">⅔</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("3/4")} title="Three quarters">¾</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("^2")} title="Squared">x²</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("^3")} title="Cubed">x³</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("<=")} title="Less than or equal">≤</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText(">=")} title="Greater than or equal">≥</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("!=")} title="Not equal">≠</button>
-              
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("x")} title="Variable x">x</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("y")} title="Variable y">y</button>
               <button className="dinolabsPluginsPlotKey function" onClick={() => insertText("a")} title="Variable a">a</button>
