@@ -137,19 +137,29 @@ export default function DinoLabsPluginsCalculator() {
     neg: { prec: 4, assoc: "R", arity: 1, fn: (a) => -a },
   };
 
+  const CONSTANTS = {
+    pi: Math.PI,
+    tau: 2 * Math.PI,
+    e: Math.E,
+  };
+
+  const TRIG_FUNCTIONS = new Set(['sin', 'cos', 'tan', 'sec', 'csc', 'cot']);
+  const INVERSE_TRIG_FUNCTIONS = new Set(['asin', 'acos', 'atan', 'asec', 'acsc', 'acot']);
+
   const FUNCTIONS = {
-    sin: { arity: 1, fn: (x) => Math.sin(x) },
-    cos: { arity: 1, fn: (x) => Math.cos(x) },
-    tan: { arity: 1, fn: (x) => Math.tan(x) },
-    sec: { arity: 1, fn: (x) => 1 / Math.cos(x) },
-    csc: { arity: 1, fn: (x) => 1 / Math.sin(x) },
-    cot: { arity: 1, fn: (x) => 1 / Math.tan(x) },
-    asin: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN asin"); return Math.asin(x); } },
-    acos: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN acos"); return Math.acos(x); } },
-    atan: { arity: 1, fn: (x) => Math.atan(x) },
-    asec: { arity: 1, fn: (x) => { if (x === 0) throw new Error("DOMAIN asec"); const v = 1 / x; if (v < -1 || v > 1) throw new Error("DOMAIN asec"); return Math.acos(v); } },
-    acsc: { arity: 1, fn: (x) => { if (x === 0) throw new Error("DOMAIN acsc"); const v = 1 / x; if (v < -1 || v > 1) throw new Error("DOMAIN acsc"); return Math.asin(v); } },
-    acot: { arity: 1, fn: (x) => { if (x === 0) return Math.PI / 2; return Math.atan(1 / x); } },
+    sin: { arity: 1, fn: (x) => Math.sin(x), isTrig: true },
+    cos: { arity: 1, fn: (x) => Math.cos(x), isTrig: true },
+    tan: { arity: 1, fn: (x) => Math.tan(x), isTrig: true },
+    sec: { arity: 1, fn: (x) => 1 / Math.cos(x), isTrig: true },
+    csc: { arity: 1, fn: (x) => 1 / Math.sin(x), isTrig: true },
+    cot: { arity: 1, fn: (x) => 1 / Math.tan(x), isTrig: true },
+    asin: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN asin"); return Math.asin(x); }, isInverseTrig: true },
+    acos: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN acos"); return Math.acos(x); }, isInverseTrig: true },
+    atan: { arity: 1, fn: (x) => Math.atan(x), isInverseTrig: true },
+    atan2: { arity: 2, fn: (y, x) => Math.atan2(y, x), isInverseTrig: true },
+    asec: { arity: 1, fn: (x) => { if (Math.abs(x) < 1) throw new Error("DOMAIN asec"); return Math.acos(1 / x); }, isInverseTrig: true },
+    acsc: { arity: 1, fn: (x) => { if (Math.abs(x) < 1) throw new Error("DOMAIN acsc"); return Math.asin(1 / x); }, isInverseTrig: true },
+    acot: { arity: 1, fn: (x) => { if (x === 0) return Math.PI / 2; return Math.atan(1 / x); }, isInverseTrig: true },
     sinh: { arity: 1, fn: (x) => (Math.sinh ? Math.sinh(x) : (Math.exp(x) - Math.exp(-x)) / 2) },
     cosh: { arity: 1, fn: (x) => (Math.cosh ? Math.cosh(x) : (Math.exp(x) + Math.exp(-x)) / 2) },
     tanh: { arity: 1, fn: (x) => (Math.tanh ? Math.tanh(x) : (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x))) },
@@ -159,9 +169,9 @@ export default function DinoLabsPluginsCalculator() {
     sech: { arity: 1, fn: (x) => 1 / (Math.cosh ? Math.cosh(x) : (Math.exp(x) + Math.exp(-x)) / 2) },
     csch: { arity: 1, fn: (x) => { const s = Math.sinh ? Math.sinh(x) : (Math.exp(x) - Math.exp(-x)) / 2; if (s === 0) throw new Error("DOMAIN csch"); return 1 / s; } },
     coth: { arity: 1, fn: (x) => { const t = Math.tanh ? Math.tanh(x) : (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x)); if (t === 0) throw new Error("DOMAIN coth"); return 1 / t; } },
-    asech: { arity: 1, fn: (x) => { if (x <= 0 || x > 1) throw new Error("DOMAIN asech"); return FUNCTIONS.acosh.fn(1 / x); } },
-    acsch: { arity: 1, fn: (x) => { if (x === 0) throw new Error("DOMAIN acsch"); return FUNCTIONS.asinh.fn(1 / x); } },
-    acoth: { arity: 1, fn: (x) => { if (Math.abs(x) <= 1) throw new Error("DOMAIN acoth"); return FUNCTIONS.atanh.fn(1 / x); } },
+    asech: { arity: 1, fn: (x) => { if (x <= 0 || x > 1) throw new Error("DOMAIN asech"); const val = 1 / x; return Math.acosh ? Math.acosh(val) : Math.log(val + Math.sqrt(val - 1) * Math.sqrt(val + 1)); } },
+    acsch: { arity: 1, fn: (x) => { if (x === 0) throw new Error("DOMAIN acsch"); const val = 1 / x; return Math.asinh ? Math.asinh(val) : Math.log(val + Math.sqrt(val * val + 1)); } },
+    acoth: { arity: 1, fn: (x) => { if (Math.abs(x) <= 1) throw new Error("DOMAIN acoth"); const val = 1 / x; return Math.atanh ? Math.atanh(val) : 0.5 * Math.log((1 + val) / (1 - val)); } },
     exp: { arity: 1, fn: (x) => Math.exp(x) },
     ln: { arity: 1, fn: (x) => { if (x <= 0) throw new Error("DOMAIN ln"); return Math.log(x); } },
     log: { arity: 1, fn: (x) => { if (x <= 0) throw new Error("DOMAIN log"); return Math.log10 ? Math.log10(x) : Math.log(x) / Math.LN10; } },
@@ -182,12 +192,15 @@ export default function DinoLabsPluginsCalculator() {
     comb: { arity: 2, fn: (n, k) => { if (![n, k].every(Number.isInteger) || n < 0 || k < 0 || k > n) throw new Error("DOMAIN comb"); k = Math.min(k, n - k); let num = 1; let den = 1; for (let i = 1; i <= k; i++) { num *= n - k + i; den *= i; } return num / den; } },
     toRad: { arity: 1, fn: (deg) => deg * (Math.PI / 180) },
     toDeg: { arity: 1, fn: (rad) => rad * (180 / Math.PI) },
-    pi: { arity: 0, fn: () => Math.PI },
-    tau: { arity: 0, fn: () => 2 * Math.PI },
+    mod: { arity: 2, fn: (a, b) => { if (b === 0) throw new Error("DOMAIN mod"); return ((a % b) + b) % b; } },
+    max: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY max"); return Math.max(...xs); } },
+    min: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY min"); return Math.min(...xs); } },
+    avg: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY avg"); return xs.reduce((a, b) => a + b, 0) / xs.length; } },
   };
 
   const FUNCTION_NAMES = new Set(Object.keys(FUNCTIONS).map((s) => s.toLowerCase()));
-  const RESERVED = new Set([...Object.keys(FUNCTIONS)].map((s) => s.toLowerCase()));
+  const CONSTANT_NAMES = new Set(Object.keys(CONSTANTS).map((s) => s.toLowerCase()));
+  const RESERVED = new Set([...Object.keys(FUNCTIONS), ...Object.keys(CONSTANTS)].map((s) => s.toLowerCase()));
 
   const [expression, setExpression] = useState("");
   const [history, setHistory] = useState([]);
@@ -199,10 +212,14 @@ export default function DinoLabsPluginsCalculator() {
   const [useScientificNotation, setUseScientificNotation] = useState(false);
   const [scientificNotationThreshold, setScientificNotationThreshold] = useState(6);
   const [useFractionMode, setUseFractionMode] = useState(false);
+  const [angleMode, setAngleMode] = useState('rad');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const inputRef = useRef(null);
   const cursorPositionRef = useRef(null);
+
+  const degToRad = (deg) => deg * (Math.PI / 180);
+  const radToDeg = (rad) => rad * (180 / Math.PI);
 
   const gcd = (a, b) => {
     a = Math.abs(Math.round(a));
@@ -234,6 +251,36 @@ export default function DinoLabsPluginsCalculator() {
     if (n && n.isFraction) return n;
     if (!Number.isFinite(n)) return { num: n, den: 1, isFraction: true };
     if (Number.isInteger(n)) return createFraction(n, 1);
+    
+    const tolerance = 1e-10;
+    const maxDenominator = 1000000;
+    
+    const sign = n < 0 ? -1 : 1;
+    const absN = Math.abs(n);
+    
+    let h1 = 1, h2 = 0;
+    let k1 = 0, k2 = 1;
+    let b = absN;
+    
+    while (k1 <= maxDenominator) {
+      const a = Math.floor(b);
+      const aux = h1;
+      h1 = a * h1 + h2;
+      h2 = aux;
+      const auxK = k1;
+      k1 = a * k1 + k2;
+      k2 = auxK;
+      
+      if (Math.abs(absN - h1 / k1) < tolerance) {
+        return createFraction(sign * h1, k1);
+      }
+      
+      if (b - a < tolerance) break;
+      b = 1 / (b - a);
+      
+      if (!isFinite(b)) break;
+    }
+    
     const precision = 1e10;
     const wholePart = Math.floor(n);
     const decimalPart = n - wholePart;
@@ -938,7 +985,7 @@ export default function DinoLabsPluginsCalculator() {
         continue;
       }
 
-      if (c === "τ") { tokens.push({ type: "ident", value: "τ" }); i++; continue; }
+      if (c === "τ") { tokens.push({ type: "ident", value: "tau" }); i++; continue; }
       if (c === "⁻") { tokens.push({ type: "op", value: "-" }); i++; continue; }
       if ("([{".includes(c)) { tokens.push({ type: "lparen" }); i++; continue; }
       if (")]}".includes(c)) { tokens.push({ type: "rparen" }); i++; continue; }
@@ -1024,17 +1071,24 @@ export default function DinoLabsPluginsCalculator() {
       const t = tokens[i];
       if (t.type === "ident") {
         const lower = String(t.value).toLowerCase();
-        if (FUNCTION_NAMES.has(lower)) out.push({ type: "function", value: lower });
-        else out.push({ type: "ident", value: lower });
-      } else out.push(t);
+        if (FUNCTION_NAMES.has(lower)) {
+          out.push({ type: "function", value: lower });
+        } else if (CONSTANT_NAMES.has(lower)) {
+          out.push({ type: "constant", value: lower });
+        } else {
+          out.push({ type: "ident", value: lower });
+        }
+      } else {
+        out.push(t);
+      }
     }
     return out;
   };
 
   const insertImplicitMultiplication = (tokens) => {
     const out = [];
-    const isValueEnd = (t) => t.type === "number" || t.type === "rparen" || t.type === "ident";
-    const isValueStart = (t) => t.type === "number" || t.type === "lparen" || t.type === "ident" || t.type === "function";
+    const isValueEnd = (t) => t.type === "number" || t.type === "rparen" || t.type === "ident" || t.type === "constant";
+    const isValueStart = (t) => t.type === "number" || t.type === "lparen" || t.type === "ident" || t.type === "function" || t.type === "constant";
 
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i];
@@ -1065,7 +1119,7 @@ export default function DinoLabsPluginsCalculator() {
       const t = tokens[i];
       const prev = tokens[i - 1];
 
-      if (t.type === "number" || t.type === "ident") {
+      if (t.type === "number" || t.type === "ident" || t.type === "constant") {
         output.push(t);
         continue;
       }
@@ -1143,7 +1197,7 @@ export default function DinoLabsPluginsCalculator() {
     return output;
   };
 
-  const evalRPN = (rpn, variables = {}, fractionMode = false) => {
+  const evalRPN = (rpn, userVariables = {}, fractionMode = false, currentAngleMode = 'rad') => {
     const st = [];
     for (let i = 0; i < rpn.length; i++) {
       const t = rpn[i];
@@ -1157,9 +1211,22 @@ export default function DinoLabsPluginsCalculator() {
         continue;
       }
 
+      if (t.type === "constant") {
+        const constVal = CONSTANTS[t.value];
+        if (constVal === undefined) {
+          throw new Error("Unknown constant \"" + t.value + "\"");
+        }
+        if (fractionMode) {
+          st.push(numberToFraction(constVal));
+        } else {
+          st.push(constVal);
+        }
+        continue;
+      }
+
       if (t.type === "ident") {
-        if (Object.prototype.hasOwnProperty.call(variables, t.value)) {
-          const val = Number(variables[t.value]);
+        if (Object.prototype.hasOwnProperty.call(userVariables, t.value)) {
+          const val = Number(userVariables[t.value]);
           if (fractionMode) {
             st.push(numberToFraction(val));
           } else {
@@ -1219,12 +1286,24 @@ export default function DinoLabsPluginsCalculator() {
             args.unshift(arg);
           }
         }
-        const v = def.fn(...args);
-        if (!isFinite(v)) throw new Error("Invalid result");
+
+        let processedArgs = args;
+        if (def.isTrig && currentAngleMode === 'deg') {
+          processedArgs = args.map(a => degToRad(a));
+        }
+
+        const v = def.fn(...processedArgs);
+
+        let finalResult = v;
+        if (def.isInverseTrig && currentAngleMode === 'deg') {
+          finalResult = radToDeg(v);
+        }
+
+        if (!isFinite(finalResult)) throw new Error("Invalid result");
         if (fractionMode) {
-          st.push(numberToFraction(v));
+          st.push(numberToFraction(finalResult));
         } else {
-          st.push(v);
+          st.push(finalResult);
         }
         continue;
       }
@@ -1247,7 +1326,7 @@ export default function DinoLabsPluginsCalculator() {
     return val;
   };
 
-  const parseAndEvaluate = (expr, allVariables = {}, fractionMode = false) => {
+  const parseAndEvaluate = (expr, allVariables = {}, fractionMode = false, currentAngleMode = 'rad') => {
     try {
       const evalExpr = convertSymbolsForEvaluation(expr);
 
@@ -1256,7 +1335,7 @@ export default function DinoLabsPluginsCalculator() {
       const annotatedTokens = annotateIdentifiers(splitTokens);
       const withImplicitMult = insertImplicitMultiplication(annotatedTokens);
       const rpn = toRPN(withImplicitMult);
-      const val = evalRPN(rpn, allVariables, fractionMode);
+      const val = evalRPN(rpn, allVariables, fractionMode, currentAngleMode);
       return { value: val, error: null };
     } catch (error) {
       const raw = String(error && error.message ? error.message : "Error");
@@ -1266,6 +1345,7 @@ export default function DinoLabsPluginsCalculator() {
       if (raw.includes("Mismatched parentheses")) return { value: null, error: "Mismatched Parentheses." };
       if (raw.includes("Stack Underflow")) return { value: null, error: "Malformed Expression." };
       if (raw.startsWith("Unknown variable")) return { value: null, error: "Unknown Variable." };
+      if (raw.startsWith("Unknown constant")) return { value: null, error: "Unknown Constant." };
       if (raw.includes("Invalid Expression")) return { value: null, error: "Malformed Expression." };
       if (raw.includes("Invalid number")) return { value: null, error: "Invalid Number Format." };
       return { value: null, error: "Error." };
@@ -1316,8 +1396,8 @@ export default function DinoLabsPluginsCalculator() {
 
     const f = (x) => {
       const allVars = { ...variables, [variable]: x };
-      const l = parseAndEvaluate(leftStr, allVars, false);
-      const r = parseAndEvaluate(rightStr, allVars, false);
+      const l = parseAndEvaluate(leftStr, allVars, false, angleMode);
+      const r = parseAndEvaluate(rightStr, allVars, false, angleMode);
       if (l.error || r.error) return NaN;
       const lVal = l.value && l.value.isFraction ? fractionToNumber(l.value) : l.value;
       const rVal = r.value && r.value.isFraction ? fractionToNumber(r.value) : r.value;
@@ -1389,7 +1469,7 @@ export default function DinoLabsPluginsCalculator() {
       return true;
     }
 
-    const result = parseAndEvaluate(valueExpr, variables, false);
+    const result = parseAndEvaluate(valueExpr, variables, false, angleMode);
     if (result.error) return false;
 
     const numVal = result.value && result.value.isFraction ? fractionToNumber(result.value) : result.value;
@@ -1407,14 +1487,14 @@ export default function DinoLabsPluginsCalculator() {
       if (handleVariableAssignment(originalExpression)) {
         const parts = originalExpression.split("=");
         const varName = parts[0].trim().toLowerCase();
-        const value = variables[varName] || parseAndEvaluate(parts[1].trim(), variables, false).value;
+        const value = variables[varName] || parseAndEvaluate(parts[1].trim(), variables, false, angleMode).value;
         const numVal = value && value.isFraction ? fractionToNumber(value) : value;
         result = varName + " = " + formatResult(numVal);
       } else {
         result = solveEquation(originalExpression);
       }
     } else {
-      const { value, error } = parseAndEvaluate(originalExpression, variables, useFractionMode);
+      const { value, error } = parseAndEvaluate(originalExpression, variables, useFractionMode, angleMode);
       if (!error) {
         if (useFractionMode && value && value.isFraction) {
           result = formatFraction(value);
@@ -1533,6 +1613,7 @@ export default function DinoLabsPluginsCalculator() {
 
       <div className="dinolabsPluginsCalculatorContainer">
         <div className="dinolabsPluginsCalculatorTopBar">
+   
           <button
             className="dinolabsPluginsCalculatorSettingsGear"
             onClick={() => setShowSettingsModal(true)}
@@ -1557,7 +1638,7 @@ export default function DinoLabsPluginsCalculator() {
             className="dinolabsPluginsCalculatorInput"
             value={expression}
             onChange={handleInputChange}
-            placeholder="Enter expression. Try: 1e5, 2.5E-3, x^10, sin(x²)"
+            placeholder={`Enter expression (${angleMode === 'deg' ? 'Degrees' : 'Radians'}). Try: sin(${angleMode === 'deg' ? '30' : 'π/6'}), cos(π), tan(45)`}
             autoFocus
           />
           {expression && detectVariablesInExpression(expression).length > 0 && (
@@ -1623,18 +1704,18 @@ export default function DinoLabsPluginsCalculator() {
                   <TTButton title="Raise A Number To A Power; With One Argument, It Squares The Input." onClick={() => appendToExpression("pow(")} className="dinolabsPluginsCalculatorFunction">pow</TTButton>
                   <TTButton title="Compute The Natural Logarithm Of A Positive Number." onClick={() => appendToExpression("ln(")} className="dinolabsPluginsCalculatorFunction">ln</TTButton>
                   <TTButton title="Compute The Base-10 Logarithm Of A Positive Number." onClick={() => appendToExpression("log(")} className="dinolabsPluginsCalculatorFunction">log</TTButton>
-                  <TTButton title="Return The Sine Of An Angle In Radians." onClick={() => appendToExpression("sin(")} className="dinolabsPluginsCalculatorFunction">sin</TTButton>
-                  <TTButton title="Return The Cosine Of An Angle In Radians." onClick={() => appendToExpression("cos(")} className="dinolabsPluginsCalculatorFunction">cos</TTButton>
-                  <TTButton title="Return The Tangent Of An Angle In Radians." onClick={() => appendToExpression("tan(")} className="dinolabsPluginsCalculatorFunction">tan</TTButton>
-                  <TTButton title="Return The Secant Of An Angle In Radians." onClick={() => appendToExpression("sec(")} className="dinolabsPluginsCalculatorFunction">sec</TTButton>
-                  <TTButton title="Return The Cosecant Of An Angle In Radians." onClick={() => appendToExpression("csc(")} className="dinolabsPluginsCalculatorFunction">csc</TTButton>
-                  <TTButton title="Return The Cotangent Of An Angle In Radians." onClick={() => appendToExpression("cot(")} className="dinolabsPluginsCalculatorFunction">cot</TTButton>
-                  <TTButton title="Return The Arcsine In Radians; Domain Is −1 To 1." onClick={() => appendToExpression("asin(")} className="dinolabsPluginsCalculatorFunction">asin</TTButton>
-                  <TTButton title="Return The Arccosine In Radians; Domain Is −1 To 1." onClick={() => appendToExpression("acos(")} className="dinolabsPluginsCalculatorFunction">acos</TTButton>
-                  <TTButton title="Return The Arctangent In Radians." onClick={() => appendToExpression("atan(")} className="dinolabsPluginsCalculatorFunction">atan</TTButton>
-                  <TTButton title="Return The Arcsecant In Radians; Domain Excludes 0." onClick={() => appendToExpression("asec(")} className="dinolabsPluginsCalculatorFunction">asec</TTButton>
-                  <TTButton title="Return The Arccosecant In Radians; Domain Excludes 0." onClick={() => appendToExpression("acsc(")} className="dinolabsPluginsCalculatorFunction">acsc</TTButton>
-                  <TTButton title="Return The Arccotangent In Radians; Acot(0) = π⁄2." onClick={() => appendToExpression("acot(")} className="dinolabsPluginsCalculatorFunction">acot</TTButton>
+                  <TTButton title={`Return The Sine Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("sin(")} className="dinolabsPluginsCalculatorFunction">sin</TTButton>
+                  <TTButton title={`Return The Cosine Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("cos(")} className="dinolabsPluginsCalculatorFunction">cos</TTButton>
+                  <TTButton title={`Return The Tangent Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("tan(")} className="dinolabsPluginsCalculatorFunction">tan</TTButton>
+                  <TTButton title={`Return The Secant Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("sec(")} className="dinolabsPluginsCalculatorFunction">sec</TTButton>
+                  <TTButton title={`Return The Cosecant Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("csc(")} className="dinolabsPluginsCalculatorFunction">csc</TTButton>
+                  <TTButton title={`Return The Cotangent Of An Angle (${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("cot(")} className="dinolabsPluginsCalculatorFunction">cot</TTButton>
+                  <TTButton title={`Return The Arcsine (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}); Domain Is −1 To 1.`} onClick={() => appendToExpression("asin(")} className="dinolabsPluginsCalculatorFunction">asin</TTButton>
+                  <TTButton title={`Return The Arccosine (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}); Domain Is −1 To 1.`} onClick={() => appendToExpression("acos(")} className="dinolabsPluginsCalculatorFunction">acos</TTButton>
+                  <TTButton title={`Return The Arctangent (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}).`} onClick={() => appendToExpression("atan(")} className="dinolabsPluginsCalculatorFunction">atan</TTButton>
+                  <TTButton title={`Return The Arcsecant (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}); Domain Excludes (-1, 1).`} onClick={() => appendToExpression("asec(")} className="dinolabsPluginsCalculatorFunction">asec</TTButton>
+                  <TTButton title={`Return The Arccosecant (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}); Domain Excludes (-1, 1).`} onClick={() => appendToExpression("acsc(")} className="dinolabsPluginsCalculatorFunction">acsc</TTButton>
+                  <TTButton title={`Return The Arccotangent (Result In ${angleMode === 'deg' ? 'Degrees' : 'Radians'}); Acot(0) = ${angleMode === 'deg' ? '90°' : 'π⁄2'}.`} onClick={() => appendToExpression("acot(")} className="dinolabsPluginsCalculatorFunction">acot</TTButton>
                   <TTButton title="Return The Hyperbolic Sine." onClick={() => appendToExpression("sinh(")} className="dinolabsPluginsCalculatorFunction">sinh</TTButton>
                   <TTButton title="Return The Hyperbolic Cosine." onClick={() => appendToExpression("cosh(")} className="dinolabsPluginsCalculatorFunction">cosh</TTButton>
                   <TTButton title="Return The Hyperbolic Tangent." onClick={() => appendToExpression("tanh(")} className="dinolabsPluginsCalculatorFunction">tanh</TTButton>
@@ -1691,6 +1772,8 @@ export default function DinoLabsPluginsCalculator() {
             </div>
 
             <div className="dinolabsPluginsCalculatorModalContent">
+             
+
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">Fraction Mode:</div>
                 <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
@@ -1705,6 +1788,24 @@ export default function DinoLabsPluginsCalculator() {
                     onClick={() => setUseFractionMode(true)}
                   >
                     Fraction
+                  </button>
+                </div>
+              </div>
+
+              <div className="dinolabsPluginsCalculatorSettingsSection">
+                <div className="dinolabsPluginsCalculatorSettingsLabel">Angle Mode:</div>
+                <div className="dinolabsPluginsCalculatorSettingsButtonGroup">
+                  <button
+                    className={`dinolabsPluginsCalculatorSettingsButton ${angleMode === 'rad' ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setAngleMode('rad')}
+                  >
+                    Radians
+                  </button>
+                  <button
+                    className={`dinolabsPluginsCalculatorSettingsButton ${angleMode === 'deg' ? "dinolabsPluginsCalculatorSettingsButtonActive" : ""}`}
+                    onClick={() => setAngleMode('deg')}
+                  >
+                    Degrees
                   </button>
                 </div>
               </div>
@@ -1726,7 +1827,7 @@ export default function DinoLabsPluginsCalculator() {
                   </button>
                 </div>
               </div>
-
+              
               <div className="dinolabsPluginsCalculatorSettingsSection">
                 <div className="dinolabsPluginsCalculatorSettingsLabel">
                   {useSignificantFigures ? `Significant Figures: ${significantFigures}` : `Decimal Places: ${decimalPlaces}`}

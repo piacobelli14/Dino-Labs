@@ -161,6 +161,7 @@ export default function DinoLabsPluginsPlot() {
   const [intercepts, setIntercepts] = useState([]);
   const [isKeyboardView, setIsKeyboardView] = useState(false);
   const [functionMode, setFunctionMode] = useState("fx");
+  const [angleMode, setAngleMode] = useState('rad');
   const [colorPickerOpen, setColorPickerOpen] = useState({});
   const [circleColorPickerOpen, setCircleColorPickerOpen] = useState({});
   const [triangleColorPickerOpen, setTriangleColorPickerOpen] = useState({});
@@ -186,6 +187,9 @@ export default function DinoLabsPluginsPlot() {
   const [draggingPolygon, setDraggingPolygon] = useState(null);
   const [draggingPolygonVertex, setDraggingPolygonVertex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  const degToRad = (deg) => deg * (Math.PI / 180);
+  const radToDeg = (rad) => rad * (180 / Math.PI);
 
   const randomColor = () => {
     const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57", "#ff9ff3", "#54a0ff", "#5f27cd", "#00d2d3", "#ff9f43", "#10ac84", "#ee5253"];
@@ -621,37 +625,68 @@ export default function DinoLabsPluginsPlot() {
     return value.toFixed(decimalPlaces).replace(/\.?0+$/, "");
   };
 
-  const createMathFunctions = () => {
+  const createMathFunctions = (currentAngleMode = 'rad') => {
+    const toRadians = (v) => currentAngleMode === 'deg' ? degToRad(v) : v;
+    const fromRadians = (v) => currentAngleMode === 'deg' ? radToDeg(v) : v;
+
     const SAFE_MATH = {
-      sin: (v) => Math.sin(v),
-      cos: (v) => Math.cos(v),
-      tan: (v) => Math.tan(v),
+      sin: (v) => {
+        const input = toRadians(v);
+        return Math.sin(input);
+      },
+      cos: (v) => {
+        const input = toRadians(v);
+        return Math.cos(input);
+      },
+      tan: (v) => {
+        const input = toRadians(v);
+        return Math.tan(input);
+      },
       sec: (v) => {
-        const cos_val = Math.cos(v);
+        const input = toRadians(v);
+        const cos_val = Math.cos(input);
         return Math.abs(cos_val) < 1e-15 ? NaN : 1 / cos_val;
       },
       csc: (v) => {
-        const sin_val = Math.sin(v);
+        const input = toRadians(v);
+        const sin_val = Math.sin(input);
         return Math.abs(sin_val) < 1e-15 ? NaN : 1 / sin_val;
       },
       cot: (v) => {
-        const tan_val = Math.tan(v);
+        const input = toRadians(v);
+        const tan_val = Math.tan(input);
         return Math.abs(tan_val) < 1e-15 ? NaN : 1 / tan_val;
       },
-      asin: (v) => (v < -1 || v > 1) ? NaN : Math.asin(v),
-      acos: (v) => (v < -1 || v > 1) ? NaN : Math.acos(v),
-      atan: (v) => Math.atan(v),
+      asin: (v) => {
+        if (v < -1 || v > 1) return NaN;
+        const result = Math.asin(v);
+        return fromRadians(result);
+      },
+      acos: (v) => {
+        if (v < -1 || v > 1) return NaN;
+        const result = Math.acos(v);
+        return fromRadians(result);
+      },
+      atan: (v) => {
+        const result = Math.atan(v);
+        return fromRadians(result);
+      },
       asec: (v) => {
         if (Math.abs(v) < 1) return NaN;
         const inv_v = 1 / v;
-        return Math.acos(inv_v);
+        const result = Math.acos(inv_v);
+        return fromRadians(result);
       },
       acsc: (v) => {
         if (Math.abs(v) < 1) return NaN;
         const inv_v = 1 / v;
-        return Math.asin(inv_v);
+        const result = Math.asin(inv_v);
+        return fromRadians(result);
       },
-      acot: (v) => (v === 0) ? Math.PI / 2 : Math.atan(1 / v),
+      acot: (v) => {
+        const result = (v === 0) ? Math.PI / 2 : Math.atan(1 / v);
+        return fromRadians(result);
+      },
 
       sinh: (v) => {
         if (Math.abs(v) > 700) return v > 0 ? Infinity : -Infinity;
@@ -810,8 +845,8 @@ export default function DinoLabsPluginsPlot() {
     return { SAFE_MATH, CONSTANTS };
   };
 
-  const parseExpression = (expression, variables) => {
-    const { SAFE_MATH, CONSTANTS } = createMathFunctions();
+  const parseExpression = (expression, variables, currentAngleMode = 'rad') => {
+    const { SAFE_MATH, CONSTANTS } = createMathFunctions(currentAngleMode);
     
     window.SAFE_MATH = SAFE_MATH;
     window.CONSTANTS = CONSTANTS;
@@ -913,8 +948,8 @@ export default function DinoLabsPluginsPlot() {
     }
   };
 
-  const evaluateFunction = (formula, x, vars = {}) => {
-    const func = parseExpression(formula.text, vars);
+  const evaluateFunction = (formula, x, vars = {}, currentAngleMode = 'rad') => {
+    const func = parseExpression(formula.text, vars, currentAngleMode);
     return func ? func(x) : NaN;
   };
 
@@ -1369,7 +1404,7 @@ export default function DinoLabsPluginsPlot() {
       const formula = formulas[i];
       if (formula.isHidden) continue;
       
-      const func = parseExpression(formula.text, vars);
+      const func = parseExpression(formula.text, vars, angleMode);
       if (!func) continue;
       
       let prevY = func(mathMinX);
@@ -1833,7 +1868,7 @@ export default function DinoLabsPluginsPlot() {
     formulas.forEach(formula => {
       if (formula.isHidden) return;
       
-      const func = parseExpression(formula.text, vars);
+      const func = parseExpression(formula.text, vars, angleMode);
       if (!func) return;
       
       const samples = Math.max(2000, Math.abs(mathMaxX - mathMinX) * 100);
@@ -2206,7 +2241,7 @@ export default function DinoLabsPluginsPlot() {
         ctx.fillText(text, point.x, point.y - 22);
       }
     });
-  }, [formulas, circles, triangles, rectangles, polygons, variables, intercepts, mathMinX, mathMaxX, mathMinY, mathMaxY]);
+  }, [formulas, circles, triangles, rectangles, polygons, variables, intercepts, mathMinX, mathMaxX, mathMinY, mathMaxY, angleMode]);
 
   const extractMissingVariables = (text) => {
     if (!text) return [];
@@ -2449,7 +2484,7 @@ export default function DinoLabsPluginsPlot() {
                         updateFormula(formula.id, newValue, cursorPos);
                       }}
                       onSelect={(e) => cursorPositionRef.current = e.target.selectionStart}
-                      placeholder="Enter formula... Try: sin(x), x^2, sqrt(x)"
+                      placeholder={`Enter formula (${angleMode === 'deg' ? 'Degrees' : 'Radians'})...`}
                     />
 
                     <button 
@@ -3083,6 +3118,23 @@ export default function DinoLabsPluginsPlot() {
               title="Reset Zoom"
             >
               <FontAwesomeIcon icon={faRotate}/>
+            </button>
+
+            <button 
+              className={`dinolabsPluginsPlotControlButton ${angleMode === "rad" ? "active" : ""}`}
+              style={{}}
+              onClick={() => setAngleMode("rad")}
+              title="Radians Mode"
+            >
+              rad
+            </button>
+
+            <button 
+              className={`dinolabsPluginsPlotControlButton ${angleMode === "deg" ? "active" : ""}`}
+              onClick={() => setAngleMode("deg")}
+              title="Degrees Mode"
+            >
+              deg
             </button>
           </div>
 
