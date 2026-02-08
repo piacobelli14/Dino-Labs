@@ -136,9 +136,9 @@ const DinoLabsAccount = () => {
             const token = localStorage.getItem("token");
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user-info`, {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json", 
-                    Authorization: `Bearer ${token}` 
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({ userID, organizationID })
             });
@@ -225,11 +225,11 @@ const DinoLabsAccount = () => {
                     if (!token) return;
                     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/edit-user-image`, {
                         method: "POST",
-                        headers: { 
-                            "Content-Type": "application/json", 
-                            Authorization: `Bearer ${token}` 
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`
                         },
-                        body: JSON.stringify({ userID, image: base64Data })
+                        body: JSON.stringify({ userID, organizationID, image: base64Data })
                     });
                     if (!response.ok) return await showDialog({ title: "Alert", message: `Error uploading image: ${response.status} - ${await response.text()}` });
                     e.target.value = "";
@@ -258,9 +258,9 @@ const DinoLabsAccount = () => {
                     if (!token) return;
                     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/edit-team-image`, {
                         method: "POST",
-                        headers: { 
-                            "Content-Type": "application/json", 
-                            Authorization: `Bearer ${token}` 
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`
                         },
                         body: JSON.stringify({ userID, organizationID, image: base64Data })
                     });
@@ -296,9 +296,9 @@ const DinoLabsAccount = () => {
             const token = localStorage.getItem("token");
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/` + endpoints[fieldKey], {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json", 
-                    Authorization: `Bearer ${token}` 
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({ userID, [fieldKey]: value })
             });
@@ -317,11 +317,11 @@ const DinoLabsAccount = () => {
         }
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}` + endpoints[fieldKey], {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/` + endpoints[fieldKey], {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json", 
-                    Authorization: `Bearer ${token}` 
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({ userID, organizationID, [fieldKey]: value })
             });
@@ -412,7 +412,7 @@ const DinoLabsAccount = () => {
                     setIsTeamCreateLoad(false);
                 }, 1000);
             } else {
-                setCreateTeamError("That team name is either taken or invalid. Please select another.");
+                setCreateTeamError(data.message || "That team name is either taken or invalid. Please select another.");
                 setIsTeamCreateLoad(false);
             }
         } catch (error) {
@@ -444,9 +444,10 @@ const DinoLabsAccount = () => {
                 })
             });
             if (response.status !== 200) {
-                setJoinTeamError("There are no teams associated with that code. Please try again or contact your admin to get the correct code.");
+                const data = await response.json();
+                setJoinTeamError(data.message || "Unable to process your request. Please verify your code and try again.");
                 setIsTeamJoinLoad(false);
-            } else if (response.status === 200) {
+            } else {
                 setJoinTeamMessage("An access request has been sent to the appropriate administrators.");
                 window.location.reload();
                 setTimeout(() => {
@@ -454,7 +455,8 @@ const DinoLabsAccount = () => {
                 }, 1000);
             }
         } catch (error) {
-            return;
+            setJoinTeamError("An error occurred while joining the team. Please try again.");
+            setIsTeamJoinLoad(false);
         }
     };
 
@@ -509,7 +511,7 @@ const DinoLabsAccount = () => {
     };
 
     const handleUsernameCopy = () => {
-        copyText(formatDate(userID));
+        copyText(userID);
         setUsernameCopied(true);
         setTimeout(() => setUsernameCopied(false), 2000);
     };
@@ -892,7 +894,7 @@ const DinoLabsAccount = () => {
                                                         </p>
                                                     </div>
                                                     <div className="profileTrailingCellStack" style={{ justifyContent: "center", alignItems: "center" }}>
-                                                        <label className="profileUserImageWrapper" htmlFor="userImageUpload" style={{ background: userDetails.image && userDetails.image !== "" ? "none" : "", "boxShadow": userDetails.image && userDetails.image !== "" ? "none" : "" }}>
+                                                        <label className="profileUserImageWrapper" htmlFor="userImageUpload" style={{ background: userDetails.image && userDetails.image !== "" ? "none" : "", boxShadow: userDetails.image && userDetails.image !== "" ? "none" : "" }}>
                                                             <img src={userDetails.image} className="profileUserImage" alt="" />
                                                         </label>
                                                         <input style={{ display: "none", padding: 0 }} type="file" id="userImageUpload" accept="image/*" onChange={handleUserImageChange} />
@@ -918,18 +920,13 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.firstName ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.firstName &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, firstName: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, firstName: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
                                                             </span>
                                                         </div>
-                                                        <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                        <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                             <strong>Last Name</strong>
                                                             <span>
                                                                 <input placeholder={userDetails.lastName} disabled={!editModes.lastName} onChange={e => setUserDetails(prev => ({ ...prev, lastName: e.target.value }))} />
@@ -937,12 +934,7 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.lastName ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.lastName &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, lastName: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, lastName: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
@@ -970,18 +962,13 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.email ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.email &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, email: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, email: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
                                                             </span>
                                                         </div>
-                                                        <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                        <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                             <strong>Phone Number</strong>
                                                             <span>
                                                                 <input placeholder={formatPhoneNumber(userDetails.phone)} disabled={!editModes.phone} onChange={e => setUserDetails(prev => ({ ...prev, phone: e.target.value }))} />
@@ -989,12 +976,7 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.phone ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.phone &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, phone: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, phone: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
@@ -1014,7 +996,7 @@ const DinoLabsAccount = () => {
                                                         <p>This is your self-described position or role. It is not related to your team and it does not influence your permissions.</p>
                                                     </div>
                                                     <div className="profileTrailingCellStack" style={{ justifyContent: "center", alignItems: "center" }}>
-                                                        <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                        <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                             <strong>Role</strong>
                                                             <span>
                                                                 <input placeholder={userDetails.role} disabled={!editModes.role} onChange={e => setUserDetails(prev => ({ ...prev, role: e.target.value }))} />
@@ -1022,12 +1004,7 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.role ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.role &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, role: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, role: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
@@ -1051,8 +1028,8 @@ const DinoLabsAccount = () => {
                                                             <strong>Current Timezone</strong>
                                                             <span>
                                                                 {editModes.timezone ? (
-                                                                    <select 
-                                                                        value={userDetails.timezone} 
+                                                                    <select
+                                                                        value={userDetails.timezone}
                                                                         onChange={e => setUserDetails(prev => ({ ...prev, timezone: e.target.value }))}
                                                                         style={{
                                                                             color: "#E7E7E7",
@@ -1077,12 +1054,7 @@ const DinoLabsAccount = () => {
                                                                     <FontAwesomeIcon icon={editModes.timezone ? faSquareCheck : faPenToSquare} />
                                                                 </button>
                                                                 {editModes.timezone &&
-                                                                    <button
-                                                                        className="profileEditButton"
-                                                                        onClick={() => {
-                                                                            setEditModes(prev => ({ ...prev, timezone: false }))
-                                                                        }}
-                                                                    >
+                                                                    <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, timezone: false })) }}>
                                                                         <FontAwesomeIcon icon={faSquareXmark} />
                                                                     </button>
                                                                 }
@@ -1122,7 +1094,7 @@ const DinoLabsAccount = () => {
                                                             </span>
                                                         </div>
 
-                                                        <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                        <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                             <strong>Personal Slug</strong>
                                                             <span>
                                                                 <input placeholder={userDetails.slug} disabled={true}/>
@@ -1177,7 +1149,7 @@ const DinoLabsAccount = () => {
                                                                             </span>
                                                                         </div>
 
-                                                                        <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                                        <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                                             <span>
                                                                                 <button className="profileActionButton" onClick={handleTeamCreation}>
                                                                                     Create New Team
@@ -1196,7 +1168,7 @@ const DinoLabsAccount = () => {
                                                                 <p>{createTeamError}</p>
                                                             )}
                                                             {(createTeamError === "" && createTeamMessage !== "") && (
-                                                                <p>{createTeamError}</p>
+                                                                <p>{createTeamMessage}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1233,13 +1205,13 @@ const DinoLabsAccount = () => {
                                                         </div>
                                                         <div className="profileContentFlexCellBottom" style={{ borderTop: joinTeamError !== "" ? "1px solid #E54B4B" : "", backgroundColor: joinTeamError !== "" ? "rgba(229, 75, 75, 0.2)" : "" }}>
                                                             {(joinTeamMessage === "" && joinTeamError === "") && (
-                                                                <p>Once you enter your access code, and access request will be sent to the team admins who can approve or deny your request.</p>
+                                                                <p>Once you enter your access code, an access request will be sent to the team admins who can approve or deny your request.</p>
                                                             )}
                                                             {(joinTeamError !== "") && (
                                                                 <p>{joinTeamError}</p>
                                                             )}
                                                             {(joinTeamError === "" && joinTeamMessage !== "") && (
-                                                                <p>{joinTeamError}</p>
+                                                                <p>{joinTeamMessage}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1273,10 +1245,10 @@ const DinoLabsAccount = () => {
                                                             </p>
                                                         </div>
                                                         <div className="profileTrailingCellStack" style={{ justifyContent: "center", alignItems: "center" }}>
-                                                            <label className="profileUserImageWrapper" htmlFor="teamImageUpload" style={{ background: userDetails.orgImage && userDetails.orgImage !== "" ? "none" : "", "boxShadow": userDetails.orgImage && userDetails.orgImage !== "" ? "none" : "" }}>
+                                                            <label className="profileUserImageWrapper" htmlFor="teamImageUpload" style={{ background: userDetails.orgImage && userDetails.orgImage !== "" ? "none" : "", boxShadow: userDetails.orgImage && userDetails.orgImage !== "" ? "none" : "" }}>
                                                                 <img src={userDetails.orgImage} className="profileUserImage" alt="" />
                                                             </label>
-                                                            <input disabled={userDetails.isAdmin !== "true" ? true : false} style={{ display: "none", padding: 0 }} type="file" id="teamImageUpload" accept="image/*" onChange={handleTeamImageChange} />
+                                                            <input disabled={userDetails.isAdmin !== "true"} style={{ display: "none", padding: 0 }} type="file" id="teamImageUpload" accept="image/*" onChange={handleTeamImageChange} />
                                                         </div>
                                                     </div>
                                                     <div className="profileContentFlexCellBottom">
@@ -1304,7 +1276,7 @@ const DinoLabsAccount = () => {
                                                                     </button>
                                                                 </span>
                                                             </div>
-                                                            <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                            <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                                 <strong>Organization Slug</strong>
                                                                 <span>
                                                                     <input placeholder={userDetails.orgSlug} disabled={true}/>
@@ -1327,20 +1299,15 @@ const DinoLabsAccount = () => {
                                                             <p>This is the name of your team that other users will see when they look at your team's page.</p>
                                                         </div>
                                                         <div className="profileTrailingCellStack" style={{ justifyContent: "center", alignItems: "center" }}>
-                                                            <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                            <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                                 <strong>Team Name</strong>
                                                                 <span>
                                                                     <input placeholder={userDetails.orgName} disabled={!editModes.orgName} onChange={e => setUserDetails(prev => ({ ...prev, orgName: e.target.value }))} />
-                                                                    <button className="profileEditButton" onClick={() => editModes.orgName ? handleSaveTeamInfo("orgName", userDetails.orgName) : setEditModes(prev => ({ ...prev, orgName: true }))} disabled={userDetails.isAdmin !== "true" ? true : false}>
+                                                                    <button className="profileEditButton" onClick={() => editModes.orgName ? handleSaveTeamInfo("orgName", userDetails.orgName) : setEditModes(prev => ({ ...prev, orgName: true }))} disabled={userDetails.isAdmin !== "true"}>
                                                                         <FontAwesomeIcon icon={editModes.orgName ? faSquareCheck : faPenToSquare} />
                                                                     </button>
                                                                     {editModes.orgName &&
-                                                                        <button
-                                                                            className="profileEditButton"
-                                                                            onClick={() => {
-                                                                                setEditModes(prev => ({ ...prev, orgName: false }))
-                                                                            }}
-                                                                        >
+                                                                        <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, orgName: false })) }}>
                                                                             <FontAwesomeIcon icon={faSquareXmark} />
                                                                         </button>
                                                                     }
@@ -1368,35 +1335,25 @@ const DinoLabsAccount = () => {
                                                                 <strong>Email Address</strong>
                                                                 <span>
                                                                     <input placeholder={userDetails.orgEmail} disabled={!editModes.orgEmail} onChange={e => setUserDetails(prev => ({ ...prev, orgEmail: e.target.value }))} />
-                                                                    <button className="profileEditButton" onClick={() => editModes.orgEmail ? handleSaveTeamInfo("orgEmail", userDetails.orgEmail) : setEditModes(prev => ({ ...prev, orgEmail: true }))} disabled={userDetails.isAdmin !== "true" ? true : false}>
+                                                                    <button className="profileEditButton" onClick={() => editModes.orgEmail ? handleSaveTeamInfo("orgEmail", userDetails.orgEmail) : setEditModes(prev => ({ ...prev, orgEmail: true }))} disabled={userDetails.isAdmin !== "true"}>
                                                                         <FontAwesomeIcon icon={editModes.orgEmail ? faSquareCheck : faPenToSquare} />
                                                                     </button>
                                                                     {editModes.orgEmail &&
-                                                                        <button
-                                                                            className="profileEditButton"
-                                                                            onClick={() => {
-                                                                                setEditModes(prev => ({ ...prev, orgEmail: false }))
-                                                                            }}
-                                                                        >
+                                                                        <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, orgEmail: false })) }}>
                                                                             <FontAwesomeIcon icon={faSquareXmark} />
                                                                         </button>
                                                                     }
                                                                 </span>
                                                             </div>
-                                                            <div className="profileFieldInput" style={{ "marginBottom": 0 }}>
+                                                            <div className="profileFieldInput" style={{ marginBottom: 0 }}>
                                                                 <strong>Phone Number</strong>
                                                                 <span>
                                                                     <input placeholder={formatPhoneNumber(userDetails.orgPhone)} disabled={!editModes.orgPhone} onChange={e => setUserDetails(prev => ({ ...prev, orgPhone: e.target.value }))} />
-                                                                    <button className="profileEditButton" onClick={() => editModes.orgPhone ? handleSaveTeamInfo("orgPhone", userDetails.orgPhone) : setEditModes(prev => ({ ...prev, orgPhone: true }))} disabled={userDetails.isAdmin !== "true" ? true : false}>
+                                                                    <button className="profileEditButton" onClick={() => editModes.orgPhone ? handleSaveTeamInfo("orgPhone", userDetails.orgPhone) : setEditModes(prev => ({ ...prev, orgPhone: true }))} disabled={userDetails.isAdmin !== "true"}>
                                                                         <FontAwesomeIcon icon={editModes.orgPhone ? faSquareCheck : faPenToSquare} />
                                                                     </button>
                                                                     {editModes.orgPhone &&
-                                                                        <button
-                                                                            className="profileEditButton"
-                                                                            onClick={() => {
-                                                                                setEditModes(prev => ({ ...prev, orgPhone: false }))
-                                                                            }}
-                                                                        >
+                                                                        <button className="profileEditButton" onClick={() => { setEditModes(prev => ({ ...prev, orgPhone: false })) }}>
                                                                             <FontAwesomeIcon icon={faSquareXmark} />
                                                                         </button>
                                                                     }
@@ -1445,7 +1402,7 @@ const DinoLabsAccount = () => {
                                                             <p style={{ width: "100%" }}>
                                                                 Set up two factor authentication when signing into your Stack Forge account. When enabled, Stack Forge will send a code to your phone that you can use to login.
                                                             </p>
-                                                            <button className="profileDeleteButton" style={{ "backgroundColor": "rgba(255,255,255,0.1)", "border": "0.2vh solid #c1c1c1" }} onClick={handleToggleTwoFA}>
+                                                            <button className="profileDeleteButton" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "0.2vh solid #c1c1c1" }} onClick={handleToggleTwoFA}>
                                                                 Enable 2-Factor Authentication
                                                             </button>
                                                         </div>
@@ -1481,7 +1438,7 @@ const DinoLabsAccount = () => {
                                                             <p style={{ width: "100%" }}>
                                                                 Set up login notifications when signing into your Stack Forge account. When enabled, Stack Forge will monitor the location of signins to your account and notify you of suspicious login attempts.
                                                             </p>
-                                                            <button className="profileDeleteButton" style={{ "backgroundColor": "rgba(255,255,255,0.1)", "border": "0.2vh solid #c1c1c1" }} onClick={handleToggleLoginNotifs}>
+                                                            <button className="profileDeleteButton" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "0.2vh solid #c1c1c1" }} onClick={handleToggleLoginNotifs}>
                                                                 Enable Login Notifications
                                                             </button>
                                                         </div>
@@ -1518,7 +1475,7 @@ const DinoLabsAccount = () => {
                                                                 <p style={{ width: "100%" }}>
                                                                     Set up export notifications to be alerted whenever one of your team members exports any of your data from the Stack Forge platform.
                                                                 </p>
-                                                                <button className="profileDeleteButton" style={{ "backgroundColor": "rgba(255,255,255,0.1)", "border": "0.2vh solid #c1c1c1" }} onClick={handleToggleExportNotifs}>
+                                                                <button className="profileDeleteButton" style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "0.2vh solid #c1c1c1" }} onClick={handleToggleExportNotifs}>
                                                                     Enable Export Notifications
                                                                 </button>
                                                             </div>
@@ -1598,7 +1555,7 @@ const DinoLabsAccount = () => {
                                                         <p style={{ width: "100%" }}>
                                                             Connect your GitHub account to enable GitHub integration features such as auto deployments and repository management.
                                                         </p>
-                                                        <button className="profileDeleteButton" onClick={() => { handleGithubConnect(userID) }} style={{ "backgroundColor": "rgba(255,255,255,0.1)", "border": "0.2vh solid #c1c1c1" }}>
+                                                        <button className="profileDeleteButton" onClick={() => { handleGithubConnect(userID) }} style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "0.2vh solid #c1c1c1" }}>
                                                             Connect GitHub Account
                                                         </button>
                                                     </div>
@@ -1618,10 +1575,10 @@ const DinoLabsAccount = () => {
                                                             </p>
                                                         </div>
                                                         <div className="profileTrailingCellStack" style={{ justifyContent: "center", alignItems: "center" }}>
-                                                            <label className="profileUserImageWrapper" htmlFor="teamImageUpload" style={{ background: userDetails.gitImage && userDetails.gitImage !== "" ? "none" : "", "boxShadow": userDetails.gitImage && userDetails.gitImage !== "" ? "none" : "" }}>
+                                                            <label className="profileUserImageWrapper" htmlFor="gitImageDisplay" style={{ background: userDetails.gitImage && userDetails.gitImage !== "" ? "none" : "", boxShadow: userDetails.gitImage && userDetails.gitImage !== "" ? "none" : "" }}>
                                                                 <img src={userDetails.gitImage} className="profileUserImage" alt="" />
                                                             </label>
-                                                            <input style={{ display: "none", padding: 0 }} disabled={true} type="file" id="teamImageUpload" accept="image/*" />
+                                                            <input style={{ display: "none", padding: 0 }} disabled={true} type="file" id="gitImageDisplay" accept="image/*" />
                                                         </div>
                                                     </div>
                                                     <div className="profileContentFlexCellBottom">
@@ -1698,7 +1655,7 @@ const DinoLabsAccount = () => {
                                                             <button className="profileActionButton" onClick={handleCreateCheckoutSession}>
                                                                 Subscribe / Update Payment
                                                             </button>
-                                                            <button className="profileActionButton" onClick={handleManageBilling} style={{"marginBottom": 0}}>
+                                                            <button className="profileActionButton" onClick={handleManageBilling} style={{ marginBottom: 0 }}>
                                                                 Manage Billing Portal
                                                             </button>
                                                         </div>
@@ -1717,7 +1674,7 @@ const DinoLabsAccount = () => {
                     </div>
                 )
             ) : (
-                <div className="profileCellHeaderContainer" style={{ "justifyContent": "center" }}>
+                <div className="profileCellHeaderContainer" style={{ justifyContent: "center" }}>
                     <div className="loading-wrapper">
                         <div className="loading-circle" />
                         <label className="loading-title">
