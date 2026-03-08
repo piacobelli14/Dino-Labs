@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import "./styles/App.css";
 import useIsTouchDevice from "./TouchDevice";
 import ProtectedRoute from "./ProtectedRoute";
-import DinoLabsUnavailable from "./helpers/Unavailable";
-import Login from "./pages/Authentication/AuthLogin";
-import Register from "./pages/Authentication/AuthRegister";
+import DinoLabsMobile from "./helpers/Mobile";
+import Login from "./pages/Authentication/AuthLogin"; 
+import Register from "./pages/Authentication/AuthRegister"; 
 import Reset from "./pages/Authentication/AuthReset";
 import Verification from "./pages/Authentication/AuthVerifyEmail";
-import DinoLabs from "./pages/DinoLabs";
+import DinoLabs from "./pages/DinoLabs"; 
 import DinoLabsAccount from "./pages/DinoLabsAccount/DinoLabsAccount";
 import DinoLabsTeam from "./pages/DinoLabsAccount/DinoLabsTeam";
 import DinoLabsMonitor from "./pages/DinoLabsAccount/DinoLabsMonitoring";
@@ -49,35 +49,103 @@ function App() {
     <Router>
       <div className={`App ${osClass}`}>
         {!isTouchDevice ? (
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/reset" element={<Reset />} />
-            <Route path="/verify" element={<Verification />} />
+        <Routes>
+          <Route path="/login" element={<Login/>}/>
+          <Route path="/register" element={<Register/>}/>
+          <Route path="/reset" element={<Reset/>}/>
+          <Route path="/verify" element={<Verification/>}/>
 
-            <Route path="/dinolabs" element={<ProtectedRoute><DinoLabs /></ProtectedRoute>} />
-            <Route path="/account" element={<ProtectedRoute><DinoLabsAccount /></ProtectedRoute>} />
-            <Route path="/team" element={<ProtectedRoute><DinoLabsTeam /></ProtectedRoute>} />
-            <Route path="/monitoring" element={<ProtectedRoute><DinoLabsMonitor /></ProtectedRoute>} />
-            <Route path="/calendar" element={<ProtectedRoute><DinoLabsCalendar /></ProtectedRoute>} />
-            <Route path="/database" element={<ProtectedRoute><DinoLabsDatabase /></ProtectedRoute>} />
-            <Route path="/plugins" element={<ProtectedRoute><DinoLabsPlugins /></ProtectedRoute>} />
-            <Route path="/dictionary" element={<ProtectedRoute><DinoLabsPluginsDictionary /></ProtectedRoute>} />
-            <Route path="/thesaurus" element={<ProtectedRoute><DinoLabsPluginsThesaurus /></ProtectedRoute>} />
-            <Route path="/calculator" element={<ProtectedRoute><DinoLabsPluginsCalculator /></ProtectedRoute>} />
-            <Route path="/matrix" element={<ProtectedRoute><DinoLabsPluginsMatrix /></ProtectedRoute>} />
-            <Route path="/factoring" element={<ProtectedRoute><DinoLabsPluginsFactoring /></ProtectedRoute>} />
-            <Route path="/colortypelab" element={<ProtectedRoute><DinoLabsPluginsColorTypeLab /></ProtectedRoute>} />
-            <Route path="/timestamplab" element={<ProtectedRoute><DinoLabsPluginsTimestampLab /></ProtectedRoute>} />
-            <Route path="/compressionlab" element={<ProtectedRoute><DinoLabsPluginsCompressionLab /></ProtectedRoute>} />
-            <Route path="/backgroundremover" element={<ProtectedRoute><DinoLabsPluginsBackgroundRemover /></ProtectedRoute>} />
-            <Route path="/plot" element={<ProtectedRoute><DinoLabsPluginsPlot /></ProtectedRoute>} />
+          <Route path="/dinolabs" element={
+            <ProtectedRoute>
+              <DinoLabs />
+            </ProtectedRoute>
+          } />
+          <Route path="/account" element={
+            <ProtectedRoute>
+              <DinoLabsAccount />
+            </ProtectedRoute>
+          } />
+          <Route path="/team" element={
+            <ProtectedRoute>
+              <DinoLabsTeam />
+            </ProtectedRoute>
+          } />
+          <Route path="/monitoring" element={
+            <ProtectedRoute>
+              <DinoLabsMonitor />
+            </ProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <DinoLabsCalendar />
+            </ProtectedRoute>
+          } />
+          <Route path="/database" element={
+            <ProtectedRoute>
+              <DinoLabsDatabase />
+            </ProtectedRoute>
+          } />
+          <Route path="/plugins" element={
+            <ProtectedRoute>
+              <DinoLabsPlugins />
+            </ProtectedRoute>
+          } />
+          <Route path="/dictionary" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsDictionary />
+            </ProtectedRoute>
+          } />
+          <Route path="/thesaurus" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsThesaurus />
+            </ProtectedRoute>
+          } />
+          <Route path="/calculator" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsCalculator />
+            </ProtectedRoute>
+          } />
+          <Route path="/matrix" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsMatrix />
+            </ProtectedRoute>
+          } />
+          <Route path="/factoring" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsFactoring />
+            </ProtectedRoute>
+          } />
+          <Route path="/colortypelab" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsColorTypeLab />
+            </ProtectedRoute>
+          } />
+          <Route path="/timestamplab" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsTimestampLab />
+            </ProtectedRoute>
+          } />
+          <Route path="/compressionlab" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsCompressionLab />
+            </ProtectedRoute>
+          } />
+          <Route path="/backgroundremover" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsBackgroundRemover />
+            </ProtectedRoute>
+          } />
+          <Route path="/plot" element={
+            <ProtectedRoute>
+              <DinoLabsPluginsPlot />
+            </ProtectedRoute>
+          } />
 
-            <Route index element={<Navigate to="/login" replace />} />
-          </Routes>
+          <Route index element={<Navigate to="/login" replace />} />
+        </Routes>
         ) : (
           <Routes>
-            <Route path="*" element={<DinoLabsUnavailable />} />
+            <Route path="*" element={<DinoLabsMobile />} />
           </Routes>
         )}
       </div>
