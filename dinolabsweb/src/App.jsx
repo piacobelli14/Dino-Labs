@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./styles/App.css";
+import useIsTouchDevice from "./TouchDevice";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "./pages/Authentication/AuthLogin"; 
 import Register from "./pages/Authentication/AuthRegister"; 
@@ -23,6 +24,7 @@ import DinoLabsPluginsTimestampLab from "./pages/DinoLabsPlugins/DinoLabsPlugins
 import DinoLabsPluginsCompressionLab from "./pages/DinoLabsPlugins/DinoLabsPluginsCompressionLab/DinoLabsPluginsCompressionLab";
 import DinoLabsPluginsPlot from "./pages/DinoLabsPlugins/DinoLabsPluginsPlot/DinoLabsPluginsPlot";
 import DinoLabsPluginsBackgroundRemover from "./pages/DinoLabsPlugins/DinoLabsPluginsBackgroundRemover/DinoLabsPluginsBackgroundRemover";
+import DinoLabsUnavailable from "./helpers/Unavailable";
 
 function App() {
   const [osClass, setOsClass] = useState("");
@@ -45,6 +47,7 @@ function App() {
   return (
     <Router>
       <div className={`App ${osClass}`}>
+        {useIsTouchDevice ? (
         <Routes>
           <Route path="/login" element={<Login/>}/>
           <Route path="/register" element={<Register/>}/>
@@ -139,6 +142,13 @@ function App() {
 
           <Route index element={<Navigate to="/login" replace />} />
         </Routes>
+        ) : (
+          <Routes>
+            <Route path="/unavailable">
+              <DinoLabsUnavailable/>
+            </Route>
+          </Routes>
+        )}
       </div>
     </Router>
   );
