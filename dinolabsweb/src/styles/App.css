@@ -83,3 +83,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .button:focus {
   outline: none; 
 }
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.App {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

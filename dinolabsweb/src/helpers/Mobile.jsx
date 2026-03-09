@@ -6,7 +6,7 @@ const DinoLabsUnavailable = ({ screenSize }) => {
   const safeScreenSize = typeof screenSize === "number" ? screenSize : 0;
 
   return (
-    <div className="dinolabsUnavailableContainer">
+    <div className="dinolabsPageWrapper" style={{justifyContent: "center"}}>
       <div className="dinolabsUnavailableWrapper">
         <div className="dinolabsUnavailableContent">
           <img
