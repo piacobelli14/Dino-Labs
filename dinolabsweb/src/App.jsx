@@ -28,7 +28,7 @@ import DinoLabsPluginsBackgroundRemover from "./pages/DinoLabsPlugins/DinoLabsPl
 
 function App() {
   const [osClass, setOsClass] = useState("");
-  //const isTouchDevice = useIsTouchDevice();
+  const isTouchDevice = useIsTouchDevice();
 
   useEffect(() => {
     const detectOS = () => {
@@ -44,8 +44,6 @@ function App() {
     const os = detectOS();
     setOsClass(os);
   }, []);
-
-  let isTouchDevice = true;
 
   return (
     <Router>
