@@ -82,8 +82,6 @@ export default function DinoLabs() {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [screenSize, setScreenSize] = useState(window.innerWidth);
-  const [pageState, setPageState] = useState("startup");
-  const [hasSeenStartup, setHasSeenStartup] = useState(false);
   const [directoryWidth, setDirectoryWidth] = useState(20);
   const [contentWidth, setContentWidth] = useState(80);
   const [paneWidths, setPaneWidths] = useState({ pane1: 50, pane2: 50 });
@@ -722,8 +720,6 @@ export default function DinoLabs() {
             setRepositoryFiles(await loadDirectoryContents(dirHandle, rootName));
             setIsRootOpen(true);
             setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
-            setPageState("dinolabside");
-            setHasSeenStartup(true);
           } catch { } finally {
             setIsNavigatorLoading(false);
           }
@@ -732,8 +728,6 @@ export default function DinoLabs() {
         for (const handle of handles) {
           if (handle.kind === "file") {
             openFile(handle, handle.name);
-            setPageState("dinolabside");
-            setHasSeenStartup(true);
           }
         }
         return;
@@ -918,53 +912,6 @@ export default function DinoLabs() {
     if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
       setIsExternalDragOverNavigator(false);
     }
-  };
-
-  const handleStartupAreaDrop = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (fsOpLoading) return;
-
-    const handles = await getFileSystemHandlesFromDataTransfer(e.dataTransfer);
-
-    if (handles.length > 0) {
-      const dirHandle = handles.find(h => h.kind === "directory");
-      if (dirHandle) {
-        try {
-          setIsNavigatorLoading(true);
-          const rootName = dirHandle.name;
-          setPanes([{ openedTabs: [], activeTabId: null }]);
-          setActivePaneIndex(0);
-          setUnsavedChanges({});
-          setOriginalContents({});
-          setModifiedContents({});
-          setPaneWidths({ pane1: 50, pane2: 50 });
-          setRootDirectoryHandle(dirHandle);
-          setRootDirectoryName(rootName);
-          setRepositoryFiles(await loadDirectoryContents(dirHandle, rootName));
-          setIsRootOpen(true);
-          setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
-          setPageState("dinolabside");
-          setHasSeenStartup(true);
-        } catch { } finally {
-          setIsNavigatorLoading(false);
-        }
-        return;
-      }
-      for (const handle of handles) {
-        if (handle.kind === "file") {
-          openFile(handle, handle.name);
-          setPageState("dinolabside");
-          setHasSeenStartup(true);
-        }
-      }
-    }
-  };
-
-  const handleStartupAreaDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   const flattenTree = (files, parentPath = "", level = 0, isParentVisible = true) => {
@@ -2248,11 +2195,6 @@ export default function DinoLabs() {
     return "";
   };
 
-  const handleContinueToPlayground = () => {
-    setPageState("dinolabside");
-    setHasSeenStartup(true);
-  };
-
   useEffect(() => {
     repositoryFilesRef.current = repositoryFiles;
     openedDirectoriesRef.current = openedDirectories;
@@ -2366,12 +2308,7 @@ export default function DinoLabs() {
       try {
         const savedState = await loadStateFromDB();
         const rootHandle = await loadRootHandle();
-        
-        if (savedState?.hasSeenStartup) {
-          setHasSeenStartup(true);
-          setPageState("dinolabside");
-        }
-        
+
         if (rootHandle && savedState?.rootDirectoryName) {
           setRootDirectoryHandle(rootHandle);
           setRootDirectoryName(savedState.rootDirectoryName);
@@ -2504,7 +2441,6 @@ export default function DinoLabs() {
         unsavedChanges,
         originalContents,
         modifiedContents,
-        hasSeenStartup,
         panes: panes.map((pane) => ({
           openedTabs: pane.openedTabs.map((tab) => ({
             id: tab.id,
@@ -2539,7 +2475,6 @@ export default function DinoLabs() {
     unsavedChanges,
     originalContents,
     modifiedContents,
-    hasSeenStartup,
     panes,
     activePaneIndex,
     rootDirectoryHandle
@@ -2624,106 +2559,138 @@ export default function DinoLabs() {
       <DinoLabsNav activePage="dinolabside" />
       {screenSize >= 700 && screenSize <= 5399 && isLoaded ? (
         <div className="dinolabsHeaderContainer">
-          {pageState === "dinolabside" || (rootDirectoryName && repositoryFiles.length > 0) ? (
-            <div className="dinolabsControlFlex">
-              <div
-                className="leadingIDEDirectoryStack"
-                style={{ 
-                  width: `${directoryWidth}%`,
-                }}
-                ref={directoryRef}
-                onContextMenu={(e) => handleContextMenu(e, { type: "navigator", path: rootDirectoryName })}
-                onDragOver={handleExternalDragOver}
-                onDragEnter={handleNavigatorDragEnter}
-                onDragLeave={handleNavigatorDragLeave}
-                onDrop={(e) => {
-                  if (e.dataTransfer.types.includes("Files")) {
-                    handleExternalFileDrop(e, rootDirectoryName);
-                  }
-                }}
-              >
-                <div className="leadingDirectoryTopBar">
-                  <div className="leadingDirectoryZoomButtonFlex">
-                    <Tippy content="Zoom In" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={handleZoomIn} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
-                        <FontAwesomeIcon icon={faPlusSquare} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Zoom Out" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={handleZoomOut} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
-                        <FontAwesomeIcon icon={faMinusSquare} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Reset View" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={handleResetZoomLevel} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
-                        <FontAwesomeIcon icon={faRetweet} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Import a Directory" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={handleLoadRepository}>
-                        <FontAwesomeIcon icon={faFolderOpen} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Import a File" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={handleLoadFile}>
-                        <FontAwesomeIcon icon={faCode} />
-                      </button>
-                    </Tippy>
-                  </div>
+          <div className="dinolabsControlFlex">
+            <div
+              className="leadingIDEDirectoryStack"
+              style={{ 
+                width: `${directoryWidth}%`,
+              }}
+              ref={directoryRef}
+              onContextMenu={(e) => handleContextMenu(e, { type: "navigator", path: rootDirectoryName })}
+              onDragOver={handleExternalDragOver}
+              onDragEnter={handleNavigatorDragEnter}
+              onDragLeave={handleNavigatorDragLeave}
+              onDrop={(e) => {
+                if (e.dataTransfer.types.includes("Files")) {
+                  handleExternalFileDrop(e, rootDirectoryName);
+                }
+              }}
+            >
+              <div className="leadingDirectoryTopBar">
+                <div className="leadingDirectoryZoomButtonFlex">
+                  <Tippy content="Zoom In" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={handleZoomIn} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                      <FontAwesomeIcon icon={faPlusSquare} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Zoom Out" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={handleZoomOut} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                      <FontAwesomeIcon icon={faMinusSquare} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Reset View" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={handleResetZoomLevel} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                      <FontAwesomeIcon icon={faRetweet} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Import a Directory" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={handleLoadRepository}>
+                      <FontAwesomeIcon icon={faFolderOpen} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Import a File" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={handleLoadFile}>
+                      <FontAwesomeIcon icon={faCode} />
+                    </button>
+                  </Tippy>
                 </div>
+              </div>
 
-                <div className="leadingDirectoryStack">
-                  <div className="leadingDirectoryTabsWrapper">
-                    <button
-                      className="leadingDirectoryTabButton"
-                      style={{ backgroundColor: isNavigatorState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
-                      onClick={() => {
-                        setIsSearchState(!isSearchState);
-                        setIsNavigatorState(!isNavigatorState);
-                      }}
-                    >
-                      Navigator
-                    </button>
-                    <button
-                      className="leadingDirectoryTabButton"
-                      style={{ backgroundColor: isSearchState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
-                      onClick={() => {
-                        setIsSearchState(!isSearchState);
-                        setIsNavigatorState(!isNavigatorState);
-                      }}
-                    >
-                      Search
-                    </button>
+              <div className="leadingDirectoryStack">
+                <div className="leadingDirectoryTabsWrapper">
+                  <button
+                    className="leadingDirectoryTabButton"
+                    style={{ backgroundColor: isNavigatorState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
+                    onClick={() => {
+                      setIsSearchState(!isSearchState);
+                      setIsNavigatorState(!isNavigatorState);
+                    }}
+                  >
+                    Navigator
+                  </button>
+                  <button
+                    className="leadingDirectoryTabButton"
+                    style={{ backgroundColor: isSearchState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
+                    onClick={() => {
+                      setIsSearchState(!isSearchState);
+                      setIsNavigatorState(!isNavigatorState);
+                    }}
+                  >
+                    Search
+                  </button>
+                </div>
+                {isNavigatorState && (
+                  <div className="leadingDirectorySearchWrapper">
+                    <input
+                      type="text"
+                      className="directorySearchInput"
+                      placeholder="Search the directory..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                  {isNavigatorState && (
-                    <div className="leadingDirectorySearchWrapper">
-                      <input
-                        type="text"
-                        className="directorySearchInput"
-                        placeholder="Search the directory..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
+                )}
+                {isNavigatorState &&
+                  (isNavigatorLoading ? (
+                    <div className="leadingDirectoryFilesSupplement" style={{textAlign: "center"}}>
+                      <div className="loading-circle" />
                     </div>
-                  )}
-                  {isNavigatorState &&
-                    (isNavigatorLoading ? (
-                      <div className="leadingDirectoryFilesSupplement" style={{textAlign: "center"}}>
-                        <div className="loading-circle" />
-                      </div>
-                    ) : (
-                      <div className="leadingDirectoryFiles" style={{position: "relative"}}>
-                        {isExternalDragOverNavigator && (
-                          <div className="leadingDirectoryFileHoverOver"/>
-                        )}
+                  ) : (
+                    <div className="leadingDirectoryFiles" style={{position: "relative"}}>
+                      {isExternalDragOverNavigator && (
+                        <div className="leadingDirectoryFileHoverOver"/>
+                      )}
 
-                        {rootDirectoryName && (
-                          <ul className="leadingDirectoryFileStack">
-                            <li className="leadingDirectoryFileStackContent">
+                      {rootDirectoryName && (
+                        <ul className="leadingDirectoryFileStack">
+                          <li className="leadingDirectoryFileStackContent">
+                            <div
+                              onClick={() => setIsRootOpen(!isRootOpen)}
+                              onContextMenu={(e) => handleContextMenu(e, { type: "directory", path: rootDirectoryName })}
+                              className="directoryListItemRoot"
+                              onDragOver={handleExternalDragOver}
+                              onDrop={(e) => {
+                                if (e.dataTransfer.types.includes("Files")) {
+                                  handleExternalFileDrop(e, rootDirectoryName);
+                                } else {
+                                  handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
+                                }
+                              }}
+                              onDragEnter={(e) => {
+                                setDragOverId(rootDirectoryName);
+                                handleExternalDragEnter(e, rootDirectoryName);
+                              }}
+                              onDragLeave={(e) => {
+                                setDragOverId(null);
+                                handleExternalDragLeave(e);
+                              }}
+                              style={{ 
+                                background: dragOverId === rootDirectoryName ? "rgba(255,255,255,0.2)" : 
+                                           externalDragOver === rootDirectoryName ? "rgba(100,255,100,0.2)" :
+                                           openedDirectories[rootDirectoryName] ? "rgba(255,255,255,0.05)" : undefined 
+                              }}
+                            >
+                              <FontAwesomeIcon icon={isRootOpen ? faAngleDown : faAngleRight} />
+                              {rootDirectoryName}
+                              {unsavedChanges[rootDirectoryName] && (
+                                <Tippy content="Unsaved" theme="tooltip-light">
+                                  <span className="dinolabsFileUnsavedDot" />
+                                </Tippy>
+                              )}
+                            </div>
+                            {isRootOpen && flattenedDirectoryList.length > 0 && (
                               <div
-                                onClick={() => setIsRootOpen(!isRootOpen)}
-                                onContextMenu={(e) => handleContextMenu(e, { type: "directory", path: rootDirectoryName })}
-                                className="directoryListItemRoot"
+                                className="nestedDirectoryFileStack"
                                 onDragOver={handleExternalDragOver}
                                 onDrop={(e) => {
                                   if (e.dataTransfer.types.includes("Files")) {
@@ -2740,452 +2707,321 @@ export default function DinoLabs() {
                                   setDragOverId(null);
                                   handleExternalDragLeave(e);
                                 }}
-                                style={{ 
-                                  background: dragOverId === rootDirectoryName ? "rgba(255,255,255,0.2)" : 
-                                             externalDragOver === rootDirectoryName ? "rgba(100,255,100,0.2)" :
-                                             openedDirectories[rootDirectoryName] ? "rgba(255,255,255,0.05)" : undefined 
-                                }}
                               >
-                                <FontAwesomeIcon icon={isRootOpen ? faAngleDown : faAngleRight} />
-                                {rootDirectoryName}
-                                {unsavedChanges[rootDirectoryName] && (
-                                  <Tippy content="Unsaved" theme="tooltip-light">
-                                    <span className="dinolabsFileUnsavedDot" />
-                                  </Tippy>
-                                )}
-                              </div>
-                              {isRootOpen && flattenedDirectoryList.length > 0 && (
-                                <div
+                                <List
+                                  height={
+                                    directoryRef.current
+                                      ? directoryRef.current.clientHeight - (100 + (isNavigatorState ? 75 : 0))
+                                      : window.innerHeight * 0.4
+                                  }
+                                  itemCount={flattenedDirectoryList.length}
+                                  itemSize={getVirtualizedItemHeight(screenSize)}
+                                  width="100%"
+                                  itemData={flattenedDirectoryList}
                                   className="nestedDirectoryFileStack"
-                                  onDragOver={handleExternalDragOver}
-                                  onDrop={(e) => {
-                                    if (e.dataTransfer.types.includes("Files")) {
-                                      handleExternalFileDrop(e, rootDirectoryName);
-                                    } else {
-                                      handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
-                                    }
-                                  }}
-                                  onDragEnter={(e) => {
-                                    setDragOverId(rootDirectoryName);
-                                    handleExternalDragEnter(e, rootDirectoryName);
-                                  }}
-                                  onDragLeave={(e) => {
-                                    setDragOverId(null);
-                                    handleExternalDragLeave(e);
-                                  }}
                                 >
-                                  <List
-                                    height={
-                                      directoryRef.current
-                                        ? directoryRef.current.clientHeight - (100 + (isNavigatorState ? 75 : 0))
-                                        : window.innerHeight * 0.4
-                                    }
-                                    itemCount={flattenedDirectoryList.length}
-                                    itemSize={getVirtualizedItemHeight(screenSize)}
-                                    width="100%"
-                                    itemData={flattenedDirectoryList}
-                                    className="nestedDirectoryFileStack"
-                                  >
-                                    {renderNavigatorRow}
-                                  </List>
-                                </div>
-                              )}
-                            </li>
-                          </ul>
-                        )}
-                      </div>
-                    )
-                  )}
-                  {isSearchState && (
-                    <div className="leadingDirectoryGlobalSearchWrapper">
-                      <div className="leadingDirectoryGlobalSearchFlex">
-                        <input
-                          type="text"
-                          className="leadingDirectoryGlobalSearchInput"
-                          placeholder="Search across all files..."
-                          value={globalSearchQuery}
-                          onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                          disabled={isGlobalReplacing}
-                        />
-                        <div className="leadingDirectoryGlobalSearchTrailingButtons">
-                          <Tippy content="Case Sensitive" theme="tooltip-light">
-                            <button
-                              className="leadingDirectoryGlobalSearchButton"
-                              onClick={() => setIsCaseSensitiveSearch(!isCaseSensitiveSearch)}
-                              onMouseDown={(e) => e.preventDefault()}
-                            >
-                              <FontAwesomeIcon icon={faA} style={{ color: isCaseSensitiveSearch ? "#AD6ADD" : "" }} />
-                            </button>
-                          </Tippy>
-                          <Tippy content="Search Files" theme="tooltip-light">
-                            <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalSearch} disabled={isGlobalSearching || isGlobalReplacing}>
-                              <FontAwesomeIcon icon={faMagnifyingGlass} />
-                            </button>
-                          </Tippy>
-                        </div>
-                      </div>
-                      <div className="leadingDirectoryGlobalSearchFlex" style={{ alignItems: "flex-start" }}>
-                        <input
-                          type="text"
-                          className="leadingDirectoryGlobalSearchInput"
-                          placeholder="Replace with..."
-                          value={globalReplaceTerm}
-                          onChange={(e) => setGlobalReplaceTerm(e.target.value)}
-                          disabled={isGlobalReplacing}
-                        />
-                        <div className="leadingDirectoryGlobalSearchTrailingButtons">
-                          <Tippy content="Replace Across Files" theme="tooltip-light">
-                            <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalReplace} disabled={!globalSearchQuery || isGlobalSearching || isGlobalReplacing}>
-                              <FontAwesomeIcon icon={faMagnifyingGlassPlus} />
-                            </button>
-                          </Tippy>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {isSearchState && (
-                    <div className="leadingDirectoryFiles">
-                      {isGlobalSearching || isGlobalReplacing ? (
-                        <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
-                          <div className="loading-circle" />
-                          <p>{getProgressMessage()}</p>
-                        </div>
-                      ) : (
-                        <List
-                          height={directoryRef.current ? directoryRef.current.clientHeight - 250 : window.innerHeight * 0.4}
-                          itemCount={flattenedSearchList.length}
-                          itemSize={getVirtualizedItemHeight(screenSize)}
-                          width="100%"
-                          itemData={flattenedSearchList}
-                          className="nestedDirectoryFileStack"
-                        >
-                          {renderSearchRow}
-                        </List>
+                                  {renderNavigatorRow}
+                                </List>
+                              </div>
+                            )}
+                          </li>
+                        </ul>
                       )}
                     </div>
-                  )}
-                </div>
-                <div className="leadingDirectoryBottomBar">
-                  <div className="leadingDirectorySettingsButtonFlex" style={{ borderRight: "0.2vh solid rgba(255,255,255,0.1)" }}>
-                    <Tippy content="Calendar" theme="tooltip-light">
-                      <button
-                        className="leadingDirectoryZoomButton"
-                        onClick={() => { navigate("/calendar"); }}
-                        style={{ position: "relative" }}
-                      >
-                        <FontAwesomeIcon icon={faCalendarDays} style={{ color: "" }} />
-                        {todaysEventsCount > 0 && (
-                          <span className="bottomBarNotifCount">
-                            {todaysEventsCount > 9 ? "9+" : todaysEventsCount}
-                          </span>
-                        )}
-                      </button>
-                    </Tippy>
-                    <Tippy content="Toolkit" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/plugins"); })}>
-                        <FontAwesomeIcon icon={faHammer} style={{ color: "" }} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Database" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/database"); })}>
-                        <FontAwesomeIcon icon={faDatabase} style={{ color: "" }} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="Monitoring" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={() => { navigate("/monitoring"); }}>
-                        <FontAwesomeIcon icon={faComputer} style={{ color: "" }} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="My Account" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/account"); })}>
-                        <FontAwesomeIcon icon={faUserCog} style={{ color: "" }} />
-                      </button>
-                    </Tippy>
-                    <Tippy content="My Team" theme="tooltip-light">
-                      <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/team"); })}>
-                        <FontAwesomeIcon icon={faUsersCog} style={{ color: "" }} />
-                      </button>
-                    </Tippy>
+                  )
+                )}
+                {isSearchState && (
+                  <div className="leadingDirectoryGlobalSearchWrapper">
+                    <div className="leadingDirectoryGlobalSearchFlex">
+                      <input
+                        type="text"
+                        className="leadingDirectoryGlobalSearchInput"
+                        placeholder="Search across all files..."
+                        value={globalSearchQuery}
+                        onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                        disabled={isGlobalReplacing}
+                      />
+                      <div className="leadingDirectoryGlobalSearchTrailingButtons">
+                        <Tippy content="Case Sensitive" theme="tooltip-light">
+                          <button
+                            className="leadingDirectoryGlobalSearchButton"
+                            onClick={() => setIsCaseSensitiveSearch(!isCaseSensitiveSearch)}
+                            onMouseDown={(e) => e.preventDefault()}
+                          >
+                            <FontAwesomeIcon icon={faA} style={{ color: isCaseSensitiveSearch ? "#AD6ADD" : "" }} />
+                          </button>
+                        </Tippy>
+                        <Tippy content="Search Files" theme="tooltip-light">
+                          <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalSearch} disabled={isGlobalSearching || isGlobalReplacing}>
+                            <FontAwesomeIcon icon={faMagnifyingGlass} />
+                          </button>
+                        </Tippy>
+                      </div>
+                    </div>
+                    <div className="leadingDirectoryGlobalSearchFlex" style={{ alignItems: "flex-start" }}>
+                      <input
+                        type="text"
+                        className="leadingDirectoryGlobalSearchInput"
+                        placeholder="Replace with..."
+                        value={globalReplaceTerm}
+                        onChange={(e) => setGlobalReplaceTerm(e.target.value)}
+                        disabled={isGlobalReplacing}
+                      />
+                      <div className="leadingDirectoryGlobalSearchTrailingButtons">
+                        <Tippy content="Replace Across Files" theme="tooltip-light">
+                          <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalReplace} disabled={!globalSearchQuery || isGlobalSearching || isGlobalReplacing}>
+                            <FontAwesomeIcon icon={faMagnifyingGlassPlus} />
+                          </button>
+                        </Tippy>
+                      </div>
+                    </div>
                   </div>
+                )}
+                {isSearchState && (
+                  <div className="leadingDirectoryFiles">
+                    {isGlobalSearching || isGlobalReplacing ? (
+                      <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
+                        <div className="loading-circle" />
+                        <p>{getProgressMessage()}</p>
+                      </div>
+                    ) : (
+                      <List
+                        height={directoryRef.current ? directoryRef.current.clientHeight - 250 : window.innerHeight * 0.4}
+                        itemCount={flattenedSearchList.length}
+                        itemSize={getVirtualizedItemHeight(screenSize)}
+                        width="100%"
+                        itemData={flattenedSearchList}
+                        className="nestedDirectoryFileStack"
+                      >
+                        {renderSearchRow}
+                      </List>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="leadingDirectoryBottomBar">
+                <div className="leadingDirectorySettingsButtonFlex" style={{ borderRight: "0.2vh solid rgba(255,255,255,0.1)" }}>
+                  <Tippy content="Calendar" theme="tooltip-light">
+                    <button
+                      className="leadingDirectoryZoomButton"
+                      onClick={() => { navigate("/calendar"); }}
+                      style={{ position: "relative" }}
+                    >
+                      <FontAwesomeIcon icon={faCalendarDays} style={{ color: "" }} />
+                      {todaysEventsCount > 0 && (
+                        <span className="bottomBarNotifCount">
+                          {todaysEventsCount > 9 ? "9+" : todaysEventsCount}
+                        </span>
+                      )}
+                    </button>
+                  </Tippy>
+                  <Tippy content="Toolkit" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/plugins"); })}>
+                      <FontAwesomeIcon icon={faHammer} style={{ color: "" }} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Database" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/database"); })}>
+                      <FontAwesomeIcon icon={faDatabase} style={{ color: "" }} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="Monitoring" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={() => { navigate("/monitoring"); }}>
+                      <FontAwesomeIcon icon={faComputer} style={{ color: "" }} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="My Account" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/account"); })}>
+                      <FontAwesomeIcon icon={faUserCog} style={{ color: "" }} />
+                    </button>
+                  </Tippy>
+                  <Tippy content="My Team" theme="tooltip-light">
+                    <button className="leadingDirectoryZoomButton" onClick={(() => { navigate("/team"); })}>
+                      <FontAwesomeIcon icon={faUsersCog} style={{ color: "" }} />
+                    </button>
+                  </Tippy>
                 </div>
+              </div>
+            </div>
+            <div
+              className="dinolabsControlStack"
+              style={{ width: `${contentWidth}%` }}
+              ref={contentRef}
+              onMouseDown={widthDrag.onMouseDown}
+            >
+              <div className="topIDEControlBarWrapper">
+                {panes.map((pane, paneIndex) => (
+                  <React.Fragment key={`pane-wrapper-${paneIndex}`}>
+                    <div
+                      className="topIDEControlBar"
+                      style={{ height: "100%", width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, paneIndex)}
+                    >
+                      {pane.openedTabs.length ? (
+                        pane.openedTabs.map((tab) => {
+                          editorRefs.current[paneIndex] ??= {};
+                          editorRefs.current[paneIndex][tab.id] ??= React.createRef();
+                          const cls =
+                            pane.activeTabId === tab.id && unsavedChanges[tab.id]
+                              ? "activeUnsavedTab"
+                              : pane.activeTabId === tab.id
+                                ? "activeTab"
+                                : unsavedChanges[tab.id]
+                                  ? "unsavedTab"
+                                  : "";
+                          return (
+                            <div
+                              key={tab.id}
+                              className={`dinolabsTabItem ${cls}`}
+                              onClick={() => switchTab(paneIndex, tab.id)}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, paneIndex, tab.id)}
+                              style={{ width: "fit-content" }}
+                            >
+                              {unsavedChanges[tab.id] && (
+                                <Tippy content="Unsaved" theme="tooltip-light">
+                                  <span className="dinolabsFileUnsavedDot" />
+                                </Tippy>
+                              )}
+                              {getFileIcon(tab.name)}
+                              {tab.name}
+                              <span
+                                className="dinolabsCloseTab"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  closeTab(paneIndex, tab.id);
+                                }}
+                              >
+                                ×
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="dinolabsTabItem activeTab">
+                          <FontAwesomeIcon icon={faWandMagicSparkles} /> Get Started
+                        </div>
+                      )}
+                    </div>
+                    {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" />}
+                  </React.Fragment>
+                ))}
               </div>
               <div
-                className="dinolabsControlStack"
-                style={{ width: `${contentWidth}%` }}
-                ref={contentRef}
-                onMouseDown={widthDrag.onMouseDown}
+                className="dinolabsMarkdownWrapper"
+                onMouseDown={paneDrag.onMouseDown}
               >
-                <div className="topIDEControlBarWrapper">
-                  {panes.map((pane, paneIndex) => (
-                    <React.Fragment key={`pane-wrapper-${paneIndex}`}>
-                      <div
-                        className="topIDEControlBar"
-                        style={{ height: "100%", width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => handleDrop(e, paneIndex)}
-                      >
+                {panes.map((pane, paneIndex) => (
+                  <React.Fragment key={`pane-${paneIndex}`}>
+                    <div
+                      className="dinolabsMarkdownPaneWrapper"
+                      style={{ width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
+                      onClick={() => setActivePaneIndex(paneIndex)}
+                    >
+                      <div className="dinolabsMarkdownPaneFlex">
                         {pane.openedTabs.length ? (
-                          pane.openedTabs.map((tab) => {
-                            editorRefs.current[paneIndex] ??= {};
-                            editorRefs.current[paneIndex][tab.id] ??= React.createRef();
-                            const cls =
-                              pane.activeTabId === tab.id && unsavedChanges[tab.id]
-                                ? "activeUnsavedTab"
-                                : pane.activeTabId === tab.id
-                                  ? "activeTab"
-                                  : unsavedChanges[tab.id]
-                                    ? "unsavedTab"
-                                    : "";
-                            return (
-                              <div
-                                key={tab.id}
-                                className={`dinolabsTabItem ${cls}`}
-                                onClick={() => switchTab(paneIndex, tab.id)}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, paneIndex, tab.id)}
-                                style={{ width: "fit-content" }}
-                              >
-                                {unsavedChanges[tab.id] && (
-                                  <Tippy content="Unsaved" theme="tooltip-light">
-                                    <span className="dinolabsFileUnsavedDot" />
-                                  </Tippy>
-                                )}
-                                {getFileIcon(tab.name)}
-                                {tab.name}
-                                <span
-                                  className="dinolabsCloseTab"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    closeTab(paneIndex, tab.id);
-                                  }}
-                                >
-                                  ×
-                                </span>
-                              </div>
-                            );
-                          })
+                          pane.openedTabs.map((tab) => (
+                            <div key={tab.id} className="dinolabsMarkdownPane" style={{ display: pane.activeTabId === tab.id ? "block" : "none" }}>
+                              {tab.isAccount ? (
+                                <DinoLabsAccount
+                                  onClose={() => closeTab(paneIndex, tab.id)}
+                                  keyBinds={keyBinds}
+                                  setKeyBinds={setKeyBinds}
+                                  zoomLevel={zoomLevel}
+                                  setZoomLevel={setZoomLevel}
+                                  colorTheme={colorTheme}
+                                  setColorTheme={setColorTheme}
+                                />
+                              ) : tab.isMedia ? (
+                                <>
+                                  {mediaExtensions.image.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsImageEditor fileHandle={tab.fileHandle} />
+                                  )}
+                                  {mediaExtensions.video.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsVideoEditor fileHandle={tab.fileHandle} />
+                                  )}
+                                  {mediaExtensions.audio.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsAudioEditor fileHandle={tab.fileHandle} />
+                                  )}
+                                  {mediaExtensions.pdf.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsPDFEditor fileHandle={tab.fileHandle} />
+                                  )}
+                                  {mediaExtensions.threeD.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabs3DEditor fileHandle={tab.fileHandle} />
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {["txt", "md"].includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsRichTextEditor fileHandle={tab.fileHandle} keyBinds={keyBinds}
+                                      onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
+                                      onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                    />
+                                  )}
+                                  {["csv"].includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                    <DinoLabsTabularEditor
+                                      fileHandle={tab.fileHandle}
+                                      keyBinds={keyBinds}
+                                      onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
+                                      onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                    />
+                                  )}
+                                  {(!tab.fileHandle ||
+                                    !["txt", "md", "csv"].includes(tab.fileHandle.name.split(".").pop()?.toLowerCase() || "")) && (
+                                      <DinoLabsMarkdown
+                                        fileContent={tab.content}
+                                        detectedLanguage={tab.language}
+                                        forceOpen={tab.forceOpen}
+                                        onForceOpen={() => handleForceOpenTab(paneIndex, tab.id)}
+                                        searchTerm={tab.searchTerm}
+                                        setSearchTerm={(term) => tabPatch(paneIndex, tab.id, { searchTerm: term })}
+                                        replaceTerm={tab.replaceTerm}
+                                        setReplaceTerm={(term) => tabPatch(paneIndex, tab.id, { replaceTerm: term })}
+                                        searchPositions={tab.searchPositions}
+                                        setSearchPositions={(positions) => tabPatch(paneIndex, tab.id, { searchPositions: positions })}
+                                        currentSearchIndex={tab.currentSearchIndex}
+                                        setCurrentSearchIndex={(index) => tabPatch(paneIndex, tab.id, { currentSearchIndex: index })}
+                                        onSplit={splitTab}
+                                        disableSplit={panes.length >= 2 || pane.openedTabs.length <= 1 || pane.openedTabs.some((inner) => inner.isMedia || inner.isAccount || ["txt", "md", "csv"].includes(inner.name.split(".").pop()?.toLowerCase() || ""))}
+                                        paneIndex={paneIndex}
+                                        tabId={tab.id}
+                                        isSearchOpen={tab.isSearchOpen}
+                                        isReplaceOpen={tab.isReplaceOpen}
+                                        setTabSearchOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isSearchOpen: isOpen })}
+                                        setTabReplaceOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isReplaceOpen: isOpen })}
+                                        ref={editorRefs.current[paneIndex][tab.id]}
+                                        onEdit={(prevState, newState) => handleEdit(paneIndex, tab.id, prevState, newState)}
+                                        onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                        fileHandle={tab.fileHandle}
+                                        isGlobalSearchActive={!!globalSearchQuery}
+                                        keyBinds={keyBinds}
+                                        colorTheme={colorTheme}
+                                        zoomLevel={zoomLevel}
+                                      />
+                                    )}
+                                </>
+                              )}
+                            </div>
+                          ))
                         ) : (
-                          <div className="dinolabsTabItem activeTab">
-                            <FontAwesomeIcon icon={faWandMagicSparkles} /> Get Started
-                          </div>
+                          <DinoLabsNoFileSelected
+                            handleLoadRepository={handleLoadRepository}
+                            handleLoadFile={handleLoadFile}
+                            isPlotRendered={isPlotRendered}
+                            personalUsageByDay={personalUsageByDay}
+                            usageLanguages={usageLanguages}
+                          />
                         )}
                       </div>
-                      {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" />}
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div
-                  className="dinolabsMarkdownWrapper"
-                  onMouseDown={paneDrag.onMouseDown}
-                >
-                  {panes.map((pane, paneIndex) => (
-                    <React.Fragment key={`pane-${paneIndex}`}>
-                      <div
-                        className="dinolabsMarkdownPaneWrapper"
-                        style={{ width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
-                        onClick={() => setActivePaneIndex(paneIndex)}
-                      >
-                        <div className="dinolabsMarkdownPaneFlex">
-                          {pane.openedTabs.length ? (
-                            pane.openedTabs.map((tab) => (
-                              <div key={tab.id} className="dinolabsMarkdownPane" style={{ display: pane.activeTabId === tab.id ? "block" : "none" }}>
-                                {tab.isAccount ? (
-                                  <DinoLabsAccount
-                                    onClose={() => closeTab(paneIndex, tab.id)}
-                                    keyBinds={keyBinds}
-                                    setKeyBinds={setKeyBinds}
-                                    zoomLevel={zoomLevel}
-                                    setZoomLevel={setZoomLevel}
-                                    colorTheme={colorTheme}
-                                    setColorTheme={setColorTheme}
-                                  />
-                                ) : tab.isMedia ? (
-                                  <>
-                                    {mediaExtensions.image.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsImageEditor fileHandle={tab.fileHandle} />
-                                    )}
-                                    {mediaExtensions.video.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsVideoEditor fileHandle={tab.fileHandle} />
-                                    )}
-                                    {mediaExtensions.audio.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsAudioEditor fileHandle={tab.fileHandle} />
-                                    )}
-                                    {mediaExtensions.pdf.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsPDFEditor fileHandle={tab.fileHandle} />
-                                    )}
-                                    {mediaExtensions.threeD.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabs3DEditor fileHandle={tab.fileHandle} />
-                                    )}
-                                  </>
-                                ) : (
-                                  <>
-                                    {["txt", "md"].includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsRichTextEditor fileHandle={tab.fileHandle} keyBinds={keyBinds}
-                                        onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
-                                        onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
-                                      />
-                                    )}
-                                    {["csv"].includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
-                                      <DinoLabsTabularEditor
-                                        fileHandle={tab.fileHandle}
-                                        keyBinds={keyBinds}
-                                        onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
-                                        onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
-                                      />
-                                    )}
-                                    {(!tab.fileHandle ||
-                                      !["txt", "md", "csv"].includes(tab.fileHandle.name.split(".").pop()?.toLowerCase() || "")) && (
-                                        <DinoLabsMarkdown
-                                          fileContent={tab.content}
-                                          detectedLanguage={tab.language}
-                                          forceOpen={tab.forceOpen}
-                                          onForceOpen={() => handleForceOpenTab(paneIndex, tab.id)}
-                                          searchTerm={tab.searchTerm}
-                                          setSearchTerm={(term) => tabPatch(paneIndex, tab.id, { searchTerm: term })}
-                                          replaceTerm={tab.replaceTerm}
-                                          setReplaceTerm={(term) => tabPatch(paneIndex, tab.id, { replaceTerm: term })}
-                                          searchPositions={tab.searchPositions}
-                                          setSearchPositions={(positions) => tabPatch(paneIndex, tab.id, { searchPositions: positions })}
-                                          currentSearchIndex={tab.currentSearchIndex}
-                                          setCurrentSearchIndex={(index) => tabPatch(paneIndex, tab.id, { currentSearchIndex: index })}
-                                          onSplit={splitTab}
-                                          disableSplit={panes.length >= 2 || pane.openedTabs.length <= 1 || pane.openedTabs.some((inner) => inner.isMedia || inner.isAccount || ["txt", "md", "csv"].includes(inner.name.split(".").pop()?.toLowerCase() || ""))}
-                                          paneIndex={paneIndex}
-                                          tabId={tab.id}
-                                          isSearchOpen={tab.isSearchOpen}
-                                          isReplaceOpen={tab.isReplaceOpen}
-                                          setTabSearchOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isSearchOpen: isOpen })}
-                                          setTabReplaceOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isReplaceOpen: isOpen })}
-                                          ref={editorRefs.current[paneIndex][tab.id]}
-                                          onEdit={(prevState, newState) => handleEdit(paneIndex, tab.id, prevState, newState)}
-                                          onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
-                                          fileHandle={tab.fileHandle}
-                                          isGlobalSearchActive={!!globalSearchQuery}
-                                          keyBinds={keyBinds}
-                                          colorTheme={colorTheme}
-                                          zoomLevel={zoomLevel}
-                                        />
-                                      )}
-                                  </>
-                                )}
-                              </div>
-                            ))
-                          ) : (
-                            <DinoLabsNoFileSelected
-                              handleLoadRepository={handleLoadRepository}
-                              handleLoadFile={handleLoadFile}
-                              isPlotRendered={isPlotRendered}
-                              personalUsageByDay={personalUsageByDay}
-                              usageLanguages={usageLanguages}
-                            />
-                          )}
-                        </div>
-                      </div>
-                      {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" onMouseDown={paneDrag.onMouseDown} />}
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="bottomIDEControlBar" />
+                    </div>
+                    {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" onMouseDown={paneDrag.onMouseDown} />}
+                  </React.Fragment>
+                ))}
               </div>
+              <div className="bottomIDEControlBar" />
             </div>
-          ) : !hasSeenStartup ? (
-            <div 
-              className="dinolabsControlFlex"
-              onDrop={handleStartupAreaDrop}
-              onDragOver={handleStartupAreaDragOver}
-            >
-              <div className="mainCellScrollContainer">
-                <div className="mainCellGridContainer">
-                  <div className="mainCellGrid">
-                    <div className="mainCellGridHeader">
-                      <span className="mainCellGridHeaderLead">
-                        <img src={"./ref-logos/DinoLabsLogo.png"} />
-                        <label>
-                          Dino Labs Playground
-                        </label>
-                      </span>
-                    </div>
-                    <div className="mainCellGridContent">
-                      <img src={"./ref-images/PlaygroundRefImage.png"} />
-                      <label>
-                        The DinoLabs Playground platform is an all-in-one, web-based solution designed to meet a wide range of creative and technical needs.
-                        Featuring an integrated IDE with support for over 13 programming languages, it also includes a variety of specialized editors for text, tables, images, video, audio, PDFs, and 3D models.
-                      </label>
-                    </div>
-                    <div className="mainCellButtonWrapper">
-                      <a className="mainCellGridButton" onClick={handleContinueToPlayground}>
-                        Continue to Dino Labs Playground
-                        <FontAwesomeIcon icon={faChevronRight} />
-                      </a>
-                    </div>
-                  </div>
-                  <div className="mainCellGrid">
-                    <div className="mainCellGridHeader">
-                      <span className="mainCellGridHeaderLead">
-                        <img src={"./ref-logos/DinoSatLogo.png"} />
-                        <label>
-                          Dino Sat
-                        </label>
-                      </span>
-                    </div>
-                    <div className="mainCellGridContent">
-                      <img src={"./ref-images/PlaygroundRefImage.png"} />
-                      <label>
-                        DinoSat is a comprehensive platform for tracking satellites, comets, and celestial bodies, with detailed catalogues of stars, exoplanets, and the solar system.
-                        In addition to its astronomical capabilities, DinoSat includes advanced modules for botany, geology, and mineralogy, featuring robust tools for cataloguing species, geological formations, and mineral deposits.
-                        The platform also integrates simulators and telemetry monitors for real-time data analysis and simulations.
-                        With habitat monitoring already in place, DinoSat offers a complete solution for environmental conditions and sustainability tracking. Whether you're exploring the cosmos or conducting in-depth research on Earth, DinoSat provides all the tools needed for scientific discovery in one unified platform.
-                      </label>
-                    </div>
-                    <div className="mainCellButtonWrapper">
-                      <a className="mainCellGridButton" href={"https://dino-sat.vercel.app/login"}>
-                        Continue to Dino Sat
-                        <FontAwesomeIcon icon={faChevronRight} />
-                      </a>
-                    </div>
-                  </div>
-                  <div className="mainCellGrid">
-                    <div className="mainCellGridHeader">
-                      <span className="mainCellGridHeaderLead">
-                        <img src={"./ref-logos/DinoBrainLogo.png"} />
-                        <label>
-                          Dino Brain
-                        </label>
-                      </span>
-                    </div>
-                    <div className="mainCellGridContent">
-                      <img src={"./ref-images/PlaygroundRefImage.png"} />
-                      <label>
-                        DinoBrain is a cutting-edge neural mapping application designed to map brain scans over brain meshes with unparalleled precision.
-                        At its core is BioNet, a highly advanced biological neural network that simulates anatomical structures as closely as possible, offering a sophisticated platform for understanding the complexities of the brain.
-                        DinoBrain enables detailed analysis and visualization of brain anatomy and neural activity, making it an invaluable tool for neuroscientists, researchers, and clinicians.
-                      </label>
-                    </div>
-                    <div className="mainCellButtonWrapper">
-                      <a className="mainCellGridButton" href={"https://dino-sat.vercel.app/login"}>
-                        Continue to Dino Brain
-                        <FontAwesomeIcon icon={faChevronRight} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div
-              onDrop={handleStartupAreaDrop}
-              onDragOver={handleStartupAreaDragOver}
-              style={{ width: "100%", height: "100%" }}
-            >
-              <DinoLabsNoFileSelected
-                handleLoadRepository={handleLoadRepository}
-                handleLoadFile={handleLoadFile}
-                isPlotRendered={isPlotRendered}
-                personalUsageByDay={personalUsageByDay}
-                usageLanguages={usageLanguages}
-              />
-            </div>
-          )}
+          </div>
         </div>
       ) : !isLoaded ? (
         <DinoLabsLoading />
