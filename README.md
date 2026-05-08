@@ -1,3 +1,3 @@
-# Dino Labs Playground
+# Dino Labs
 
 https://www.playground.dinolaboratories.com/
