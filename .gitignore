@@ -129,5 +129,13 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Directory to ignore
-info/
+# Environment files
+.env
+.env.*
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
