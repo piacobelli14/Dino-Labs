@@ -92,7 +92,7 @@ const DinoLabsTeam = () => {
     setBackendError(false);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/team-members`, {
+      const response = await fetch(`${import.meta.env.VITE_API_AUTH_URL}/team-members`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -118,7 +118,7 @@ const DinoLabsTeam = () => {
     setBackendError(false);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/team-members-access-requests`, {
+      const response = await fetch(`${import.meta.env.VITE_API_AUTH_URL}/team-members-access-requests`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -142,7 +142,7 @@ const DinoLabsTeam = () => {
   const handleRequestResponse = async (requestUsername, action) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/team-members-access-response`, {
+      await fetch(`${import.meta.env.VITE_API_AUTH_URL}/team-members-access-response`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -162,7 +162,7 @@ const DinoLabsTeam = () => {
   const handleRemove = async (memberUsername) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/remove-team-member`, {
+      await fetch(`${import.meta.env.VITE_API_AUTH_URL}/remove-team-member`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -177,7 +177,7 @@ const DinoLabsTeam = () => {
   const handlePermissionChange = async (username, isAdmin) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/team-members-permissions`, {
+      await fetch(`${import.meta.env.VITE_API_AUTH_URL}/team-members-permissions`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
