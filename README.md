@@ -14,11 +14,11 @@ The backend surface is intentionally tiny. Calendar CRUD and a PostgreSQL connec
 
 | Code Editor | Plugins Hub | Tabular Editor |
 |:---:|:---:|:---:|
-| ![Code Editor](Screenshots/CodeEditor.png) | ![Plugins Hub](Screenshots/PluginsHub.png) | ![Tabular Editor](Screenshots/TabularEditor.png) |
+| ![Code Editor](screenshots/codeeditor.png) | ![Plugins Hub](screenshots/toolkit.png) | ![Tabular Editor](screenshots/tabulareditor.png) |
 
 | Image Editor | Calendar | Database Explorer |
 |:---:|:---:|:---:|
-| ![Image Editor](Screenshots/ImageEditor.png) | ![Calendar](Screenshots/Calendar.png) | ![Database Explorer](Screenshots/DatabaseExplorer.png) |
+| ![Image Editor](screenshots/imageeditor.png) | ![Calendar](screenshots/calendar.png) | ![Database Explorer](screenshots/database.png) |
 
 ---
 
