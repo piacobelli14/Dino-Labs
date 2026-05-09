@@ -1,12 +1,12 @@
 # DinoLabs
 
-A browser-native creative studio. DinoLabs is a single web app that pulls together the file editors, productivity utilities, and developer tooling that normally live across a dozen separate desktop apps, and runs them all client-side in a unified workstation. Twenty-five pages, three product categories, one persistent workspace, no server round-trips for any of the actual editing.
+A complete creative studio available right in your broawser. DinoLabs is a single web app that pulls together the file editors, productivity utilities, and developer tooling that normally live across a dozen separate desktop apps, and runs them all client-side in a unified workstation. 
 
-Hosted at **[DinoLabs](https://dinolabs.app)**. Account creation, sessions, and team management are handled through Dino Auth (see below).
+Hosted at **[DinoLabs](https://dino-labs.vercel.app/login)**. Account creation, sessions, and team management are handled through Dino Auth (see below).
 
 **Stack:** React + Vite on the frontend, Node.js + Express + PostgreSQL on the backend. File System Access API + IndexedDB for persistence.
 
-The backend surface is intentionally tiny. Calendar CRUD and a PostgreSQL connection proxy are the only two route groups, plus the Dino Auth pass-through for everything user/team-related. Everything else (the seven editors, the ten toolkit plugins, the workstation diagnostics, the file system layer) runs entirely in the browser. Most "creative studio" platforms in this category are thin clients on top of a heavy server. DinoLabs is the inverse.
+This is a frontend product. The backend is kept intentionally small. Calendar CRUD and a PostgreSQL connection proxy are the only two route groups, plus the Dino Auth pass-through for everything user/team-related. Most "creative studio" platforms in this category are thin clients on top of a heavy server. DinoLabs is the inverse.
 
 ---
 
@@ -29,7 +29,7 @@ DinoLabs groups its pages into three categories: **Workstation** (account, produ
 ### Workstation
 
 #### Calendar
-Month/week/day views with 64-pixel-per-hour time-slot grids and per-day-segment positioning for multi-day events: each day a multi-day event touches gets its own block, with start/end clamped to midnight on intermediate days. Block geometry runs through `getEventPosition`, which classifies each render against `isStartDay`, `isEndDay`, and `isMiddleDay` and produces top/height in pixels.
+The calendar includes month, week, and day views, with 64-pixel-per-hour time slots and support for events that continue across multiple days. Each day that is touched by a multi-day event gets its own block, with the start and end of the event clamped to midnight on any days that are entirely covered by the event.  Block geometry runs through `getEventPosition`, which classifies each render against `isStartDay`, `isEndDay`, and `isMiddleDay` and produces top/height in pixels.
 
 A custom `CustomDateTimePicker` component handles datetime input rather than the native browser control. It embeds an inline mini-calendar with month navigation, a day grid, and three selects (12-hour hour, minute, AM/PM), all driven through regex-parsing of a timezone-formatted display string so the picker stays consistent with `userTimezone`.
 
