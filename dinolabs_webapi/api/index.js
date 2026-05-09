@@ -12,7 +12,7 @@ const playgroundDatabase = require("./routes/dinolabs-playground/dinolabs-playgr
 
 const ALLOWED_ORIGINS = [
   "https://dino-auth.vercel.app",
-  "https://dino-sat.vercel.app",
+  "https://dino-labs.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
@@ -20,7 +20,7 @@ const ALLOWED_ORIGINS = [
 ];
 
 const REDIRECT_MAP = {
-  dinosat: "https://dino-sat.vercel.app/login",
+  dinosat: "https://dino-labs.vercel.app/login",
 };
 
 const app = express();
