@@ -113,122 +113,49 @@ Export dialog offers format (MP4, MOV, WebM, AVI), quality (480p to 4K), and res
 Currently, this is essentially just a renderer that pulls a PDF into an iFrame blob URL with the native browser PDF viewer. we parameterize it with `#page=1&zoom=page-width&view=FitH&navpanes=0` to suppress the navigation panes and fit it horizontally. Currently, it is intentionally minimal. 
 
 #### 3D Viewer
-A magic-byte and header-text format detector dispatches to four format-specific parsers. STL handles both ASCII and binary, with per-triangle normal extraction and a fallback to computed vertex normals when the source normals are zero. OBJ handles material slot parsing, per-vertex normals when provided, and fan triangulation of n-gon faces. PLY handles ASCII and binary in both little- and big-endian flavors, with header property parsing that drives a type-dispatched scalar reader for char/uchar/short/ushort/int/uint/float/double. OFF parses the simpler vertex-then-face format from the Princeton Shape Benchmark. GLTF, GLB, DAE, X3D, and 3MF are recognized at the magic-byte level and currently render as icosahedron placeholders pending full parser implementations. Format detection runs against the first 8KB of the file plus structural checks (PK zip header for 3MF, glTF magic 0x46546C67 + version 2 for GLB, text-pattern matches for the rest).
+This editor includes a magic-byte and header-text format detector to dispatch to four different format-specific object parsers. the STL parser can handle both ASCII and binary, and features normalized per-triangle extraction with a fallback to computed vertex normals when the normals from the source are zero. The OBJ parser can handle material slot parsing, per-vertex normals when they are available from the source, and fan triangulation of n-gonal faces. The PLY parser can also handle both ASCII and binary in little- and big-endian flavors, and includes header property parsing that fuels a type-dispatched scalar reader for different types. The OFF parser can handle the simpler vertex-then-face format from the Princeton Shape Benchmark. the editor supports GLTF, GLB, DAE, X3D, and 3MF at the magic-byte level however currently those types render as icosahedron placeholders, as the full parsers have not been built yet. The format detectiojn runs against the first 8 kb of the file and includes additional structural checks. 
 
-The viewer renders into a Three.js scene with manual orbit/pan/zoom controls implemented from scratch rather than through OrbitControls: spherical-coordinate orbit math with phi clamping at the poles, screen-space pan using camera matrix columns, distance-clamped wheel zoom. The grid auto-scales with camera distance so it stays visually appropriate from extreme close-up to far-out views. Loaded models are auto-centered and scaled to fit a 40-unit target, with normals computed when the source format omits them. Click-to-highlight raycasting toggles the model's material color on hit. A directional pad in the corner dispatches `CustomEvent("movementCommand")` events that the scene picks up to translate or rotate the model with configurable scale and unit (mm/cm/in/°), letting precise transforms run through the pad rather than mouse drags. The axes overlay (X cyan, Y purple, Z dark blue) is toggleable.
+The editor currently uses a Three.js scene with manual controls for the viewing. these manual controls include orbit, panning, zooming, and they are implemented from scratch. Spherical orbit match uses phi clamping at the poles, the screen-space panning uses camera matrix columns, and the zooming uses a distance-clamped wheel. the grid is designed to auto-scale with the distance of the camera so that it can be visually appropriate at extreme ranges. Initially loaded models are auto-scaled to fit a 40 unit target and auto-centered. Normals for the loaded object are computed if the source doesn't include them. We've implemented click-to-highlight raycasting to toggle the material color of the model, as well as a custom built directional pad with unit scaling/normalization. 
 
 #### Tabular Editor
-A spreadsheet with a real formula engine. The engine tokenizes formula strings (numbers, A1-style cell refs, `:` range refs, function names, operators), runs Shunting-yard to convert to RPN, and evaluates with cycle detection: a `visiting` set tracks cells currently on the evaluation stack and any re-entry returns `#CYCLE!`, with a memoizing cache reused across the full table compute pass on each edit. Roughly 35 built-in functions covering arithmetic and aggregates (SUM, AVERAGE, MIN, MAX, MEDIAN, STDEV, VAR, PRODUCT, COUNT, COUNTA), conditional aggregates (COUNTIF, SUMIF with `>`/`<`/equality predicates), math (SQRT, ABS, POWER, ROUND, FLOOR, CEILING, LOG, EXP, trig, RAND, PI), logic (IF, AND, OR, NOT), text (CONCAT, TEXT), and date (NOW, TODAY).
+This is a spreadsheet editor with a real, custom formula engine. The engine works by tokenizing formula strings (numbers, A1-style cell references, : range references, function names, and operators), then runs Shunting-yard to convert to RPN, and then uses cycle detection to evaluate them: a `visiting` set tracks cells that are currently on the evaluation stack and any re-entry returns `#CYCLE!`, with an additional memoizing cache that is reused across the full table compute pass on every edit. Currently we support about 35  built-in functions covering basic arithmetic, operators, logic, date, and aggregation. 
 
-Cell editing supports formula-bar cell-picking: when the cursor is positioned inside a function call's argument slot (detected by counting unbalanced parens in the prefix), clicking a cell or dragging across a range inserts the matching `A1` or `A1:B5` reference text into the formula at the active argument boundary, replacing whatever range was previously there. Header-click multi-select extends this so clicking a column header inserts a column-spanning range, and clicking a row header inserts a row-spanning range. While editing, the referenced cells of the current formula get a colored overlay so it's visible at a glance which cells the formula depends on, and a separate semi-transparent overlay marks the range being actively picked.
+Cell editing in the spreadsheet supports formula-bar cell-picking. If you position the cursor inside of the argument slot of a function call (detected by counting the unbalanced parentheses in the prefix), when you click on or drag across a range, it will insert the matching reference text into that single cell or all the cells in the dragged over range, replacing what was previously there. The header-click multi-select extends this functionality so when you click a column header it will insert a column-spanning range, and clicking a row number will insert a row-spanning range. When you are editing a cell, the referenced cells of the current active formula get a colored overlay so you can easily tell which cells the formula is dependent on, and a separate semi-transparent overlay denotes the range that is being actively picked. 
 
-The grid renders through `react-window`'s `VariableSizeGrid` so 100k+ cell sheets scroll at frame rate. Rows and columns auto-grow on scroll: the visible window minimums (`minNeededRows`, `minNeededCols`) are computed from container dimensions divided by default cell size plus a buffer, and new rows/columns mount in chunks of up to 10,000 at a time when the user scrolls past the current edge. Column filtering renders an "All" / "N selected" trigger button on every column header that opens a portaled dropdown with per-value checkboxes, search-filtering across the value list, and Select All / Clear / Close actions. Active filters tint the column header purple and reduce the visible row set by intersecting all active per-column filters. Selection-aware navigation skips filtered-out rows correctly: arrow keys, Enter, and Tab walk through the filtered visible rows, not the underlying actual row indices.
+The grid is rendered through react-window's VariableSizeGrid , which is great for keeping the scrolling at a smooth frame rate even for sheets that have 100k+ cells. Both the rows and the columns will auto-grow as you scroll. the visible window minimums we currently have (`minNeededRows`, `minNeededCols`) are derived from the dimensions of the container divided by the default cell sized, plus a buffer, and new rows and columns are mounted on in chunks of up to 10k at a time, whenever. the scroll position passes the max boundary.
 
-Selections support multi-cell and full-row/full-column modes, drag-to-move the selection block to a new origin (with a "data being moved will replace existing data" confirmation dialog if the destination is non-empty), Shift+Click to extend, and a bottom-right resize handle that grows the selection by dragging. Copy/cut/paste with relative reference adjustment, paste-over confirmation if the destination has differing content. Sort by column with four modes (A-Z, Z-A, 0-9, 9-0) operating on the selection range when one exists, otherwise the full table; empty cells sort to the end consistently.
+Each of the column headers has an "All" or "N selected" trigger button for filtering of that column, which opens a custom dropdown that has per-value checkboxes with search so you can filter for specific values in the column. Active filters tint the column header purple and reduce the visible row set by intersecting all of the active per-column filters. The keyboard navigation is selection-aware and will skip rows that you have filtered out.
 
-A summary panel below the grid renders in two collapsible sections. **Summary Statistics** reports count, mean, median, standard deviation, min, and max for the numeric values in the current selection (or the full table when nothing is selected). **Data Quality** reports null count, N/A count (matched against `n/a` and `null` substrings), missing percentage, unique value count, and duplicate count across the same scope. Both panels update live as the selection changes.
+The custom-built selection system supports multi-cell and full-row/full-column modes. You can drag-to-move the selection block to set a new origin (with a dialog for when you drag over existing data), Shift+Click to extend, and selection block resizing to grab more or less data. The copy/cut/paste commands will also trigger a conformation dialog when data is being removed or replaced. Basic column sorting supports 0-9, 9-0, A-Z, and Z-A filtering on the selection range, with empty cells sorting to the end.
 
-The formula bar at the top of the grid mirrors the active cell's editing buffer with bidirectional sync, and includes a function picker dropdown that inserts `=FUNCNAME(` at the cursor. Cell-level undo/redo runs through a per-cell ring buffer so character-level edits can be undone within an active edit, and cross-cell undo/redo runs through a separate stack at the table-mutation level. Search/replace runs across the full underlying data with case-sensitive toggle and per-match highlighting in the rendered grid. CSV import and export (with last-non-empty-row trimming on export so trailing blank rows don't bloat the file).
+The formula bar implemented at the top of the spreadsheet will mirror the active cell's editing buffer with bidirectional sync, and also includes a function picker dropdown that will allow you to pick a preset function. A per-cell ring buffer is used to track the history of that cell, allowing for undo/redo within individual active cells, separate from the cross-cell history stack that controls undo/redo when no individual cell is currently active.
 
 #### Rich Text Editor
-contentEditable-based rich text editor for `.txt` and `.md` files. Undo/redo runs through a 300ms-debounced string-snapshot history (snapshots `textContent` rather than the DOM tree) with an `isUndoRedoAction` lockout flag that prevents the snapshot logic from firing during programmatic restores. The history is trimmed at the current index on each new edit so redo is correctly invalidated after a divergent change. After save, history clears.
-
-Search runs through a `TreeWalker` over text nodes with a global-offset accumulator that tracks each match's absolute character position across node boundaries, then a separate highlight pass wraps matches in `<span class="search-match">` (or `search-match-active` for the current cursor) by rebuilding the affected text node's children as a document fragment. The active match auto-scrolls into view via `scrollIntoView`. Replace and Replace All apply edits in reverse order so earlier replacements don't shift the offsets of later ones.
-
-Special character picker covers four categories with explicit symbol arrays: math operators and relations (≈200 symbols, ∀ through ⋿), Latin extended (À through ÿ), Greek (Α through ω), and punctuation (— – « » ¶ † etc.). Insertion goes through `document.execCommand("insertText")` so the contentEditable's native cursor position is respected and undo state stays consistent.
+This editor is built to support .txt and .md files. It includes standard text editor functionality including undo/redo, copy/paste/cut, and file saving. the editor also features a special characters dropdown picker that covers four different categories with specific symbols acceptable in the given file type: math operators and relations, Latin characters, Greek characters, and punctuation.
 
 ### Toolkit
 
 #### Toolkit Hub
-This is the launcher for the toolkit pages. It renders as a grid that is grouped by categories: math/computation, design/media, reference/utility. Each of the tiles in this grid contains the tool name and a brief description with an icon for easy selection and navigation to that built-in tool. It has built-in search to quickly filter the available tools. 
-
-Ten plugin pages, all client-side except Dictionary and Thesaurus which call the Merriam-Webster API.
+This is the launcher for the toolkit pages. It renders as a grid that is grouped by categories: math/computation, design/media, reference/utility. Each of the tiles in this grid contains the tool name and a brief description with an icon for easy selection and navigation to that built-in tool. It has built-in search to quickly filter the available tools. It features a set of experimental tools tht are all still under development. 
 
 #### Math / Computation
 
-##### Calculator
-Scientific calculator with a custom Shunting-yard tokenizer and RPN evaluator. Implicit multiplication (`2x` parses correctly), multi-letter variable splitting against the user's defined-variables dictionary so `xyz` resolves to `x*y*z` if all three are defined (greedy longest-match against known names, falling back to single-letter splits when no dictionary match exists), and a function table of roughly 40 entries: trig (sin, cos, tan, sec, csc, cot) and inverse trig (asin, acos, atan, atan2, asec, acsc, acot) with a rad/deg toggle that converts inputs to inverse-trig outputs in the active mode; hyperbolics (sinh, cosh, tanh, sech, csch, coth) and inverse hyperbolics (asinh, acosh, atanh, asech, acsch, acoth); exp, ln, log (base 10), logn (arbitrary base); sqrt, cbrt, pow, root; abs, floor, ceil, round, sign; hypot (variadic), clamp, mod, max/min/avg (variadic); fact (capped at n=170), perm, comb; toRad, toDeg.
-
-Live symbol formatting transforms input as the user types: `sqrt(` becomes `√(`, `**` and `^` map to exponent form, `*` rendered as `×` (with negative-lookbehind/ahead so it doesn't trigger inside identifier names), `<=`/`>=`/`!=` to `≤`/`≥`/`≠`, the full lowercase Greek set (alpha, beta, gamma, delta, epsilon, theta, lambda, mu, sigma, phi, omega, tau) plus pi/tau/infinity, and `+-`/`-+` to `±`/`∓`. Pipe characters auto-toggle between `abs(` and matching `)` based on whether an absolute-value scope is currently open.
-
-Fraction mode runs exact rational arithmetic. Float-to-fraction conversion uses continued-fraction expansion with a 1,000,000 max-denominator ceiling. Power operations check for perfect-nth-root reductions on `(p/q)^(m/n)` (split into integer-part-plus-fraction-part with `integerNthRootIfPerfect` testing q-th root candidates ±2 around the float approximation) and fall back to float on failure. Display formatting renders unicode superscript exponents (digits, +/-, decimal point, parens, plus most Latin letters), unicode fractions (`³⁄₄`) assembled from numerator+`⁄`+denominator, and subscript log bases. Variable assignment (`a = 5`, then use `a` in subsequent expressions) persists in-memory for the session and clears on reload.
-
-Equation solving (any expression with `=`) extracts a single variable to solve for (prefers `x` if present, otherwise the single detected variable), then tries bisection across seven hardcoded search ranges (`[-1e6, 1e6]` down through `[-5, 5]`), returning immediately on the first sign-change result. If all bisection attempts fail, falls back to Newton's method seeded from eleven points (0, ±1, ±2, ±5, ±10, ±100). Newton is the fallback, not a refinement step.
-
-Settings modal exposes: fraction-mode toggle, angle-mode toggle (rad/deg), rounding-mode toggle (decimal places vs significant figures, both 0/1-15), scientific-notation toggle with a configurable exponent threshold (1-12), and a live variables list with per-variable delete buttons.
-
-##### Factoring
-Six modes via tabs, each with step-by-step working displayed in the history pane below the result. Prime factorization uses trial division with `divisor*divisor > num` early-exit and exponent grouping (`120 = 2³ × 3 × 5`). Euclidean GCD with full quotient-remainder log per step. LCM via `a*b/gcd`. Divisor enumeration loops `i` up to `sqrt(n)` pushing both `i` and `n/i` per hit, dedups perfect-square self-pairs, sorts ascending.
-
-Quadratic factoring (`ax² + bx + c`) routes through a preprocessor that handles three input shapes before parsing: outer-parenthesis stripping (recursive), binomial-product expansion (`(x+1)(x+2)` form, parsed as two binomials and FOIL'd into standard form), and coefficient-times-polynomial expansion (`2(x²+3x+1)` form, distributing the leading scalar across the inner polynomial). Once in standard form, the engine computes the discriminant, branches on sign (negative returns "No real factors", non-perfect-square positive returns the four-decimal-place irrational roots without claiming a factorization), and reconstructs `a(x - r₁)(x - r₂)` for the integer-root case. Linear fallback when `a=0` (with optional GCF extraction). GCF extraction mode pulls the greatest common factor across coefficients out of the polynomial; returns the input unchanged when GCF ≤ 1.
-
-Step-by-step history is tagged with the mode used (rendered as `[MODE]` prefix). Different modes accept different input shapes: integer/divisors take a single integer with comma-stripping, GCD/LCM take comma-separated pairs, polynomial/GCF take expression strings. Output formatting converts `*` to `×` and bare hyphens to typographic minus `−`.
-
-Shares the live symbol-formatting layer with Calculator and Plot (the same superscript/subscript maps, fraction-assembly, log-base subscripting, and `applySymbolFormatting` pipeline drives all three pages).
-
-##### Matrix
-Up to 10x10 dual-matrix workspace (A and B, each independently sized). Operations include addition, subtraction, scalar multiplication on either matrix, transpose on either matrix, A×B and B×A as separate matrix-multiply operations, determinant via partial-pivot LU decomposition, **inverse via Gauss-Jordan elimination** (augments `[A|I]`, runs RREF, slices off the right half — the README of an earlier version called this LU-based, but it's RREF-based), RREF via Gaussian elimination with a row-operation log (each swap, scale, and subtract step recorded), rank derived from the post-RREF nonzero-row count, Ax=b solver via LU forward/back-substitution (with `B` overloaded as the right-hand-side column vector), and dominant eigenpair approximation via 1000-iteration power iteration with a `1e-10` convergence tolerance.
-
-Cell values render with a heatmap background scaled to the global min/max across both input matrices and the result simultaneously (so heatmap cells are comparable across all three grids). Hue 210 (blue) for negative values, hue 0 (red) for positive, dead-zone bypass for `|t| < 0.15`. Templates (zero, identity, random) for fast setup. Random fills with values in `[-10, 10]` rounded to one decimal. Import accepts CSV, whitespace-delimited, or semicolon-delimited input via a textarea (with row-by-row zero-padding for ragged input). Export writes CSV, JSON, or LaTeX (`\begin{bmatrix}...\end{bmatrix}`) to clipboard, plus a separate Download CSV button. A 50-entry rolling history shows past results with Preview, → A, and → B buttons that route any historical result back into the workspace.
-
-Eigen output stacks the eigenvalue as the first row above the eigenvector (so a 3x3 matrix produces a 4x1 column). Only the dominant eigenpair is computed.
-
-##### Plot
-Custom HTML5 canvas grapher with no third-party charting libraries. The viewport runs through a manual coordinate transform (`mathToScreen`/`screenToMath`) for shape hit-testing and rendering. Three function modes — `f(x)`, `d/dx`, and `∫f` — are display-only labels that change the prefix string in the formula bar (`y = `, `y' = `, `∫y = `); the user types whatever expression they want plotted, and there's no symbolic differentiation or integration step. The "derivative" and "integral" modes don't compute anything special; they're a UI hint, and the user types the derivative or antiderivative themselves.
-
-Multiple formulas can be plotted simultaneously, each with its own color, visibility toggle, and per-axis shading mode (to x-axis or to y-axis, rendered at ~15% alpha). The expression parser uses string substitution into a JavaScript expression that's then `eval`ed under namespaced `window.SAFE_MATH.*` and `window.CONSTANTS.*` aliases. Roughly the same 40-function table as the Calculator (sin/cos/tan + sec/csc/cot + their inverses, hyperbolics + reciprocals + their inverses, exp/ln/log/logn, sqrt/cbrt/pow/root, abs/floor/ceil/round/sign, hypot/clamp/fact/perm/comb, toRad/toDeg). The `sum`, `prod`, `integral` function names are accepted but evaluate to identity; they're symbol placeholders, not actual reductions. Implicit multiplication is inserted automatically (digit-letter, digit-paren, paren-digit, paren-paren, letter-digit; identifier-paren is preserved when the identifier is a known function name).
-
-Built-in constants table covers mathematical constants (pi, e, tau, phi/golden ratio, gamma/Euler-Mascheroni) plus the physics set (c, G, h, hbar, k, R, NA, qe, eps0, mu0, me, mp, mn, g0, sigmaSB, Ry, alpha, ke).
-
-Interactive shapes (circle, triangle, rectangle, polygon) render alongside the function plots. Each shape type supports drag-to-translate via a centroid handle, plus per-vertex or per-handle resize/reshape: circle has a radius drag handle, triangle has three vertex handles, rectangle has a bottom-right corner resize handle, polygon has per-vertex handles plus add/remove-vertex buttons in the sidebar (minimum three vertices enforced). All four shape types have an optional fill toggle (~15% alpha). Hit-testing runs in screen space against shape control points with a 10-pixel proximity threshold for handles and a 5-pixel band around the circle perimeter for body grabs.
-
-Bisection-based intercept finder samples the visible x-range at 4000 points, identifies sign changes between consecutive samples, and refines each candidate with 50 iterations of bisection. Adds the y-intercept (`f(0)`) when 0 is in the visible x-range. Dedups intercepts by `1e-4` tolerance. Detected intercepts render as colored dots with white-bordered labels showing `(x, y)` to 3 decimal places, drawn directly onto the canvas.
-
-Auto-detected variables in formula text prompt the user to add them as sliders (range `[-10, 10]`, step 0.1). Rad/deg toggle wraps trig inputs and inverse-trig outputs accordingly. Zoom in / zoom out / reset zoom buttons rescale the math viewport by 0.9x / 1.1x around its center. Virtual keyboard panel with a numbers/operators row and a functions/constants row covering Greek letters, fractions, and most of the function table.
+- Calculator
+- Factoring Calculator
+- Matrix Calculator
+- Plotting Calculator
 
 #### Design / Media
 
-##### Background Remover
-Four removal modes. Smart samples 10x10-pixel blocks from each of the four corners (up to 400 corner samples per image) and uses those as flood-fill seed colors. Color-key chroma-keys to a single picked color and runs as a full-image scan rather than a flood-fill, so disconnected matching regions all get removed. Edge-detect samples colors along the four image edges at a `width/20` step interval and treats those as targets for the flood-fill. Corner sampling grabs the four exact corner pixels and floods from there.
-
-For all modes except color-key, the core algorithm is an 8-connected BFS flood-fill seeded from edge pixels (top/bottom rows and left/right columns), with RGB Euclidean-distance tolerance against the target color set. The fill walks both cardinal and diagonal neighbors, which handles thin diagonal seams correctly. After the mask is built, an optional feather pass runs a BFS distance transform inward from the mask boundary, then applies a quadratic alpha falloff (`alpha = 1 - (d/smoothing)²`) to soften the mask edge within a configurable feather radius (0-10 pixels).
-
-Tolerance is configurable via slider (1-100) with named presets (Low/Medium/High/Maximum at 10/30/60/100). Background replacement is a solid color only; there's no image-replacement path. Output as PNG, JPEG, or WebP, with JPEG quality hardcoded at 0.9.
-
-##### Color Type Lab
-Brand palette generator (primary, secondary, accent) with HSL-based tint and shade derivation, configurable from 2 to 8 steps in each direction (lightness shifts of ±0.06 per step). Randomize button generates HSL-constrained random brand colors (saturation 0.6-0.9, lightness 0.45-0.55).
-
-Data-viz palette generation in three modes: sequential (RGB linear interpolation between two user-picked endpoint colors, so the hue can shift between endpoints), diverging (interpolation between two endpoints through a hardcoded white midpoint), and qualitative (evenly-spaced hues at fixed saturation and lightness, with configurable start hue, saturation, and lightness sliders). Configurable color count from 3 to 12.
-
-WCAG contrast checker with proper sRGB linearization (gamma decode via `(c+0.055)/1.055)^2.4` above the threshold, linear below), runs all four pass tiers (AA normal at 4.5:1, AAA normal at 7:1, AA large at 3:1, AAA large at 4.5:1) for any pair. Two-stop linear gradient editor with configurable angle (0-360°). Color harmony rules: complementary (180°), analogous (-30°/0°/+30°), triadic (0°/120°/240°), tetradic (0°/90°/180°/270°), and monochromatic (lightness shifts -0.2/0/+0.2).
-
-Image color extraction from an uploaded image: the input is resized to a max 400px dimension preserving aspect, then RGB channels are bucketed at 5-step increments per channel (`Math.floor(channel/5)*5`), pixels with alpha < 128 skipped. Buckets are deduplicated by Euclidean RGB distance with a 15-unit minimum separation, then sorted with **saturated colors prioritized over desaturated ones** (saturation > 0.15 ranks higher) before falling back to occurrence count. An "Apply Colors" button maps the extracted palette into the brand and gradient slots automatically (slots 0/1/2 → primary/secondary/accent, 3/4 → diverging endpoints, 0+5 → gradient endpoints).
-
-Modular type scale generator with configurable base size and a five-option ratio dropdown (minorThird 1.2, majorThird 1.25, perfectFourth 1.333, perfectFifth 1.5, golden 1.618). Configurable step range (default -2 to +8) and live preview at each step. Variable-font axis controls (weight, width, slant, optical size) applied via `font-variation-settings` on a sample-text preview. Exports as design tokens (JSON), CSS variables, or Tailwind theme config (mapping the modular scale to xs/sm/base/lg/xl/2xl/3xl/4xl/5xl/6xl with `base` anchored at index 2). All three exports support copy-to-clipboard and download.
-
-##### Compression Lab
-Image compression via canvas resize-and-reencode with format conversion (JPEG, PNG, WebP) and a quality slider (10-100%, ignored for PNG since it's lossless). PNG/JPEG/WebP run through `canvas.toBlob` after redrawing through optional resize. Resize supports either freeform width/height inputs or a set of presets (4K, 1440p, 1080p, 720p, 480p), with an aspect-ratio toggle that scales the longer dimension first.
-
-Text-like file compression (text/*, JSON, JS, XML, CSS, HTML, CSV) runs through a custom dictionary-based compress pass. Binary file compression uses the browser's native `CompressionStream` API with gzip and a streaming reader/writer pattern. Already-compressed file types (audio/*, video/*, application/pdf, .zip, .rar, .7z, .mp3, .mp4, .webm, .jpg, .jpeg, .png, .webp) get detected and pass through unchanged with a 0.0% reduction marker.
-
-The output-format dropdown also lists MP4/WebM/MP3/ZIP options inherited from a planned transcoding pipeline; those are non-functional in the current build and route image inputs through the standard image path. Side-by-side panels show original and compressed file sizes per file, plus aggregate Original Size, Compressed Size, and Space Saved (%) summary stats. Per-file dimensions appear on image outputs.
+- Background Remover
+- Color Type Lab
+- Compression Lab
 
 #### Reference / Utility
 
-##### Dictionary
-Merriam-Webster Collegiate JSON API client. The key resolver checks several env-var names in order (`VITE_REACT_APP_MW_DICTIONARY_KEY`, `VITE_REACT_APP_MW_DICT_KEY`, `VITE_MW_DICTIONARY_KEY`, `VITE_MW_KEY`, plus the legacy `process.env.REACT_APP_*` and `process.env.MW_*` equivalents). With no key set, the page renders a setup banner and refuses to fetch. Returns either suggestion chips (when the query doesn't match a headword, capped at 12 chips) or normalized entry cards with headword (asterisks converted to `·` middle-dot syllable separators), part-of-speech, up to six short definitions, and a "View Full Entry" link to merriam-webster.com (resolved from `meta.id` with the colon suffix stripped, opened with `target="_blank" rel="noopener noreferrer"`).
-
-##### Thesaurus
-Sibling to Dictionary, hits the Merriam-Webster Thesaurus API. The key resolver checks `VITE_REACT_APP_MW_THESAURUS_KEY`, `VITE_MW_THESAURUS_KEY`, `VITE_REACT_APP_MW_THES_KEY`, plus `process.env.REACT_APP_*` and `process.env.MW_*` equivalents. Walks the `def[].sseq[][]` structure to extract `syn_list` and `ant_list` buckets. Synonyms preserve their bucket-per-sense structure and render as multiple chip rows, capped at 3 buckets per entry and 10 chips per bucket (with a 24-chip flat fallback when buckets are empty). Antonyms get flattened into a single chip row capped at 16 chips. The same suggestion-chip fallback fires when MW returns string suggestions (capped at 10). Renders the same `meta.id`-based offsite link to merriam-webster.com/thesaurus/{slug}, with `target="_blank" rel="noopener noreferrer"`, and the same headword middle-dot syllable conversion via `*` → `·`.
-
-##### Timestamp Lab
-Live unix-second and unix-milliseconds counters that update every 100ms (with a Pause/Resume button), bidirectional unix to human conversion with a seconds/milliseconds unit toggle on the unix input, and a date/time picker with a "Use This Date" sync button that pushes the picker's value into the unix input. 37-zone IANA timezone grid that converts the configured timestamp to every zone simultaneously (the grid covers UTC, eleven Americas zones, the major European/Asian/Australasian/African zones, and Pacific outliers).
-
-Date difference calculator computes scalar deltas (milliseconds, seconds, minutes, hours, days, weeks, months, years) plus a Y-M-D-H-M-S breakdown object; the sidebar UI surfaces the days/weeks/months scalars from the result. Months use a 30.44-day average and years use 365.25 days, so non-calendar-aware approximations near month boundaries are expected.
-
-Add/subtract time across all units (seconds through years) with operation toggle, applied via the appropriate JavaScript Date setter (so calendar-aware for months/years, additive for the smaller units). Stopwatch with 10ms tick precision (`setInterval` at 10ms), formatted as `HH:MM:SS.cc`.
-
-Date metadata panel reports ISO week number (configurable Sunday/Monday start), day-of-year, quarter, leap year flag, weekday name, and UTC offset (in minutes, from the browser's local offset). Multi-epoch conversion across Unix (1970), Windows FILETIME (1601, with the correct 100-nanosecond-tick scaling), Mac HFS+ (1904), Cocoa NSDate (2001), and GPS (1980). Format-template reference list (ISO 8601, ISO Date, US/EU formats, full datetime, 12-hour time, RFC 2822, unix timestamp, milliseconds) — these are reference strings only; the page doesn't apply them to the configured timestamp. JSON export bundles the input config, six conversion outputs (ISO 8601, RFC 2822, unix seconds/ms, relative time like "3 days from now", and the human-readable string in the selected timezone), the full timezone conversion table, and the metadata block. Both Copy and Download buttons.
+- Dictionnary
+- Thesaurus
+- Timestamp Lab
 
 ---
 
@@ -338,19 +265,16 @@ dinolabs_webapi/
 └── vercel.json
 ```
 
-The route namespace is intentionally minimal. Calendar handles event CRUD. Database handles connection management (save, load, delete, test) plus query execution proxying with AES-256-CBC encrypted credential storage. Everything else (auth, profile, team, billing) routes through Dino Auth as a pass-through.
+The backend routes are intentionally designed to be minimal. Calendar handles event CRUD. Database handles connection management including saving, loading, deleting, and testing connections, plus query execution proxying and secure encrypted credential storage using AES-256-CBC. Everything else including auth, profile, and team routes through Dino Auth as a pass-through.
 
 ### Persistence
-- **File System Access API.** Modern Chromium browsers get direct file handles, so opening a file once gives the editor read/write access to it on subsequent sessions without re-prompting. Edits save back to the original file on disk.
-- **IndexedDB.** The fallback persistence layer for browsers without File System Access API support, and the working-buffer store for unsaved changes regardless of browser. Survives reloads.
-- **Session state.** Open files, editor positions, panel visibility, and per-page settings persist in IndexedDB so the workspace restores on next visit.
-- **PostgreSQL.** Backend storage for calendar events and saved database connection metadata only. No file content ever touches the backend.
-
+- File System Access API. Modern Chromium browsers get direct file handles, so opening a file once gives the editor read/write access to it on subsequent sessions without re-prompting. Edits save back to the original file on disk.
+- IndexedDB. The fallback persistence layer for browsers without File System Access API support, and the working-buffer store for unsaved changes regardless of browser. Survives reloads.
+- Session State. Things like open files and save state are preserved in IndexedDB so they can survive page refreshes..
+- PostgreSQL. Used for storing your calendar events and database access credentials. Otherwise only used for saving minimal usage metrics.
+- 
 ### Three.js
-Used in two places: the 3D Viewer (geometry rendering for STL/OBJ/PLY/OFF files) and the Plot toolkit page (interactive shapes overlaid on the canvas grapher). Both use manual orbit math rather than OrbitControls.
-
-### Linting
-Per-language linting scripts live in `pages/DinoLabsCode/DinoLabsLint/`. Each script exports a `lint(source)` function that returns an array of diagnostic objects (line, column, severity, message), and the editor surfaces them as gutter markers and underlines. Adding a new language is a matter of dropping a new file in that directory.
+Only used in the 3D Viewer for geometry rendering and the plotting calculator toolkit page. Both use manual orbit math rather than OrbitControls.
 
 ### Data sources
 - **Merriam-Webster Collegiate.** Dictionary plugin (frontend-direct, requires API key).
@@ -361,15 +285,14 @@ Per-language linting scripts live in `pages/DinoLabsCode/DinoLabsLint/`. Each sc
 
 ## Authentication and accounts
 
-Account creation, login, sessions, password resets, email verification, organization management, and role-based access are **all handled through Dino Auth**, a separate private API internal to the broader DinoLabs architecture. Dino Auth is **not part of this repository**, is not open-sourced, and is not available for self-hosting. DinoLabs is simply integrated with it: the platform does not implement its own auth, does not store passwords, and does not roll its own session management.
+All of your account information, settings, and profile and team management are handled through our secure internal platform Dino Auth. Dino Auth is not part of this repository, is not open-sourced, and is not available for self-hosting. DinoLabs is simply integrated with it: the platform does not implement its own auth, does not store passwords, and does not roll its own session management.
 
 What this means in practice:
 
-- Sign-up, login, reset, and verification flows all proxy through Dino Auth.
-- Sessions come back as bearer tokens with embedded user ID and optional org ID.
-- Team management (inviting members, role assignment, org-level settings) lives in the `DinoLabsTeam.jsx` page on the DinoLabs frontend but proxies all writes through Dino Auth.
-- Every protected route on the DinoLabs backend validates tokens against Dino Auth.
-- The `ProtectedRoute.jsx` component on the frontend handles redirects and token refresh transparently.
+- For the sake of this platform's simplicity and overall security, all sign-up, login, reset, and verification all flows through Dino Auth. 
+- Sessions come back as bearer tokens that have the user ID embedded in them, along with an optional org ID.
+- All account management happened on the `DinoLabsAccount.jsx` page in the frontend, and all backend calls are proxied through DinoAuth.
+- All team management happens on the `DinoLabsTeam.jsx` page in the frontend, and all backend calls are proxied through DinoAuth. 
 
 **Existing DinoLabs accounts work here.** If you already have an account from one of our other open-source DinoLabs platforms (DinoSat, etc.), those credentials sign you straight into DinoLabs. One account, every product. Forks intending to run standalone will need to swap in their own auth provider.
 
@@ -377,7 +300,7 @@ What this means in practice:
 
 ## Hosted version
 
-The intended way to use DinoLabs is the hosted version at **[DinoLabs](https://dinolabs.app)**. It runs on infrastructure that handles the file-handle quotas, IndexedDB sync, and the calendar/database backend, and accounts are free.
+The intended way to use DinoLabs is at our hosted version available at [DinoLabs](https://dino-labs.vercel.app/login). It runs on infrastructure that handles the file-handle quotas, IndexedDB sync, and the calendar/database backend. Account creation, usage, storage, and everything else is completely free, barring an unforeseen increase in traffic (I'm just one guy and this is a for fun project after all). 
 
 This repository exists primarily as a reference and as the development home of the project. Self-hosting is possible but is not the supported path.
 
@@ -423,29 +346,6 @@ On the frontend:
 - `VITE_AUTH_PROVIDER_URL`
 - `VITE_REACT_APP_MW_DICTIONARY_KEY`
 - `VITE_REACT_APP_MW_THESAURUS_KEY`
-
----
-
-## Design notes
-
-- **Client-side first.** Every editor and every toolkit plugin runs in the browser. The backend exists for the two cases that genuinely need shared state (calendar events visible across devices) or credentialed proxying (database connections that can't safely live in client-side code). Everything else is local. This keeps the privacy model simple: file content never leaves the browser unless the user explicitly exports it.
-- **Real persistence, not draft-only.** File System Access API gives the editors actual read/write file handles on disk. Opening a file once means subsequent edits save back to the original location with no upload/download dance. This is a different model than most browser-based editors and is the main reason DinoLabs targets Chromium.
-- **No third-party editor frameworks.** The Code Editor is `DinoLabsMirror`, not Monaco or CodeMirror. The Tabular Editor's formula engine is from-scratch, not HyperFormula or Formula.js. The Plot grapher is canvas, not Chart.js or Plotly. The reasons are partly bundle size, partly the fact that most third-party editor libraries have opinions about the surrounding UI that fight the workspace shell, and partly that it's more fun this way.
-- **Per-language linting is pluggable.** Adding a language to the Code Editor's lint pipeline means dropping a new file in `DinoLabsLint/` that exports a `lint()` function. No registration, no config, no rebuild step beyond the normal Vite reload.
-- **The Toolkit is a workshop, not a single-purpose tool.** The ten plugins share a launcher and a common chrome but are otherwise independent. The Calculator, Plot, and Factoring pages share a symbol-formatting engine (superscript exponents, unicode fractions, log subscript bases, RPN evaluation) because the code legitimately reuses, but everything else is self-contained.
-- **Desktop only, by design.** Multi-pane editors with file-tree sidebars and toolbars do not work on phones, and trying to gracefully degrade burns more time than it saves. `TouchDevice.jsx` shows a desktop-only message on touch devices instead of trying to fit the workspace into 380 pixels.
-- **The Monitoring page reads, never writes.** Everything it surfaces comes from browser APIs that the user already has access to. It exists because finding all of those values in dev tools is annoying, not because DinoLabs is doing anything special with them.
-
----
-
-## Limitations and known issues
-
-- File System Access API is Chromium-only. Firefox and Safari fall back to IndexedDB, which means files have to be re-uploaded each session and exports go through the download dialog rather than saving back in place.
-- The Code Editor's regex-based tokenizer is fast but not as accurate as a true parser. Edge cases in nested template literals, JSX inside TypeScript generics, and language-specific operator overloading occasionally produce mis-highlighting. Adding a tree-sitter pass for the most-used languages is on the roadmap.
-- The Database Explorer's connection manager pools per-user, but very long-running queries can starve the pool. Per-query timeouts mitigate this but don't eliminate it.
-- Dictionary and Thesaurus require Merriam-Webster API keys. Without them the plugins display a setup banner and don't function. The free tier is rate-limited.
-- The PDF Editor's annotation layer round-trips through a re-encode pass on save, which means PDFs with form-field signatures or DRM may not save cleanly.
-- Three.js scenes in the 3D Viewer with very large meshes (10M+ triangles) get sluggish on integrated graphics. The directional pad and orbit controls are designed to compensate, but a desktop GPU is the realistic target.
 
 ---
 
