@@ -24,7 +24,7 @@ Hosted at **[DinoLabs](https://dino-labs.vercel.app/login)**. Account creation, 
 
 ---
 
-## The pages
+## The Pages
 
 DinoLabs groups its pages into three categories: **Workstation** (account, productivity, and diagnostics surfaces), **Editors** (the seven file-type editors plus the PDF viewer), and **Toolkit** (the ten plugin utilities organized into Math/Computation, Design/Media, and Reference/Utility).
 
@@ -294,7 +294,7 @@ What this means in practice:
 
 ---
 
-## Hosted version
+## Hosted Version
 
 The intended way to use DinoLabs is at my hosted version available at [DinoLabs](https://dino-labs.vercel.app/login). It runs on infrastructure that handles the file-handle quotas, IndexedDB sync, and the calendar/database backend. Account creation, usage, storage, and everything else is completely free, barring an unforeseen increase in traffic (I'm just one guy and this is a for fun project after all). 
 
