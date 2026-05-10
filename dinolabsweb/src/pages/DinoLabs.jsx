@@ -2877,7 +2877,7 @@ export default function DinoLabs() {
                               onClick={() => switchTab(paneIndex, tab.id)}
                               draggable
                               onDragStart={(e) => handleDragStart(e, paneIndex, tab.id)}
-                              style={{ width: "fit-content" }}
+                              style={{ width: "max-content", flexShrink: 0, flexGrow: 0 }}
                             >
                               {unsavedChanges[tab.id] && (
                                 <Tippy content="Unsaved" theme="tooltip-light">
