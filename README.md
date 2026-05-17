@@ -4,9 +4,9 @@ Dino Labs is built to be a free, browser-based creative studio that anyone can a
 
 While this app is self-hosted, free to use, and bears all on this GitHub, it is worth noting that it is a for-fun project. I'm just a guy. I'm not a company. This is not my full time job. I'm not a frontend engineer. Permissions, usage rights, etc. are all subject to change if hosting becomes too much. I am planning to continue to improve all of the editors, continue improving all of the existing tools, and add new tools. The rate at which I do that is also likely going to be pretty variable. Feedback is always welcome.  
 
-This is a frontend product. The backend is kept intentionally small. This is mostly because this is a frontend learning project for me. How can I make some really cool editors and tools entirely (almost) on the frontend while using minimal existing libraries, packages, etc? That is the question that sparked this project. Calendar CRUD and a PostgreSQL connection proxy are the only two route groups, plus the Dino Auth pass-through for everything user/team-related. Most "creative studio" platforms in this category are thin clients on top of a heavy server. DinoLabs is the inverse.
+This is a frontend product. The backend is kept intentionally small. This is mostly because this is a frontend learning project for me. How can I make some really cool editors and tools entirely (almost) on the frontend while using minimal existing libraries, packages, etc? That is the question that sparked this project. Calendar CRUD and a PostgreSQL connection proxy are the only two route groups, plus the DinoAuth pass-through for everything user/team-related. Most "creative studio" platforms in this category are thin clients on top of a heavy server. DinoLabs is the inverse.
 
-Hosted at **[DinoLabs](https://dino-labs.vercel.app/login)**. Account creation, sessions, and team management are handled through Dino Auth (see below).
+Hosted at **[DinoLabs](https://dino-labs.vercel.app/login)**. Account creation, sessions, and team management are handled through DinoAuth (see below).
 
 **Stack:** React + Vite on the frontend, Node.js + Express + PostgreSQL on the backend. File System Access API + IndexedDB for persistence.
 
@@ -157,7 +157,7 @@ This is the launcher for the toolkit pages. It renders as a grid that is grouped
 
 ## Architecture
 
-DinoLabs is a two-repo project: a React frontend (`dinolabsweb/`) and a Node.js/Express backend (`dinolabs_webapi/`). The backend serves only the calendar CRUD routes, the database connection proxy, and the Dino Auth integration. The frontend handles all rendering, file I/O, editing, and computation.
+DinoLabs is a two-repo project: a React frontend (`dinolabsweb/`) and a Node.js/Express backend (`dinolabs_webapi/`). The backend serves only the calendar CRUD routes, the database connection proxy, and the DinoAuth integration. The frontend handles all rendering, file I/O, editing, and computation.
 
 ### Frontend (`dinolabsweb/`)
 
@@ -227,9 +227,9 @@ dinolabsweb/
 │   │   └── mainStyles/          Per-page styles, plus MirrorThemes for code editor
 │   ├── App.jsx
 │   ├── ErrorBoundary.jsx
-│   ├── ProtectedRoute.jsx       Token gate, redirects to Dino Auth
+│   ├── ProtectedRoute.jsx       Token gate, redirects to DinoAuth
 │   ├── TouchDevice.jsx          Mobile-block screen
-│   └── UseAuth.jsx              Dino Auth hook
+│   └── UseAuth.jsx              DinoAuth hook
 ├── Dockerfile
 ├── eslint.config.js
 ├── vite.config.js
@@ -246,7 +246,7 @@ dinolabs_webapi/
 │   │   ├── s3.js                Object storage client
 │   │   └── smtp.js              Transactional mail
 │   ├── middleware/
-│   │   ├── auth.js              Dino Auth token validation
+│   │   ├── auth.js              DinoAuth token validation
 │   │   ├── errorLogger.js
 │   │   └── rateLimiter.js
 │   ├── routes/
@@ -261,7 +261,7 @@ dinolabs_webapi/
 └── vercel.json
 ```
 
-The backend routes are intentionally designed to be minimal. Calendar handles event CRUD. Database handles connection management including saving, loading, deleting, and testing connections, plus query execution proxying and secure encrypted credential storage using AES-256-CBC. Everything else including auth, profile, and team routes through Dino Auth as a pass-through.
+The backend routes are intentionally designed to be minimal. Calendar handles event CRUD. Database handles connection management including saving, loading, deleting, and testing connections, plus query execution proxying and secure encrypted credential storage using AES-256-CBC. Everything else including auth, profile, and team routes through DinoAuth as a pass-through.
 
 ### Persistence
 - File System Access API. Modern Chromium browsers get direct file handles, so opening a file once gives the editor read/write access to it on subsequent sessions without re-prompting. Edits save back to the original file on disk.
@@ -281,11 +281,11 @@ Only used in the 3D Viewer for geometry rendering and the plotting calculator to
 
 ## Authentication and Accounts
 
-All of your account information, settings, and profile and team management are handled through my secure internal platform Dino Auth. Dino Auth is not part of this repository, is not open-sourced, and is not available for self-hosting. DinoLabs is simply integrated with it: the platform does not implement its own auth, does not store passwords, and does not roll its own session management.
+All of your account information, settings, and profile and team management are handled through my secure internal platform DinoAuth. DinoAuth is not part of this repository, is not open-sourced, and is not available for self-hosting. DinoLabs is simply integrated with it: the platform does not implement its own auth, does not store passwords, and does not roll its own session management.
 
 What this means in practice:
 
-- For the sake of this platform's simplicity and overall security, all sign-up, login, reset, and verification all flows through Dino Auth. 
+- For the sake of this platform's simplicity and overall security, all sign-up, login, reset, and verification all flows through DinoAuth. 
 - Sessions come back as bearer tokens that have the user ID embedded in them, along with an optional org ID.
 - All account management happens on the `DinoLabsAccount.jsx` page in the frontend, and all backend calls are proxied through DinoAuth.
 - All team management happens on the `DinoLabsTeam.jsx` page in the frontend, and all backend calls are proxied through DinoAuth. 
