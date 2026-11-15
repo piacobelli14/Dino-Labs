@@ -1,0 +1,1674 @@
+.videoVideoEditorWrapper {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    overflow: scroll;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.videoVideoEditorContentCropIndicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 400;
+}
+
+.videoVideoEditorToolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    min-height: 100%; 
+    max-height: 100%; 
+    min-width: 40%;
+    max-width: 40%;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+    border-right: 1px solid #3d4354 !important;
+    overflow: visible;
+}
+
+.videoVideoEditorContainerWrapper {
+    min-width: 60%;
+    max-width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+}
+
+.videoVideoEditorContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.videoVideoEditorContainerInnerStack {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden !important;
+}
+
+.videoVideoEditorCellWrapper, 
+.videoVideoEditorCellWrapperCollapsed,
+.videoVideoEditorCellWrapperLayers, 
+.videoVideoEditorCellWrapperLayersCollapsed,
+.videoVideoEditorCellWrapperStackNonLayers, 
+.videoVideoEditorCellWrapperStackNonLayersLong {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%; 
+    width: 100%;
+    padding-bottom: 0;
+    position: relative; 
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    margin: 0; 
+    gap: 0; 
+    overflow: visible;
+}
+
+.videoVideoEditorCellWrapperCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.videoVideoEditorCellWrapperStackNonLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: auto; 
+    box-sizing: border-box;
+}
+
+.videoVideoEditorCellWrapperStackNonLayersLong {
+    min-height: calc(100% - 60px); 
+    max-height: calc(100% - 60px); 
+    height: calc(100% - 60px); 
+    overflow: auto; 
+    box-sizing: border-box;
+    gap: 0; 
+    overflow-x: hidden; 
+    overflow-y: visible; 
+}
+
+.videoVideoEditorCellWrapperLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: scroll; 
+    border-top: none; 
+    box-sizing: border-box;
+}
+
+.videoVideoEditorCellWrapperLayersCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.videoVideoEditorHeaderFlex, 
+.videoVideoEditorHeaderFlexDark {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 16px;
+    min-height: 60px;
+    max-height: 60px;
+    margin-bottom: 16px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    border-bottom: 2px solid #3d4354 !important;
+}
+
+.videoVideoEditorHeaderFlexDark {
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+    position: sticky; 
+    top: 0; 
+    z-index: 900; 
+}
+
+.videoVideoEditorCellTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.videoVideoEditorCellFlexStackSplitWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 0 0 16px !important;
+    overflow: scroll; 
+}
+
+.videoVideoEditorCellFlexStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    overflow: scroll; 
+    padding: 0 16px 16px 16px !important;
+}
+
+.videoVideoEditorCellFlexStackHalf {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 46%;
+}
+
+.videoVideoEditorTextArea {
+    min-width: 100%; 
+    max-width: 100%;
+    height: 60px; 
+    box-sizing: border-box;
+    padding: 0.8rem 1rem; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    border: 1px solid #3d4354; 
+    border-radius: 6px; 
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); 
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    transition: all 0.2s ease;
+}
+
+.videoVideoEditorTextArea:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.videoVideoEditorTextArea:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.videoVideoEditorLargeStack,
+.videoVideoEditorMiniStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.videoVideoEditorLargeStack {
+    min-width: 40%;
+    max-width: 40%;
+}
+
+.videoVideoEditorMiniStack {
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.videoVideoEditorPositionInput,
+.videoVideoEditorPositionInputMini,
+.videoVideoEditorPositionInputFlexed,
+.videoVideoEditorPositionInputFlexedMini,
+.videoVideoEditorCSSInput {
+    padding: 0.8rem 0.8rem;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+.videoVideoEditorPositionInput::placeholder,
+.videoVideoEditorPositionInputMini::placeholder,
+.videoVideoEditorPositionInputFlexed::placeholder,
+.videoVideoEditorPositionInputFlexedMini::placeholder,
+.videoVideoEditorCSSInput::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.videoVideoEditorPositionInput:hover,
+.videoVideoEditorPositionInputMini:hover,
+.videoVideoEditorPositionInputFlexed:hover,
+.videoVideoEditorPositionInputFlexedMini:hover,
+.videoVideoEditorCSSInput:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.videoVideoEditorPositionInput:focus,
+.videoVideoEditorPositionInputMini:focus,
+.videoVideoEditorPositionInputFlexed:focus,
+.videoVideoEditorPositionInputFlexedMini:focus,
+.videoVideoEditorCSSInput:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.videoVideoEditorPositionInputFlexed {
+    width: 35%;
+    max-width: 35%;
+    min-width: 35%;
+}
+
+.videoVideoEditorPositionInputFlexedMini {
+    width: 20%;
+    max-width: 20%;
+    min-width: 20%;
+}
+
+.videoVideoEditorPositionInput {
+    max-width: 40%;
+}
+
+.videoVideoEditorPositionInputMini {
+    max-width: 20%;
+}
+
+.videoVideoEditorCSSInput {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.videoVideoEditorCellFlexTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    opacity: 1;
+    margin: 8px 0;
+}
+
+.videoVideoEditorCellFlexTitle span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin-left: 8px;
+}
+
+.videoVideoEditorCellFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-width: 100%;
+    gap: 4%;
+}
+
+.videoVideoEditorCellFlexSubStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px; 
+    width: 100%; 
+}
+
+.videoVideoEditorCellFlexSubRow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0;
+    width: 100%;
+    gap: 4%;
+}
+
+.videoVideoEditorCellFlexSupplement {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+}
+
+.videoVideoEditorCellMiniInputWrapper {
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px; 
+    min-width: 30%; 
+    max-width: 30%; 
+}
+
+.videoVideoEditorBrushSizeFlex {
+    width: 80%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5%;
+}
+
+.videoVideoEditorToolButton,
+.videoVideoEditorToolButtonBig,
+.videoVideoEditorToolButtonBigger,
+.videoVideoEditorToolButtonHeader,
+.videoVideoEditorToolButtonText,
+.videoVideoEditorToolButtonMini, 
+.videoVideoEditorToolSelect {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.8rem 0.8rem !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.videoVideoEditorToolButton {
+    min-width: 10%;
+    max-width: 10%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.videoVideoEditorToolButtonBig {
+    min-width: 50%;
+    max-width: 50%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.videoVideoEditorToolButtonBigger {
+    min-width: 40%;
+    max-width: 40%;
+    padding: 0.8rem 0.8rem !important;
+    gap: 8px;
+}
+
+.videoVideoEditorToolButtonHeader {
+    width: auto;
+    padding: 0.8rem 0.8rem !important;
+    max-height: 55%;
+}
+
+.videoVideoEditorToolButtonText {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.videoVideoEditorToolButtonMini {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.videoVideoEditorToolButton:hover,
+.videoVideoEditorToolButtonBig:hover,
+.videoVideoEditorToolButtonBigger:hover,
+.videoVideoEditorToolButtonHeader:hover,
+.videoVideoEditorToolButtonText:hover,
+.videoVideoEditorToolButtonMini:hover,
+.videoVideoEditorToolSelect:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    outline: none;
+}
+
+.videoVideoEditorToolButton:focus,
+.videoVideoEditorToolButtonBig:focus,
+.videoVideoEditorToolButtonBigger:focus,
+.videoVideoEditorToolButtonHeader:focus,
+.videoVideoEditorToolButtonText:focus,
+.videoVideoEditorToolButtonMini:focus,
+.videoVideoEditorToolSelect:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.videoVideoEditorColorPicker {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.videoVideoEditorColorPicker:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    border-color: #4ecdc4;
+}
+
+.videoConfrmationCheck {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0 0 0; 
+}
+
+.videoConfrmationCheck span {
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    margin: 0; 
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    overflow: hidden; 
+    white-space: nowrap;
+    padding: 0 8px; 
+}
+
+.videoImageResizer {
+    position: absolute;
+    cursor: move;
+}
+
+.videoVideoEditorContent {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+    max-width: none;
+    max-height: none;
+}
+
+.videoVideoEditorResizeHandle {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #000;
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.videoVideoEditorResizeHandle.top-left,
+.videoVideoEditorResizeHandle.bottom-left,
+.videoVideoEditorResizeHandle.top-right,
+.videoVideoEditorResizeHandle.bottom-right,
+.videoVideoEditorRotationHandle.top-left,
+.videoVideoEditorRotationHandle.bottom-left,
+.videoVideoEditorRotationHandle.top-right,
+.videoVideoEditorRotationHandle.bottom-right {
+    cursor: grab;
+}
+
+.videoVideoEditorResizeHandle:hover {
+    opacity: 0.6;
+}
+
+.videoVideoEditorCropRectangle .videoVideoEditorResizeHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+}
+
+.videoVideoEditorRotationHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.videoCornerInputGridWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.videoCornerInputFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.videoVideoEditorModeIndicator {
+    width: 33%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.videoVideoEditorModeIndicator span {
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+.videoVideoInputBottomBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    min-height: 10%;
+    max-height: 10%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 4;
+    box-sizing: border-box;
+    padding: 0 16px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    border-top: 1px solid #3d4354 !important;
+}
+
+.videoClipSliderTrack {
+    background-color: rgba(92, 43, 226, 0.2);
+    pointer-events: none;
+    height: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.videoClipSliderBar {
+    background-color: rgba(229, 75, 75, 0.8);
+    width: 12px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+}
+
+.videoVideoContentFlexBig,
+.videoVideoContentFlexSmall {
+    width: 33%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.videoVideoContentFlexBig {
+    width: auto;
+    justify-content: center;
+    overflow: scroll;
+}
+
+.videoVideoContentFlexSmall {
+    width: auto;
+}
+
+.videoVideoButton,
+.videoVideoButtonHelper,
+.videoVideoButtonSupplementLeading,
+.videoVideoButtonSupplementTrailing,
+.videoVideoButtonX {
+    background-color: transparent;
+    padding: 0;
+    color: #6f7789;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+.videoVideoButton {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.videoVideoButtonHelper {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.videoVideoButtonSupplementLeading,
+.videoVideoButtonSupplementTrailing {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.videoVideoButtonX {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    opacity: 0.8;
+}
+
+.videoVideoButtonSupplementLeading {
+    margin-right: 8px;
+}
+
+.videoVideoButtonSupplementTrailing {
+    margin-left: 8px;
+    margin-right: 16px;
+}
+
+.videoVideoButton:hover,
+.videoVideoButtonHelper:hover,
+.videoVideoButtonSupplementLeading:hover,
+.videoVideoButtonSupplementTrailing:hover,
+.videoVideoButtonX:hover {
+    color: #ebf0f8;
+    
+    outline: none;
+    border: none;
+}
+
+.videoVideoButton:focus,
+.videoVideoButtonHelper:focus,
+.videoVideoButtonSupplementLeading:focus,
+.videoVideoButtonSupplementTrailing:focus,
+.videoVideoButtonX:focus {
+    outline: none;
+    border: none;
+}
+
+.videoAudioWaveformDisplayBig,
+.videoAudioWaveformDisplaySmall {
+    width: 100%;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-bottom: 1px solid #3d4354;
+    overflow: visible;
+    position: relative;
+}
+
+.videoAudioWaveformDisplayBig {
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+    border: 1px solid #3d4354;
+}
+
+.videoAudioWaveformDisplaySmall {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    border: 1px solid #3d4354;
+    padding: 16px;
+}
+
+.videoAudioWaveformDisplayFlex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+}
+
+.videoVideoEditorTextOverlay {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ebf0f8;
+    border-color: #3d4354;
+    border-width: 1px;
+    border-radius: 6px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.videoVideoEditorTextDragSectionTop,
+.videoVideoEditorTextDragSectionBottom {
+    width: 100%;
+    height: 10%;
+    background-color: #3d4354;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+}
+
+.videoVideoEditorTextSpace {
+    height: calc(100% - 20%);
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    padding: 8px;
+}
+
+.videoVideoEditorTextSpace:hover,
+.videoVideoEditorTextSpace:focus {
+    border: none;
+    outline: none;
+}
+
+.videoVideoEditorTextCloseButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    color: #ebf0f8;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.videoVideoEditorTextResizeHandle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 40%;
+    background-color: #3d4354;
+    cursor: nwse-resize;
+}
+
+.videoTextEditorLayerList, 
+.videoTextEditorHistoryTimeline {
+    width: 100%; 
+    box-sizing: border-box;
+    padding: 0; 
+    margin: 0; 
+    height: 100%; 
+    overflow: scroll;
+}
+
+.videoTextEditorLayerList li, 
+.videoTextEditorHistoryItem {
+    width: 100%; 
+    overflow: scroll;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0;
+    cursor: pointer;
+    border-bottom: 1px solid #3d4354; 
+    transition: all 0.2s ease;
+    padding: 0; 
+}
+
+.videoTextEditorLayerList li:hover, 
+.videoTextEditorHistoryItem:hover {
+    background: rgba(78, 205, 196, 0.15);
+    transform: translateX(1px);
+}
+
+.videoTextEditorLayerListFlex {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px; 
+    padding: 0.6rem 0 0 0; 
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}
+
+.videoLayerItem {
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%; 
+}
+
+.videoTextEditorLayerList li small, 
+.videoTextEditorHistoryItem small {
+    font-size: 0.7rem !important; 
+    font-weight: 700; 
+    color: #6f7789;
+    padding: 0; 
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+     width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}
+
+.videoVideoEditorSliderWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 8px;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorSliderWrapper {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+}
+
+.videoVideoEditorCellGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 0 12px 16px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorCellFlex {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 8px;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorCellFlex > * {
+    min-width: 0;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorToolButton {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.4rem;
+    min-width: 2.4rem;
+    max-width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 !important;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorToolButtonBig {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: none;
+    height: 2.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.videoVideoEditorCellGroup .videoVideoEditorCellFlexStack {
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0;
+    overflow: visible;
+}
+
+.videoVideoEditorDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px;
+    max-height: 56vh;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    z-index: 20;
+    box-shadow: 0 0 20px black;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+    user-select: none;
+}
+
+.videoVideoEditorDropdownMenu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.videoVideoEditorDropdownMenu::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.videoVideoEditorDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.videoVideoEditorDropdownMenuItem:hover {
+    opacity: 0.8; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    transform: translateX(1px);
+}
+
+.videoVideoEditorShapeSurface {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    cursor: crosshair;
+}
+
+.videoVideoEditorShapeLayer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.videoVideoEditorSaveBanner {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 30;
+    padding: 10px 14px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.videoVideoEditorAdjustmentCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 16px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerList li {
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px !important;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-bottom: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerList li:hover {
+    border-color: #4ecdc4;
+    background: linear-gradient(160deg, #262b38 0%, #171b24 100%);
+    transform: none;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerListFlex {
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerListFlex .videoVideoEditorToolButton {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.1rem;
+    min-width: 2.1rem;
+    max-width: 2.1rem;
+    height: 2.1rem;
+    padding: 0 !important;
+    font-size: 0.72rem;
+}
+
+.videoVideoEditorCellWrapperLayers .videoVideoEditorPositionInput {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 2.1rem;
+    padding: 0 8px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.videoVideoEditorCellWrapperLayers .videoTextEditorLayerList:empty {
+    display: none;
+}
+
+.videoVideoEditorCellWrapperLayers .videoVideoEditorHeaderFlexDark {
+    margin-bottom: 16px;
+}
+
+.videoVideoEditorCornerInputGridWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.videoVideoEditorCornerInputFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.videoVideoEditorTimelinePlayhead {
+    position: absolute; 
+    top: 0;
+    bottom: 0; 
+    width: 2px; 
+    background-color: rgba(90, 11, 226, 0.8);
+    z-index: 10; 
+    pointer-events: none;
+}
+
+.videoVideoEditorTimelineHeader {
+    width: 100%; 
+    min-width: 100%;
+    max-width: 100%;
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem; 
+    box-sizing: border-box;
+    overflow-x: scroll !important;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    border-bottom: 1px solid #3d4354 !important;
+}
+
+.videoVideoEditorTimelineHeaderSupplementLeading {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem; 
+}
+
+.videoVideoEditorTimelineHeaderSupplementTrailing {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem; 
+}
+
+.videoVideoEditorTimelineHeaderSupplementLeading span,
+.videoVideoEditorTimelineHeaderSupplementTrailing span {
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    padding: 0; 
+    margin: 0; 
+    text-align: center;
+}
+
+.videoVideoEditorTimelineVideoTracks {
+    position: relative; 
+    height: 50%; 
+    width: 100%; 
+}
+
+.videoVideoEditorTimeline {
+    flex: 1; 
+    position: relative; 
+    overflow: auto; 
+    box-sizing: border-box;
+    border-bottom: 1px solid #3d4354 !important;
+    overflow: scroll !important;
+}
+
+.videoVideoEditorTimelineRuler {
+    height: 30px; 
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    position: relative;
+    overflow: hidden !important;
+    width: 100%; 
+}
+
+.videoVideoEditorTimelineRulerItem {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.4rem; 
+    position: absolute; 
+    top: 0; 
+    height: 100%; 
+    border-left: 1px solid #3d4354 !important;
+    color: #ebf0f8; 
+    font-size: 0.8rem;
+    font-weight: 700; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow: hidden !important;
+}
+
+.videoVideoEditorTimelineVideoTrackLabel {
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    width: 60px; 
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    display: flex; 
+    align-items: center;
+    border-left: 1px solid #3d4354 !important;
+    border-right: 1px solid #3d4354 !important;
+    border-top: 1px solid #3d4354 !important;
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    z-index: 11;
+    height: 100%; 
+    box-sizing: border-box;
+    padding: 0.6rem;
+}
+
+.videoVideoEditorTimelineVideoTrackContent {
+    position: relative; 
+    left: 60px; 
+    top: 0; 
+    width: calc(100% - 60px); 
+    background-color: rgba(0,0,0,0.3);
+    display: flex; 
+    align-items: center;
+    border-left: none;
+    border-right: 1px solid #3d4354 !important;
+    border-top: 1px solid #3d4354 !important;
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    z-index: 11;
+    min-height: 100%; 
+    max-height: 100%; 
+    box-sizing: border-box;
+    padding: 0.6rem;
+    border-radius: none; 
+}
+
+.videoVideoEditorTimelineVideoTrackTimelineClip {
+    position: absolute; 
+    left: 60px; 
+    top: 0; 
+    width: calc(100% - 60px); 
+    background-color: rgba(0,0,0,0.3);
+    display: flex; 
+    align-items: center;
+    border: 1px solid #3d4354 !important;
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    z-index: 11;
+    min-height: 100%; 
+    max-height: 100%; 
+    box-sizing: border-box;
+    padding: 0.6rem;
+    border-radius: none; 
+    height: 100%;
+    cursor: pointer; 
+}
+
+.videoVideoEditorTimelineVideoTrackTimelineClip span {
+    padding: 0; 
+    margin: 0; 
+    color: #ebf0f8; 
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.videoVideoEditorTimelineVideoTrackTimelineClipSection {
+    position: absolute; 
+    right: 0.6rem; 
+    display: flex; 
+    gap: 0.4rem; 
+    box-sizing: border-box;
+    padding: 0 0.4rem;
+}
+
+.videoVideoEditorTimelineVideoTrackTimelineClipSectionDelete {
+    border: none; 
+    border-radius: 6px; 
+    padding: 4px; 
+    cursor: pointer; 
+    background-color: rgba(229, 75, 75, 0.4);
+    color: #ebf0f8; 
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: 1px solid #3d4354; 
+    transition: all 0.2s ease;
+}
+
+.videoVideoEditorTimelineVideoTrackTimelineClipSectionDelete:hover {
+    opacity: 0.6; 
+}
+
+.videoVideoEditorTimelineVideoTrackContent:hover {
+    opacity: 0.6; 
+}
+
+.videoVideoEditorTimelineTrackContainer {
+    height: calc(100% - 30px);
+    min-height: calc(100% - 30px);
+    max-height: calc(100% - 30px);
+    width: 100%; 
+    gap: 0; 
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.videoVideoEditorAudioControls {
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px; 
+    padding: 0 8px; 
+    box-sizing: border-box;
+}
+
+.videoVideoEditorPlaybackControls {
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px; 
+    padding: 0 8px; 
+    box-sizing: border-box;
+}
+
+.videoVideoContentFlex {
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px; 
+    padding: 0 8px; 
+    box-sizing: border-box;
+}
+
+.videoVideoEditoreditControls {
+    display: flex; 
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px; 
+    padding: 0 8px; 
+    box-sizing: border-box;
+}
+
+.videoVideoInputBottomBarFrameSupplement {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: auto;
+    width: 100%;
+    height: 20%;
+    min-height: 20%;
+    max-height: 20%;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-top: 1px solid #3d4354;
+    position: relative;
+    padding: 0.8rem 1rem;
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.videoVideoInputTopBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    min-height: 10%;
+    max-height: 10%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 4;
+    box-sizing: border-box;
+    padding: 0 16px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+}
+
+.videoVideoInputTopBar {
+    border-bottom: 1px solid #3d4354 !important;
+}
+
+.videoVideoInputBottomBarTimelineSupplement {
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: space-between;
+    width: 100%;
+    height: 40%;
+    min-height: 40%;
+    max-height: 40%;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-top: 1px solid #3d4354;
+    position: relative;
+    padding: 0; 
+    box-sizing: border-box;
+    gap: 0;
+    overflow: hidden;
+}
+
+.videoVideoInputBottomBarFrameSupplementImageWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.videoVideoInputBottomBarFrameSupplementImage {
+    width: auto;
+    height: 60%;
+    min-height: 60%;
+    max-height: 60%;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.6rem;
+}
+
+.videoVideoInputBottomBarFrameSupplementImage:hover,
+.videoVideoInputBottomBarFrameSupplementImage:focus {
+    opacity: 0.4;
+    transform: scale(1.02);
+}
+
+.videoVideoInputBottomBarFrameSupplementImageText {
+    color: #ebf0f8;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.videoVideoPlaybackButton {
+    background-color: transparent;
+    padding: 0;
+    color: #6f7789;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+.videoVideoPlaybackButton {
+    font-size: 0.7rem;
+    font-weight: 700; 
+    opacity: 1.0;
+}
+
+.videoVideoPlaybackButton:hover {
+    color: #ebf0f8;
+    opacity: 0.6;
+    transform: scale(1.1);
+    outline: none;
+    border: none;
+}
+
+.videoVideoPlaybackButton:focus {
+    outline: none;
+    border: none;
+}
+
+.videoVideoEditorSlider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 6px;
+  margin: 0;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+
+.videoVideoEditorSlider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+.videoVideoEditorSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.videoVideoEditorSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.videoVideoEditorSlider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.videoVideoEditorSlider::-moz-range-track {
+  height: 6px;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+}
+
+.videoVideoEditorSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.videoVideoEditorSlider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.videoVideoEditorSlider::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+.videoConfrmationCheck input[type="checkbox"] {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #13151a;
+  border: 2px solid #3d4354;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.videoConfrmationCheck input[type="checkbox"]:checked {
+  background: #4ecdc4;
+  border-color: #4ecdc4;
+}
+
+.videoConfrmationCheck input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: solid #08090c;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.dropdown.videoVideoFrameIntervalDropdown {
+  width: 110px;
+}
+
+.videoVideoInputBottomBar .dropdown.videoVideoFrameIntervalDropdown .dropdownHeader {
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+}
+
+.videoVideoFrameIntervalDropdownDisabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.videoVideoContentFlexSmall:has(.dropdown) {
+  overflow: visible;
+}
+
+.videoVideoInputBottomBar .dropdownOptions {
+  top: auto;
+  bottom: 100%;
+  border-top: 2px solid var(--dd-border-open);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}

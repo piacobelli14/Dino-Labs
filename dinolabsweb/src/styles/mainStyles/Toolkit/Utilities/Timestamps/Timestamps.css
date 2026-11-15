@@ -1,0 +1,806 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.toolkitTimestampLabApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.toolkitTimestampLabCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitTimestampLabToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.toolkitTimestampLabTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.toolkitTimestampLabTitle svg {
+  color: #4ecdc4;
+}
+
+.toolkitTimestampLabStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitTimestampLabStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.toolkitTimestampLabStatusItem:last-child {
+  border-right: none;
+}
+
+.toolkitTimestampLabStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitTimestampLabStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.toolkitTimestampLabStatusAccent,
+.toolkitTimestampLabStatusAccent svg {
+  color: #4ecdc4;
+}
+
+.toolkitTimestampLabShell {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  overflow: hidden;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitTimestampLabSidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid #3d4354;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.toolkitTimestampLabSection,
+.toolkitTimestampLabCard {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-bottom: 24px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.toolkitTimestampLabSectionTitle,
+.toolkitTimestampLabCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  flex-shrink: 0;
+}
+
+.toolkitTimestampLabSectionTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitTimestampLabCardTitle {
+  justify-content: space-between;
+}
+
+.toolkitTimestampLabSection > :not(.toolkitTimestampLabSectionTitle) {
+  margin: 14px 24px 0;
+}
+
+.toolkitTimestampLabCard > :not(.toolkitTimestampLabCardTitle) {
+  margin: 16px 24px 0;
+}
+
+.toolkitTimestampLabSectionTitle + *,
+.toolkitTimestampLabCardTitle + * {
+  margin-top: 20px !important;
+}
+
+.toolkitTimestampLabMain {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.toolkitTimestampLabMainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px;
+  align-items: stretch;
+}
+
+.toolkitTimestampLabCardWide {
+  grid-column: 1 / -1;
+}
+
+.toolkitTimestampLabRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.toolkitTimestampLabLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabSmall {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  font-variant-numeric: tabular-nums;
+}
+
+.toolkitTimestampLabActions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolkitTimestampLabActions > * {
+  flex: 1 1 0;
+  min-width: max-content;
+}
+
+.toolkitTimestampLabBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.toolkitTimestampLabBtn {
+  border-color: #4ecdc4;
+}
+
+.toolkitTimestampLabBtn.toolkitTimestampLabSubtle {
+  border-color: #3d4354;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitTimestampLabBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitTimestampLabBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toolkitTimestampLabRow input[type="range"] {
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.toolkitTimestampLabRow input[type="range"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolkitTimestampLabRow input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border: 2px solid #12151b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.toolkitTimestampLabRow input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border: 2px solid #12151b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.toolkitTimestampLabInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  color-scheme: dark;
+  caret-color: #4ecdc4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitTimestampLabInput::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.toolkitTimestampLabInput:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitTimestampLabInput:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.toolkitTimestampLabInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolkitTimestampLabCopyBtn {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  color: #9aa3b5;
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitTimestampLabCopyBtn:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+}
+
+.toolkitTimestampLabCopyBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitTimestampLabCode {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  background: #12151b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #cdd4e4;
+  white-space: pre;
+}
+
+.toolkitTimestampLabExportBlock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitTimestampLabExportHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid #3d4354;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+}
+
+.toolkitTimestampLabExportTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitTimestampLabExportActions {
+  display: flex;
+  gap: 8px;
+}
+
+.toolkitTimestampLabExportActions .toolkitTimestampLabBtn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.74rem;
+  border-color: #3d4354;
+}
+
+.toolkitTimestampLabLiveDisplay {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 14px 16px;
+  text-align: center;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitTimestampLabLiveValue {
+  font-size: 26px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.toolkitTimestampLabLiveMs {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #4ecdc4;
+}
+
+.toolkitTimestampLabLiveLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabDiffResult {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.toolkitTimestampLabDiffItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitTimestampLabDiffValue {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  font-variant-numeric: tabular-nums;
+}
+
+.toolkitTimestampLabDiffLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabStopwatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitTimestampLabStopwatchDisplay {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  font-variant-numeric: tabular-nums;
+}
+
+.toolkitTimestampLabFormatGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolkitTimestampLabFormatItem,
+.toolkitTimestampLabTimezoneItem,
+.toolkitTimestampLabEpochInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.toolkitTimestampLabFormatItem:hover,
+.toolkitTimestampLabTimezoneItem:hover {
+  border-color: rgba(78, 205, 196, 0.5);
+}
+
+.toolkitTimestampLabFormatLabel,
+.toolkitTimestampLabTimezoneName,
+.toolkitTimestampLabEpochDesc {
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabFormatValue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
+.toolkitTimestampLabMetaGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 8px;
+}
+
+.toolkitTimestampLabMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitTimestampLabMetaIcon {
+  flex-shrink: 0;
+  color: #4ecdc4;
+  font-size: 0.9rem;
+}
+
+.toolkitTimestampLabMetaContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toolkitTimestampLabMetaValue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitTimestampLabMetaLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitTimestampLabTimezoneGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.toolkitTimestampLabTimezoneHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toolkitTimestampLabTimezoneValue {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitTimestampLabEpochName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitTimestampLabTemplateList {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitTimestampLabTemplateItem {
+  padding: 10px 12px;
+  border-bottom: 1px solid #3d4354;
+  transition: background 0.2s ease;
+}
+
+.toolkitTimestampLabTemplateItem:last-child {
+  border-bottom: none;
+}
+
+.toolkitTimestampLabTemplateItem:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.toolkitTimestampLabTemplateHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toolkitTimestampLabTemplateName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitTimestampLabTemplateFormat {
+  padding: 4px 9px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #9aa3b5;
+  white-space: nowrap;
+}
+
+.toolkitTimestampLabSidebar,
+.toolkitTimestampLabMain,
+.toolkitTimestampLabCode,
+.toolkitTimestampLabTimezoneGrid {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.toolkitTimestampLabSidebar::-webkit-scrollbar,
+.toolkitTimestampLabMain::-webkit-scrollbar,
+.toolkitTimestampLabCode::-webkit-scrollbar,
+.toolkitTimestampLabTimezoneGrid::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.toolkitTimestampLabSidebar::-webkit-scrollbar-track,
+.toolkitTimestampLabMain::-webkit-scrollbar-track,
+.toolkitTimestampLabCode::-webkit-scrollbar-track,
+.toolkitTimestampLabTimezoneGrid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toolkitTimestampLabSidebar::-webkit-scrollbar-thumb,
+.toolkitTimestampLabMain::-webkit-scrollbar-thumb,
+.toolkitTimestampLabCode::-webkit-scrollbar-thumb,
+.toolkitTimestampLabTimezoneGrid::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.toolkitTimestampLabSidebar::-webkit-scrollbar-thumb:hover,
+.toolkitTimestampLabMain::-webkit-scrollbar-thumb:hover,
+.toolkitTimestampLabCode::-webkit-scrollbar-thumb:hover,
+.toolkitTimestampLabTimezoneGrid::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1200px) {
+  .toolkitTimestampLabMainGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .toolkitTimestampLabShell {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .toolkitTimestampLabSidebar {
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid #3d4354;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitTimestampLabMain {
+    overflow: visible;
+  }
+
+  .toolkitTimestampLabMainGrid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitTimestampLabToolBar {
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolkitTimestampLabBtn,
+.toolkitTimestampLabInput,
+.toolkitTimestampLabCopyBtn,
+.toolkitTimestampLabFormatItem,
+.toolkitTimestampLabTimezoneItem,
+.toolkitTimestampLabTemplateItem {
+    transition: none;
+  }
+}
+
+.toolkitTimestampLabSection {
+  overflow: visible;
+}
+
+.toolkitTimestampLabSection > .toolkitTimestampLabSectionTitle {
+  border-radius: 5px 5px 0 0;
+}
+
+.toolkitTimestampLabCard {
+  overflow: visible;
+}
+
+.toolkitTimestampLabCard > .toolkitTimestampLabCardTitle {
+  border-radius: 5px 5px 0 0;
+}

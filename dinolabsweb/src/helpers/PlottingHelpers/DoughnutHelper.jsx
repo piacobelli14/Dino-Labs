@@ -3,6 +3,7 @@ import ReactEcharts from "echarts-for-react";
 import useAuth from "../../UseAuth.jsx";
 import PropTypes from 'prop-types'; 
 
+
 const DoughnutPlot = ({ cellType, data, organizationName, fontSizeMultiplier }) => {
   const { token, userID, organizationID, loading } = useAuth();
   const [screenSize, setScreenSize] = useState(window.innerWidth);

@@ -1,34 +1,35 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
+
 import { useEffect, useState } from "react";
 import "./styles/App.css";
-import useIsTouchDevice from "./TouchDevice";
-import ProtectedRoute from "./ProtectedRoute";
-import DinoLabsMobile from "./helpers/Mobile";
-import Login from "./pages/Authentication/AuthLogin"; 
-import Register from "./pages/Authentication/AuthRegister"; 
-import Reset from "./pages/Authentication/AuthReset";
-import Verification from "./pages/Authentication/AuthVerifyEmail";
-import DinoLabs from "./pages/DinoLabs"; 
-import DinoLabsAccount from "./pages/DinoLabsAccount/DinoLabsAccount";
-import DinoLabsTeam from "./pages/DinoLabsAccount/DinoLabsTeam";
-import DinoLabsMonitor from "./pages/DinoLabsAccount/DinoLabsMonitoring";
-import DinoLabsCalendar from "./pages/DinoLabsAccount/DinoLabsCalendar";
-import DinoLabsDatabase from "./pages/DinoLabsAccount/DinoLabsDatabase";
-import DinoLabsPlugins from "./pages/DinoLabsPlugins/DinoLabsPlugins";
-import DinoLabsPluginsDictionary from "./pages/DinoLabsPlugins/DinoLabsPluginsDictionary/DinoLabsPluginsDictionary";
-import DinoLabsPluginsThesaurus from "./pages/DinoLabsPlugins/DinoLabsPluginsThesaurus/DinoLabsPluginsThesaurus";
-import DinoLabsPluginsCalculator from "./pages/DinoLabsPlugins/DinoLabsPluginsCalculator/DinoLabsPluginsCalculator";
-import DinoLabsPluginsMatrix from "./pages/DinoLabsPlugins/DinoLabsPluginsMatrix/DinoLabsPluginsMatrix";
-import DinoLabsPluginsFactoring from "./pages/DinoLabsPlugins/DinoLabsPluginsFactoring/DinoLabsPluginsFactoring";
-import DinoLabsPluginsColorTypeLab from "./pages/DinoLabsPlugins/DinoLabsPluginsColorTypeLab/DinoLabsPluginsColorTypeLab";
-import DinoLabsPluginsTimestampLab from "./pages/DinoLabsPlugins/DinoLabsPluginsTimestampLab/DinoLabsPluginsTimestampLab";
-import DinoLabsPluginsCompressionLab from "./pages/DinoLabsPlugins/DinoLabsPluginsCompressionLab/DinoLabsPluginsCompressionLab";
-import DinoLabsPluginsPlot from "./pages/DinoLabsPlugins/DinoLabsPluginsPlot/DinoLabsPluginsPlot";
-import DinoLabsPluginsBackgroundRemover from "./pages/DinoLabsPlugins/DinoLabsPluginsBackgroundRemover/DinoLabsPluginsBackgroundRemover";
+
+import Login from "./pages/Authentication/AuthLogin.jsx";
+import Register from "./pages/Authentication/AuthRegister.jsx";
+import Reset from "./pages/Authentication/AuthReset.jsx";
+import Account from "./pages/Account/Account.jsx";
+import Team from "./pages/Account/Team.jsx";
+import System from "./pages/Account/System.jsx";
+import Calendar from "./pages/Account/Calendar.jsx";
+import Database from "./pages/Account/Database.jsx";
+import Studio from "./pages/Studio/Studio.jsx";
+import Calculator from "./pages/Toolkit/Math/Calculator/Calculator.jsx";
+import Plotting from "./pages/Toolkit/Math/Plotting/Plotting.jsx";
+import Factoring from "./pages/Toolkit/Math/Factoring/Factoring.jsx";
+import Matrix from "./pages/Toolkit/Math/Matrix/Matrix.jsx";
+import Statistics from "./pages/Toolkit/Math/Statistics/Statistics.jsx";
+import ColorType from "./pages/Toolkit/Design/ColorType/ColorType.jsx";
+import BackgroundRemove from "./pages/Toolkit/Design/BackgroundRemove/BackgroundRemove.jsx";
+import Compression from "./pages/Toolkit/Utilities/Compression/Compession.jsx";
+import Timestamps from "./pages/Toolkit/Utilities/Timestamps/Timestamps.jsx";
+import Regex from "./pages/Toolkit/Utilities/Regex/Regex.jsx";
+import Latex from "./pages/Toolkit/Utilities/Latex/Latex.jsx";
+import Encoding from "./pages/Toolkit/Utilities/Encoding/Encoding.jsx";
+import Dictionary from "./pages/Toolkit/Text/Dictionary/Dictionary.jsx";
+import Thesaurus from "./pages/Toolkit/Text/Thesaurus/Thesaurus.jsx";
 
 function App() {
   const [osClass, setOsClass] = useState("");
-  const isTouchDevice = useIsTouchDevice();
 
   useEffect(() => {
     const detectOS = () => {
@@ -48,106 +49,133 @@ function App() {
   return (
     <Router>
       <div className={`App ${osClass}`}>
-        {!isTouchDevice ? (
         <Routes>
-          <Route path="/login" element={<Login/>}/>
-          <Route path="/register" element={<Register/>}/>
-          <Route path="/reset" element={<Reset/>}/>
-          <Route path="/verify" element={<Verification/>}/>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/reset" element={<Reset />} />
 
-          <Route path="/dinolabs" element={
-            <ProtectedRoute>
-              <DinoLabs />
-            </ProtectedRoute>
-          } />
           <Route path="/account" element={
             <ProtectedRoute>
-              <DinoLabsAccount />
+              <Account />
             </ProtectedRoute>
           } />
+
           <Route path="/team" element={
             <ProtectedRoute>
-              <DinoLabsTeam />
+              <Team />
             </ProtectedRoute>
           } />
-          <Route path="/monitoring" element={
-            <ProtectedRoute>
-              <DinoLabsMonitor />
-            </ProtectedRoute>
-          } />
+
           <Route path="/calendar" element={
             <ProtectedRoute>
-              <DinoLabsCalendar />
+              <Calendar />
             </ProtectedRoute>
           } />
+
+          <Route path="/system" element={
+            <ProtectedRoute>
+              <System />
+            </ProtectedRoute>
+          } />
+
           <Route path="/database" element={
             <ProtectedRoute>
-              <DinoLabsDatabase />
+              <Database />
             </ProtectedRoute>
           } />
-          <Route path="/plugins" element={
+
+          <Route path="/studio" element={
             <ProtectedRoute>
-              <DinoLabsPlugins />
+              <Studio />
             </ProtectedRoute>
           } />
-          <Route path="/dictionary" element={
-            <ProtectedRoute>
-              <DinoLabsPluginsDictionary />
-            </ProtectedRoute>
-          } />
-          <Route path="/thesaurus" element={
-            <ProtectedRoute>
-              <DinoLabsPluginsThesaurus />
-            </ProtectedRoute>
-          } />
+
           <Route path="/calculator" element={
             <ProtectedRoute>
-              <DinoLabsPluginsCalculator />
+              <Calculator />
             </ProtectedRoute>
           } />
-          <Route path="/matrix" element={
+
+          <Route path="/plotting" element={
             <ProtectedRoute>
-              <DinoLabsPluginsMatrix />
+              <Plotting />
             </ProtectedRoute>
           } />
+
           <Route path="/factoring" element={
             <ProtectedRoute>
-              <DinoLabsPluginsFactoring />
+              <Factoring />
             </ProtectedRoute>
           } />
-          <Route path="/colortypelab" element={
+
+          <Route path="/matrix" element={
             <ProtectedRoute>
-              <DinoLabsPluginsColorTypeLab />
+              <Matrix />
             </ProtectedRoute>
           } />
-          <Route path="/timestamplab" element={
+
+          <Route path="/statistics" element={
             <ProtectedRoute>
-              <DinoLabsPluginsTimestampLab />
+              <Statistics />
             </ProtectedRoute>
           } />
-          <Route path="/compressionlab" element={
+
+          <Route path="/colortype" element={
             <ProtectedRoute>
-              <DinoLabsPluginsCompressionLab />
+              <ColorType />
             </ProtectedRoute>
           } />
-          <Route path="/backgroundremover" element={
+
+          <Route path="/backgroundremove" element={
             <ProtectedRoute>
-              <DinoLabsPluginsBackgroundRemover />
+              <BackgroundRemove />
             </ProtectedRoute>
           } />
-          <Route path="/plot" element={
+
+          <Route path="/compression" element={
             <ProtectedRoute>
-              <DinoLabsPluginsPlot />
+              <Compression />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/timestamps" element={
+            <ProtectedRoute>
+              <Timestamps />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/regex" element={
+            <ProtectedRoute>
+              <Regex />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/latex" element={
+            <ProtectedRoute>
+              <Latex />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/encoding" element={
+            <ProtectedRoute>
+              <Encoding />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/dictionary" element={
+            <ProtectedRoute>
+              <Dictionary />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/thesaurus" element={
+            <ProtectedRoute>
+              <Thesaurus />
             </ProtectedRoute>
           } />
 
           <Route index element={<Navigate to="/login" replace />} />
         </Routes>
-        ) : (
-          <Routes>
-            <Route path="*" element={<DinoLabsMobile />} />
-          </Routes>
-        )}
       </div>
     </Router>
   );

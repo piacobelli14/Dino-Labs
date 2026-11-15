@@ -12,7 +12,10 @@
     align-items: center;
     width: 100vw;
     height: 100vh;
+    padding-bottom: 2vh; 
 }
+
+
 
 .verifyHeroBackgroundWrapper {
     position: relative; 
@@ -43,13 +46,13 @@
 .verifyBackgroundBlur1 {
     top: -10rem;
     right: -10rem;
-    background: rgba(129, 52, 202, 0.2);
+    background: rgba(127, 233, 225, 0.05);
 }
 
 .verifyBackgroundBlur2 {
     bottom: -10rem;
     left: -10rem;
-    background: rgba(58, 23, 110, 0.2);
+    background: rgba(165, 240, 234, 0.035);
     animation-delay: 0.1s;
 }
 
@@ -59,7 +62,7 @@
     transform: translate(-50%, -50%);
     width: 24rem;
     height: 24rem;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(127, 233, 225, 0.03);
     animation-delay: 0.1s;
 }
 
@@ -93,14 +96,14 @@
 
 .unverifiedEmailIcon {
     font-size: 1.6rem; 
-    color: #f1f1f1; 
+    color: #ebf0f8; 
     margin-bottom: 1rem; 
 }
 
 .unverifiedEmailText {
     font-size: 0.8rem; 
     font-weight: 600; 
-    color: #f1f1f1; 
+    color: #ebf0f8; 
     font-style: italic; 
     margin-bottom: 1rem;
     width: 80%; 
@@ -111,7 +114,7 @@
     font-weight: 900; 
     font-style: italic;
     text-decoration: underline;
-    color: #D8C1F5; 
+    color: #a5f0ea; 
     cursor: pointer; 
 }
 
@@ -149,19 +152,19 @@
     box-shadow: 0 0 3px white; 
     margin-bottom: 1rem; 
     z-index: 2;
-    border: 1px solid #A3A3A3; 
+    border: 1px solid #5a6274; 
 }
 
 .unverifiedEmailReset:hover, 
 .unverifiedEmailRefresh:hover {
     opacity: 0.6;
-    border: 1px solid #A3A3A3; 
+    border: 1px solid #5a6274; 
     outline: none;
 }
 
 .unverifiedEmailReset:focus, 
 .unverifiedEmailRefreshfocus {
-    border: 1px solid #A3A3A3; 
+    border: 1px solid #5a6274; 
     outline: none;
 }
 
@@ -193,17 +196,15 @@
     padding: 0.8rem 1rem; 
     font-size: 0.7rem ; 
     font-weight: 700; 
-    color: #c1c1c1; 
+    color: #aab4c8; 
     background-color: rgba(255,255,255,0.05);  
-    border: 1px solid #c1c1c1; 
+    border: 1px solid #aab4c8; 
     border-radius: 6px; 
     outline: none; 
     margin-bottom: 1.5rem; 
 }
 
 .unverifiedInputWrapper:focus {
-    border: 1px solid #c1c1c1;
+    border: 1px solid #aab4c8;
     outline: none;  
 }
-
-

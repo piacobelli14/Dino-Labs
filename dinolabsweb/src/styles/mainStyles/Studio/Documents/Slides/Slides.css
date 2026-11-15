@@ -1,0 +1,833 @@
+.slidesSlidesContentWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.slidesSlidesToolbarWrapper {
+    width: 100%;
+    flex-shrink: 0;
+    z-index: 4;
+}
+
+.slidesSlidesToolBar {
+    width: 100%;
+    padding: 10px 24px 12px 24px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-bottom: 1px solid #3d4354;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.slidesSlidesTitleWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.slidesSlidesFileNameStack {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.slidesSlidesFileNameInput {
+    padding: 0.6rem 0.8rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 6rem;
+    max-width: 32%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0;
+}
+
+.slidesSlidesFileNameInput svg {
+    margin-right: 8px;
+}
+
+.slidesSlidesOperationsButtonsWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 8px;
+    padding: 2px 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.slidesSlidesOperationsButtonsWrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.slidesSlidesOperationsButtonsWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.slidesSlidesOperationsButton {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.slidesSlidesOperationsButton {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    outline: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.slidesSlidesOperationsButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    outline: none;
+}
+
+.slidesSlidesOperationsButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.slidesSlidesDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px;
+    max-height: 56vh;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    z-index: 20;
+    box-shadow: 0 0 20px black;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+    user-select: none;
+}
+
+.slidesSlidesDropdownMenu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.slidesSlidesDropdownMenu::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.slidesSlidesDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesDropdownMenuItem:hover {
+    opacity: 0.8; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    transform: translateX(1px);
+}
+
+.slidesSlidesEditingButtonsWrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 100%;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.slidesSlidesEditingButtonsWrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.slidesSlidesEditingButtonsWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.slidesSlidesStatusGroup {
+    display: flex;
+    align-items: stretch;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.slidesSlidesStatusItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #9aa3b5;
+    white-space: nowrap;
+    border-right: 1px solid #3d4354;
+}
+
+.slidesSlidesStatusItem:last-child {
+    border-right: none;
+}
+
+.slidesSlidesStatusItem svg {
+    flex-shrink: 0;
+    font-size: 0.66rem;
+    color: #6f7789;
+}
+
+.slidesSlidesStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.slidesSlidesStatusActions {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.slidesSlidesEditingButton {
+    background-color: transparent;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ebf0f8;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesStatusIconButton {
+    padding: 5px 10px !important;
+}
+
+.slidesSlidesStatusActions .slidesSlidesEditingButton {
+    padding: 5px 10px;
+    border-right: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.slidesSlidesStatusActions .slidesSlidesEditingButton:last-child {
+    border-right: none;
+}
+
+.slidesSlidesStatusActions .slidesSlidesEditingButton:hover:not(:disabled) {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.slidesSlidesStatusIconButton {
+    padding: 5px 10px;
+}
+
+.slidesSlidesStatusMenuButton {
+    padding: 5px 10px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+.slidesSlidesColorControl {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px;
+    border-right: 1px solid #3d4354;
+    color: #ebf0f8;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesColorControl:last-child {
+    border-right: none;
+}
+
+.slidesSlidesColorControl:hover {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.slidesSlidesColorSwatch {
+    display: block;
+    width: 16px;
+    height: 4px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px #3d4354;
+}
+
+.slidesSlidesStatusItem {
+    min-width: 0;
+}
+
+.slidesSlidesStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.slidesSlidesStatusGroup,
+.slidesSlidesStatusActions {
+    flex: 0 0 auto;
+}
+
+.slidesSlidesStrokeValue {
+    display: flex;
+    align-items: center;
+    padding: 5px 6px;
+    border-right: 1px solid #3d4354;
+    color: #ebf0f8;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+.slidesSlidesWorkspace {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+}
+
+.slidesSlidesRail {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    width: 11.5rem;
+    padding: 12px;
+    box-sizing: border-box;
+    border-right: 1px solid #3d4354;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.slidesSlidesRailItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 6px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.64rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesRailItem:hover {
+    border-color: #4ecdc4;
+    color: #ebf0f8;
+}
+
+.slidesSlidesRailItem.current {
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+    box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.25);
+}
+
+.slidesSlidesRailPreview {
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.slidesSlidesRailShape {
+    position: absolute;
+    display: block;
+    overflow: hidden;
+    color: #12151b;
+    line-height: 1.15;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.slidesSlidesRailPicture {
+    position: absolute;
+    object-fit: contain;
+}
+
+.slidesSlidesRailAction {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesRailAction:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.slidesSlidesStage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 24px;
+    box-sizing: border-box;
+    overflow: auto;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.slidesSlidesSurface {
+    position: relative;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.slidesSlidesShape {
+    position: absolute;
+    display: flex;
+    align-items: flex-start;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    cursor: move;
+}
+
+.slidesSlidesShape.selected {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.25);
+}
+
+.slidesSlidesShapeText {
+    width: 100%;
+    height: 100%;
+    padding: 4px 6px;
+    box-sizing: border-box;
+    outline: none;
+    color: #12151b;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.2;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    cursor: text;
+}
+
+.slidesSlidesParagraph {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+.slidesSlidesParagraph::before {
+    content: var(--slides-bullet, none);
+    user-select: none;
+}
+
+.slidesSlidesTableShape {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.slidesSlidesTableShape td {
+    border: 1px solid rgba(18, 21, 27, 0.25);
+    vertical-align: top;
+    padding: 2px 4px;
+    overflow: hidden;
+    color: #12151b;
+}
+
+.slidesSlidesSaveBanner {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 12;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-radius: 6px;
+    color: #12151b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.slidesSlidesDropdownMenuSeparator {
+    height: 1px;
+    margin: 4px 8px;
+    background: #3d4354;
+}
+
+.slidesSlidesDropdownMenuItemLabel {
+    flex-grow: 1;
+}
+
+.slidesSlidesHiddenInput {
+    display: none;
+}
+
+.slidesSlidesPicture {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+}
+
+.slidesSlidesPicturePlaceholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: #f1f2f5;
+    color: #6f7789;
+    font-size: 0.7rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.slidesSlidesHandle {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #4ecdc4;
+    border: 1px solid #12151b;
+    border-radius: 2px;
+    z-index: 3;
+}
+
+.slidesSlidesHandle-nw { top: -5px; left: -5px; cursor: nwse-resize; }
+.slidesSlidesHandle-n { top: -5px; left: calc(50% - 4.5px); cursor: ns-resize; }
+.slidesSlidesHandle-ne { top: -5px; right: -5px; cursor: nesw-resize; }
+.slidesSlidesHandle-e { top: calc(50% - 4.5px); right: -5px; cursor: ew-resize; }
+.slidesSlidesHandle-se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.slidesSlidesHandle-s { bottom: -5px; left: calc(50% - 4.5px); cursor: ns-resize; }
+.slidesSlidesHandle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.slidesSlidesHandle-w { top: calc(50% - 4.5px); left: -5px; cursor: ew-resize; }
+
+.slidesSlidesModalScrim {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(10, 12, 16, 0.55);
+}
+
+.slidesSlidesModal {
+    display: flex;
+    flex-direction: column;
+    width: 42rem;
+    max-width: calc(100vw - 4rem);
+    max-height: calc(100vh - 4rem);
+    box-sizing: border-box;
+    overflow: hidden;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.slidesSlidesModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    height: 3rem;
+    padding: 0 10px 0 16px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #3d4354;
+}
+
+.slidesSlidesModalTitle {
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.slidesSlidesModalClose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesModalClose:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.slidesSlidesTemplateGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 12px;
+    padding: 14px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.slidesSlidesTemplateCard {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 8px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesTemplateCard:hover {
+    border-color: #4ecdc4;
+    color: #ebf0f8;
+}
+
+.slidesSlidesTemplatePreview {
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.slidesSlidesTemplateBlock {
+    position: absolute;
+    background: rgba(78, 205, 196, 0.35);
+    border: 1px solid rgba(18, 21, 27, 0.35);
+    border-radius: 2px;
+}
+
+.slidesSlidesPresentation {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2147483000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5vh 3vw 9vh 3vw;
+    box-sizing: border-box;
+    background: #05070a;
+}
+
+.slidesSlidesPresentationFrame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+}
+
+.slidesSlidesPresentationStage {
+    position: relative;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.slidesSlidesPresentationProgress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.slidesSlidesPresentationProgress span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    transition: width 0.2s ease;
+}
+
+.slidesSlidesPresentationBar {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(18, 21, 27, 0.82);
+    border: 1px solid #3d4354;
+    border-radius: 999px;
+    color: #ebf0f8;
+    opacity: 0.25;
+    transition: opacity 0.2s ease;
+}
+
+.slidesSlidesPresentation:hover .slidesSlidesPresentationBar {
+    opacity: 1;
+}
+
+.slidesSlidesPresentationButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slidesSlidesPresentationButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    color: #12151b;
+}
+
+.slidesSlidesPresentationCount {
+    padding: 0 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.slidesSlidesPresentingBody .studioHeaderContainer,
+body.slidesSlidesPresentingBody nav,
+body.slidesSlidesPresentingBody .navBarWrapper,
+body.slidesSlidesPresentingBody .navigationBar {
+    visibility: hidden;
+}
+
+body.slidesSlidesPresentingBody .slidesSlidesPresentation,
+body.slidesSlidesPresentingBody .slidesSlidesPresentation * {
+    visibility: visible;
+}

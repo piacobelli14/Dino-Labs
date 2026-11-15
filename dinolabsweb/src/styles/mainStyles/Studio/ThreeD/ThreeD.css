@@ -1,0 +1,832 @@
+.threed3DModelPageWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.threed3DModelToolbarWrapper {
+  width: 100%;
+  z-index: 4;
+}
+
+.threed3DModelToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelTitleWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 35%;
+  box-sizing: border-box;
+  overflow: auto;
+  padding: 0 0.4rem;
+  margin-right: 2rem;
+}
+
+.threed3DModelFileNameStack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.threed3DModelFileNameInput {
+  padding: 0.6rem 0.8rem;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+}
+
+.threed3DModelFileNameInput svg {
+  margin-right: 8px;
+}
+
+.threed3DModelOperationsButtonsWrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 8px;
+}
+
+.threed3DModelOperationsButton {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelOperationsButton:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+  outline: none;
+}
+
+.threed3DModelOperationsButton:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.threed3DModelDropdownMenu {
+  position: fixed;
+  min-width: 240px;
+  min-height: 100px; 
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  z-index: 20;
+  box-shadow: 0 0 20px black;
+  overflow: hidden;
+  user-select: none;
+}
+
+.threed3DModelDropdownMenuItem {
+  display: flex;
+  padding: 12px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelDropdownMenuItem:hover {
+  opacity: 0.8;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  transform: translateX(1px);
+}
+
+.threed3DModelDropdownMenuItem:last-child {
+  border-bottom: none;
+}
+
+.threed3DModelEditorContentWrapper {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.threed3DModelContentWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.threed3DModelRendererMount {
+  width: 100%;
+  height: 100%;
+}
+
+.threed3DModelLoadingWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.threed3DModelLoadingCircle {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #3d4354;
+  border-top: 3px solid #4ecdc4;
+  border-radius: 50%;
+  animation: threed3DModelSpin 1s linear infinite;
+}
+
+@keyframes threed3DModelSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.threed3DModelLoadingTitle {
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.threed3DModelErrorToast {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ebf0f8;
+  padding: 24px;
+  border-radius: 6px;
+  z-index: 100;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 700;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.threed3DModelMovementControlPanel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border-radius: 6px;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid #3d4354;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.threed3DModelMovementModeButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.threed3DModelMovementModeBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  color: #ebf0f8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelMovementModeBtn.active {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.threed3DModelMovementModeBtn:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.threed3DModelMovementModeBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelMovementPad {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-auto-rows: 32px;
+  gap: 8px;
+}
+
+.threed3DModelMovementBtn,
+.threed3DModelMovementCenter {
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.threed3DModelMovementBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  color: #ebf0f8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelMovementBtn:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.threed3DModelMovementBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelMovementCenter {
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.threed3DModelMovementScaleControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.threed3DModelMovementScaleInput {
+  width: 60px;
+  height: 32px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  color: #ebf0f8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
+  padding: 0.6rem;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.threed3DModelMovementScaleInput::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.threed3DModelMovementScaleInput:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.threed3DModelMovementScaleInput:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.threed3DModelControlsHelp {
+  text-align: center;
+  color: #6f7789;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.2;
+  margin-top: 8px;
+  max-width: 200px;
+}
+
+.threed3DModelAxesToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border-radius: 6px;
+  padding: 12px 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid #3d4354;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.threed3DModelAxesToggle label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ebf0f8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.threed3DModelAxesToggle input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #4ecdc4;
+}
+.threed3DModelLayerPanel,
+.threed3DModelDisplayPanel,
+.threed3DModelMeasurePanel {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.threed3DModelLayerPanelTitle {
+  color: #6f7789;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.threed3DModelLayerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelLayerRow:hover {
+  border-color: #4ecdc4;
+}
+
+.threed3DModelLayerRow.selected {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
+}
+
+.threed3DModelLayerName {
+  color: #ebf0f8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.threed3DModelLayerToggle {
+  padding: 0.35rem 0.6rem;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  color: #ebf0f8;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelLayerToggle:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.threed3DModelStatusGroup {
+    display: flex;
+    align-items: stretch;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.threed3DModelStatusItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #9aa3b5;
+    white-space: nowrap;
+    border-right: 1px solid #3d4354;
+}
+
+.threed3DModelStatusItem:last-child {
+    border-right: none;
+}
+
+.threed3DModelStatusItem svg {
+    flex-shrink: 0;
+    font-size: 0.66rem;
+    color: #6f7789;
+}
+
+.threed3DModelStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.threed3DModelStatusItem {
+    min-width: 0;
+}
+
+.threed3DModelStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.threed3DModelStatusGroup,
+.textTextStatusActions {
+    flex: 0 0 auto;
+}
+
+.threed3DModelPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.threed3DModelPanelClose {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  color: #9aa3b5;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelPanelClose:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.threed3DModelPanelLabel {
+  color: #6f7789;
+  font-size: 0.64rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin-top: 4px;
+}
+
+.threed3DModelPanelButtonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.threed3DModelPanelButtonRow .threed3DModelMovementModeBtn {
+  flex: 1 1 0;
+  padding: 0.45rem 0.4rem;
+  font-size: 0.7rem;
+}
+
+.threed3DModelSwatch {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelSwatch.active {
+  border-color: #ebf0f8;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.35);
+}
+
+.threed3DModelLayerMeta {
+  margin-left: auto;
+  color: #6f7789;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.threed3DModelErrorCard {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  width: min(28rem, calc(100% - 40px));
+  padding: 12px 14px;
+  box-sizing: border-box;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-left: 3px solid #e46d6d;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.threed3DModelErrorCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.threed3DModelErrorCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ebf0f8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.threed3DModelErrorCardTitle svg {
+  color: #e46d6d;
+}
+
+.threed3DModelErrorCardMessage {
+  margin: 8px 0 0 0;
+  color: #9aa3b5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.4;
+}
+
+.threed3DModelAxesToggle {
+  top: auto;
+  bottom: 20px;
+  right: 20px;
+}
+
+.threed3DModelDock {
+  position: absolute;
+  top: 20px;
+  right: 84px;
+  bottom: 20px;
+  width: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+  pointer-events: auto;
+}
+
+.threed3DModelPanelRail {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.threed3DModelRailButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  color: #ebf0f8;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.threed3DModelRailButton:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.threed3DModelRailButton.active {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.threed3DModelReadoutRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2b3040;
+  border-radius: 6px;
+  color: #ebf0f8;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.threed3DModelReadoutRow span:first-child {
+  color: #6f7789;
+  white-space: nowrap;
+}
+
+.threed3DModelReadoutRow span:last-child {
+  text-align: right;
+  word-break: break-word;
+}
+
+.threed3DModelEditingButtonsWrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 100%;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.threed3DModelEditingButtonsWrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.threed3DModelEditingButtonsWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.threed3DModelStatusActions {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.threed3DModelEditingButton {
+    background-color: transparent;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ebf0f8;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.threed3DModelStatusIconButton {
+    padding: 5px 10px !important;
+}
+
+.threed3DModelStatusActions .threed3DModelEditingButton {
+    padding: 5px 10px;
+    border-right: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.threed3DModelStatusActions .threed3DModelEditingButton:last-child {
+    border-right: none;
+}
+
+.threed3DModelStatusActions .threed3DModelEditingButton:hover:not(:disabled) {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.threed3DModelStatusIconButton {
+    padding: 5px 10px;
+}
+
+.threed3DModelStatusActions {
+    flex: 0 0 auto;
+}
+
+.dropdown.threed3DModelUnitDropdown {
+  width: 84px;
+}
+
+.threed3DModelMovementScaleControls .dropdown.threed3DModelUnitDropdown .dropdownHeader {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+}
+
+.threed3DModelMovementScaleControls .dropdownOptions {
+  top: auto;
+  bottom: 100%;
+  border-top: 2px solid var(--dd-border-open);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}

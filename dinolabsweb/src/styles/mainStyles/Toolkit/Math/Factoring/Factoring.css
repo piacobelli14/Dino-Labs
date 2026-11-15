@@ -1,0 +1,527 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.tookitFactoringApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.tookitFactoringCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.tookitFactoringContainer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  position: relative;
+}
+
+.tookitFactoringToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.tookitFactoringTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.tookitFactoringTitle svg {
+  color: #4ecdc4;
+}
+
+.tookitFactoringStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.tookitFactoringStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.tookitFactoringStatusItem:last-child {
+  border-right: none;
+}
+
+.tookitFactoringStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tookitFactoringStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.tookitFactoringPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.tookitFactoringPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  flex-shrink: 0;
+}
+
+.tookitFactoringPanelTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.tookitFactoringPanelTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.tookitFactoringHistory {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.tookitFactoringHistoryEmpty {
+  margin: auto;
+  padding: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #6f7789;
+  text-align: center;
+}
+
+.tookitFactoringHistoryItem {
+  padding: 12px 24px;
+  border-top: 1px solid #3d4354;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: all 0.2s ease;
+}
+
+.tookitFactoringHistoryItem:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.tookitFactoringHistoryExpression {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.tookitFactoringHistoryMode {
+  padding: 5px 11px;
+  margin-right: auto;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #9aa3b5;
+  white-space: nowrap;
+}
+
+.tookitFactoringHistoryInput {
+  color: #9aa3b5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tookitFactoringHistoryArrow {
+  color: #6f7789;
+  flex-shrink: 0;
+}
+
+.tookitFactoringHistoryResult {
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tookitFactoringHistoryResult.tookitFactoringHistoryError {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+}
+
+.tookitFactoringHistorySteps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #3d4354;
+}
+
+.tookitFactoringHistoryStep {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #9aa3b5;
+  text-align: right;
+}
+
+.tookitFactoringHistoryStep:last-child {
+  color: #4ecdc4;
+}
+
+.tookitFactoringInputBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-top: 1px solid #3d4354;
+  border-bottom: 1px solid #3d4354;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tookitFactoringInput {
+  width: 100%;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  box-sizing: border-box;
+  outline: none;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  caret-color: #4ecdc4;
+  text-align: right;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tookitFactoringInput::placeholder {
+  color: #6f7789;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.tookitFactoringInput:hover {
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitFactoringInput:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.tookitFactoringTabs {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: #12151b;
+  border-bottom: 1px solid #3d4354;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tookitFactoringTabButton {
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  border-right: 2px solid #262b36;
+  border-radius: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tookitFactoringTabButton:hover {
+  background-color: #1c212b;
+  color: #ebf0f8;
+}
+
+.tookitFactoringTabButton.tookitFactoringTabActive {
+  background-color: #1f2530;
+  box-shadow: inset 0 -3px 0 0 #4ecdc4;
+  color: #4ecdc4;
+}
+
+.tookitFactoringKeyboard {
+  flex: 0 0 auto;
+  max-height: 46vh;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(140px, 0.7fr) minmax(160px, 0.8fr) minmax(140px, 0.7fr);
+  gap: 24px;
+  padding: 24px;
+  overflow: auto;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.tookitFactoringKeyGrid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-auto-rows: 40px;
+  gap: 8px;
+  padding: 16px 24px 24px;
+}
+
+.tookitFactoringStackGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 40px;
+  gap: 8px;
+  padding: 16px 24px 24px;
+}
+
+.tookitFactoringVariableGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 40px;
+  gap: 8px;
+  padding: 16px 24px 24px;
+}
+
+.tookitFactoringButton {
+  min-width: 0;
+  height: 40px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tookitFactoringButton:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitFactoringButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tookitFactoringButton:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tookitFactoringNumber {
+  font-size: 16px;
+  color: #ebf0f8;
+}
+
+.tookitFactoringOperator {
+  font-size: 16px;
+  color: #4ecdc4;
+}
+
+.tookitFactoringFunction {
+  font-size: 0.8rem;
+  color: #cdd4e4;
+}
+
+.tookitFactoringVariable {
+  font-size: 16px;
+  font-style: italic;
+  color: #fbbf24;
+}
+
+.tookitFactoringControl {
+  color: #9aa3b5;
+}
+
+.tookitFactoringEnter {
+  border-color: #4ecdc4;
+  color: #ebf0f8;
+}
+
+.tookitFactoringHistory,
+.tookitFactoringKeyboard,
+.tookitFactoringTabs {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.tookitFactoringHistory::-webkit-scrollbar,
+.tookitFactoringKeyboard::-webkit-scrollbar,
+.tookitFactoringTabs::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.tookitFactoringHistory::-webkit-scrollbar-track,
+.tookitFactoringKeyboard::-webkit-scrollbar-track,
+.tookitFactoringTabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tookitFactoringHistory::-webkit-scrollbar-thumb,
+.tookitFactoringKeyboard::-webkit-scrollbar-thumb,
+.tookitFactoringTabs::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.tookitFactoringHistory::-webkit-scrollbar-thumb:hover,
+.tookitFactoringKeyboard::-webkit-scrollbar-thumb:hover,
+.tookitFactoringTabs::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1100px) {
+  .tookitFactoringKeyboard {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tookitFactoringKeyboard .tookitFactoringPanel:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .tookitFactoringToolBar,
+.tookitFactoringInputBar,
+.tookitFactoringHistoryItem {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tookitFactoringKeyboard {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+    max-height: 52vh;
+  }
+
+  .tookitFactoringKeyGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .tookitFactoringKeyGrid,
+.tookitFactoringStackGrid,
+.tookitFactoringVariableGrid {
+    padding: 12px 16px 16px;
+    grid-auto-rows: 36px;
+  }
+
+  .tookitFactoringButton {
+    height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tookitFactoringButton,
+.tookitFactoringTabButton,
+.tookitFactoringInput,
+.tookitFactoringHistoryItem {
+    transition: none;
+  }
+}

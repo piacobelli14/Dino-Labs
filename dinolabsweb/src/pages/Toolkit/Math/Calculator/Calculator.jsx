@@ -1,0 +1,2008 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faGear, faXmark, faCalculator, faDeleteLeft
+} from "@fortawesome/free-solid-svg-icons";
+import Nav from "../../../../helpers/Nav.jsx";
+import useAuth from "../../../../UseAuth.jsx";
+import "../../../../styles/mainStyles/Toolkit/Math/Calculator/Calculator.css";
+import "../../../../styles/helperStyles/LoadingSpinner.css";
+
+const SUPERSCRIPT_MAP = {
+  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+  '-': '⁻', '+': '⁺', '.': '·',
+  '(': '⁽', ')': '⁾', '/': 'ᐟ',
+  'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ',
+  'f': 'ᶠ', 'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'j': 'ʲ',
+  'k': 'ᵏ', 'l': 'ˡ', 'm': 'ᵐ', 'n': 'ⁿ', 'o': 'ᵒ',
+  'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 't': 'ᵗ', 'u': 'ᵘ',
+  'v': 'ᵛ', 'w': 'ʷ', 'x': 'ˣ', 'y': 'ʸ', 'z': 'ᶻ',
+  'A': 'ᴬ', 'B': 'ᴮ', 'D': 'ᴰ', 'E': 'ᴱ', 'G': 'ᴳ',
+  'H': 'ᴴ', 'I': 'ᴵ', 'J': 'ᴶ', 'K': 'ᴷ', 'L': 'ᴸ',
+  'M': 'ᴹ', 'N': 'ᴺ', 'O': 'ᴼ', 'P': 'ᴾ', 'R': 'ᴿ',
+  'T': 'ᵀ', 'U': 'ᵁ', 'V': 'ⱽ', 'W': 'ᵂ'
+};
+
+const SUBSCRIPT_MAP = {
+  '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+  '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
+};
+
+const REVERSE_SUPERSCRIPT_DIGIT = {
+  '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+  '⁻': '-', '⁺': '+', '·': '.',
+  '⁽': '(', '⁾': ')', 'ᐟ': '/',
+  'ᵃ': 'a', 'ᵇ': 'b', 'ᶜ': 'c', 'ᵈ': 'd', 'ᵉ': 'e',
+  'ᶠ': 'f', 'ᵍ': 'g', 'ʰ': 'h', 'ⁱ': 'i', 'ʲ': 'j',
+  'ᵏ': 'k', 'ˡ': 'l', 'ᵐ': 'm', 'ⁿ': 'n', 'ᵒ': 'o',
+  'ᵖ': 'p', 'ʳ': 'r', 'ˢ': 's', 'ᵗ': 't', 'ᵘ': 'u',
+  'ᵛ': 'v', 'ʷ': 'w', 'ˣ': 'x', 'ʸ': 'y', 'ᶻ': 'z',
+  'ᴬ': 'A', 'ᴮ': 'B', 'ᴰ': 'D', 'ᴱ': 'E', 'ᴳ': 'G',
+  'ᴴ': 'H', 'ᴵ': 'I', 'ᴶ': 'J', 'ᴷ': 'K', 'ᴸ': 'L',
+  'ᴹ': 'M', 'ᴺ': 'N', 'ᴼ': 'O', 'ᴾ': 'P', 'ᴿ': 'R',
+  'ᵀ': 'T', 'ᵁ': 'U', 'ⱽ': 'V', 'ᵂ': 'W'
+};
+
+const REVERSE_SUBSCRIPT_DIGIT = {
+  '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+  '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9'
+};
+
+const SYMBOL_REPLACEMENTS = [
+  { pattern: /sqrt\(/g, replacement: "√(", description: "Square Root" },
+  { pattern: /cbrt\(/g, replacement: "∛(", description: "Cube Root" },
+  { pattern: /(?<![A-Za-z])pi\b/g, replacement: "π", description: "Pi" },
+  { pattern: /(?<![A-Za-z])tau\b/g, replacement: "τ", description: "Tau" },
+  { pattern: /(?<![A-Za-z])alpha\b/g, replacement: "α", description: "Alpha" },
+  { pattern: /(?<![A-Za-z])beta\b/g, replacement: "β", description: "Beta" },
+  { pattern: /(?<![A-Za-z])gamma\b/g, replacement: "γ", description: "Gamma" },
+  { pattern: /(?<![A-Za-z])delta\b/g, replacement: "δ", description: "Delta" },
+  { pattern: /(?<![A-Za-z])epsilon\b/g, replacement: "ε", description: "Epsilon" },
+  { pattern: /(?<![A-Za-z])theta\b/g, replacement: "θ", description: "Theta" },
+  { pattern: /(?<![A-Za-z])lambda\b/g, replacement: "λ", description: "Lambda" },
+  { pattern: /(?<![A-Za-z])mu\b/g, replacement: "μ", description: "Mu" },
+  { pattern: /(?<![A-Za-z])sigma\b/g, replacement: "σ", description: "Sigma" },
+  { pattern: /(?<![A-Za-z])phi\b/g, replacement: "φ", description: "Phi" },
+  { pattern: /(?<![A-Za-z])omega\b/g, replacement: "ω", description: "Omega" },
+  { pattern: /<=/g, replacement: "≤", description: "Less Than or Equal" },
+  { pattern: />=/g, replacement: "≥", description: "Greater Than or Equal" },
+  { pattern: /!=/g, replacement: "≠", description: "Not Equal" },
+  { pattern: /\+\-/g, replacement: "±", description: "Plus-Minus" },
+  { pattern: /-\+/g, replacement: "∓", description: "Minus-Plus" },
+  { pattern: /\*\*/g, replacement: "^", description: "Exponentiation" },
+  { pattern: /×\*/g, replacement: "^", description: "Exponentiation" },
+  { pattern: /\*/g, replacement: "×", description: "Multiplication" },
+  { pattern: /∞inity/g, replacement: "∞", description: "Infinity" },
+  { pattern: /(?<![A-Za-z])infinity\b/g, replacement: "∞", description: "Infinity" },
+  { pattern: /(?<![A-Za-z])inf\b/g, replacement: "∞", description: "Infinity" },
+  { pattern: /(?<![A-Za-z])sum\(/g, replacement: "∑(", description: "Summation" },
+  { pattern: /(?<![A-Za-z])prod\(/g, replacement: "∏(", description: "Product" },
+  { pattern: /(?<![A-Za-z])integral\(/g, replacement: "∫(", description: "Integral" },
+];
+
+const SYMBOL_TO_FUNCTION = {
+  "√": "sqrt",
+  "∛": "cbrt",
+  "π": "pi",
+  "τ": "tau",
+  "∞": "Infinity",
+  "α": "alpha",
+  "β": "beta",
+  "γ": "gamma",
+  "δ": "delta",
+  "ε": "epsilon",
+  "θ": "theta",
+  "λ": "lambda",
+  "μ": "mu",
+  "σ": "sigma",
+  "φ": "phi",
+  "ω": "omega",
+  "≤": "<=",
+  "≥": ">=",
+  "≠": "!=",
+  "±": "+-",
+  "∓": "-+",
+  "×": "*",
+  "÷": "/",
+  "⁻": "-",
+  "⁺": "+",
+  "·": ".",
+  "½": "(1/2)",
+  "⅓": "(1/3)",
+  "⅔": "(2/3)",
+  "¼": "(1/4)",
+  "¾": "(3/4)",
+  "⅕": "(1/5)",
+  "⅙": "(1/6)",
+  "⅛": "(1/8)",
+  "⁰": "^0",
+  "¹": "^1",
+  "²": "^2",
+  "³": "^3",
+  "⁴": "^4",
+  "⁵": "^5",
+  "⁶": "^6",
+  "⁷": "^7",
+  "⁸": "^8",
+  "⁹": "^9",
+  "∑": "sum",
+  "∏": "prod",
+  "∫": "integral"
+};
+
+const OPERATORS = {
+  "+": { prec: 1, assoc: "L", arity: 2, fn: (a, b) => a + b },
+  "-": { prec: 1, assoc: "L", arity: 2, fn: (a, b) => a - b },
+  "*": { prec: 2, assoc: "L", arity: 2, fn: (a, b) => a * b },
+  "/": { prec: 2, assoc: "L", arity: 2, fn: (a, b) => a / b },
+  "^": { prec: 4, assoc: "R", arity: 2, fn: (a, b) => Math.pow(a, b) },
+  neg: { prec: 4, assoc: "R", arity: 1, fn: (a) => -a },
+};
+
+const CONSTANTS = {
+  pi: Math.PI,
+  tau: 2 * Math.PI,
+  e: Math.E,
+  infinity: Infinity,
+};
+
+const TRIG_FUNCTIONS = new Set(['sin', 'cos', 'tan', 'sec', 'csc', 'cot']);
+
+const INVERSE_TRIG_FUNCTIONS = new Set(['asin', 'acos', 'atan', 'asec', 'acsc', 'acot']);
+
+const FUNCTIONS = {
+  sin: { arity: 1, fn: (x) => Math.sin(x), isTrig: true },
+  cos: { arity: 1, fn: (x) => Math.cos(x), isTrig: true },
+  tan: { arity: 1, fn: (x) => Math.tan(x), isTrig: true },
+  sec: { arity: 1, fn: (x) => 1 / Math.cos(x), isTrig: true },
+  csc: { arity: 1, fn: (x) => 1 / Math.sin(x), isTrig: true },
+  cot: { arity: 1, fn: (x) => 1 / Math.tan(x), isTrig: true },
+  asin: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN asin"); return Math.asin(x); }, isInverseTrig: true },
+  acos: { arity: 1, fn: (x) => { if (x < -1 || x > 1) throw new Error("DOMAIN acos"); return Math.acos(x); }, isInverseTrig: true },
+  atan: { arity: 1, fn: (x) => Math.atan(x), isInverseTrig: true },
+  atan2: { arity: 2, fn: (y, x) => Math.atan2(y, x), isInverseTrig: true },
+  asec: { arity: 1, fn: (x) => { if (Math.abs(x) < 1) throw new Error("DOMAIN asec"); return Math.acos(1 / x); }, isInverseTrig: true },
+  acsc: { arity: 1, fn: (x) => { if (Math.abs(x) < 1) throw new Error("DOMAIN acsc"); return Math.asin(1 / x); }, isInverseTrig: true },
+  acot: { arity: 1, fn: (x) => { if (x === 0) return Math.PI / 2; return Math.atan(1 / x); }, isInverseTrig: true },
+  sinh: { arity: 1, fn: (x) => (Math.sinh ? Math.sinh(x) : (Math.exp(x) - Math.exp(-x)) / 2) },
+  cosh: { arity: 1, fn: (x) => (Math.cosh ? Math.cosh(x) : (Math.exp(x) + Math.exp(-x)) / 2) },
+  tanh: { arity: 1, fn: (x) => (Math.tanh ? Math.tanh(x) : (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x))) },
+  asinh: { arity: 1, fn: (x) => (Math.asinh ? Math.asinh(x) : Math.log(x + Math.sqrt(x * x + 1))) },
+  acosh: { arity: 1, fn: (x) => { if (x < 1) throw new Error("DOMAIN acosh"); return Math.acosh ? Math.acosh(x) : Math.log(x + Math.sqrt(x - 1) * Math.sqrt(x + 1)); } },
+  atanh: { arity: 1, fn: (x) => { if (x <= -1 || x >= 1) throw new Error("DOMAIN atanh"); return Math.atanh ? Math.atanh(x) : 0.5 * Math.log((1 + x) / (1 - x)); } },
+  sech: { arity: 1, fn: (x) => 1 / (Math.cosh ? Math.cosh(x) : (Math.exp(x) + Math.exp(-x)) / 2) },
+  csch: { arity: 1, fn: (x) => { const s = Math.sinh ? Math.sinh(x) : (Math.exp(x) - Math.exp(-x)) / 2; if (s === 0) throw new Error("DOMAIN csch"); return 1 / s; } },
+  coth: { arity: 1, fn: (x) => { const t = Math.tanh ? Math.tanh(x) : (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x)); if (t === 0) throw new Error("DOMAIN coth"); return 1 / t; } },
+  asech: { arity: 1, fn: (x) => { if (x <= 0 || x > 1) throw new Error("DOMAIN asech"); const val = 1 / x; return Math.acosh ? Math.acosh(val) : Math.log(val + Math.sqrt(val - 1) * Math.sqrt(val + 1)); } },
+  acsch: { arity: 1, fn: (x) => { if (x === 0) throw new Error("DOMAIN acsch"); const val = 1 / x; return Math.asinh ? Math.asinh(val) : Math.log(val + Math.sqrt(val * val + 1)); } },
+  acoth: { arity: 1, fn: (x) => { if (Math.abs(x) <= 1) throw new Error("DOMAIN acoth"); const val = 1 / x; return Math.atanh ? Math.atanh(val) : 0.5 * Math.log((1 + val) / (1 - val)); } },
+  exp: { arity: 1, fn: (x) => Math.exp(x) },
+  ln: { arity: 1, fn: (x) => { if (x <= 0) throw new Error("DOMAIN ln"); return Math.log(x); } },
+  log: { arity: 1, fn: (x) => { if (x <= 0) throw new Error("DOMAIN log"); return Math.log10 ? Math.log10(x) : Math.log(x) / Math.LN10; } },
+  logn: { arity: 2, fn: (x, b) => { if (x <= 0 || b <= 0 || b === 1) throw new Error("DOMAIN logn"); return Math.log(x) / Math.log(b); } },
+  sqrt: { arity: 1, fn: (x) => { if (x < 0) throw new Error("DOMAIN sqrt"); return Math.sqrt(x); } },
+  cbrt: { arity: 1, fn: (x) => Math.cbrt ? Math.cbrt(x) : (x < 0 ? -Math.pow(-x, 1 / 3) : Math.pow(x, 1 / 3)) },
+  pow: { arity: "var", fn: (...xs) => { if (xs.length === 1) return Math.pow(xs[0], 2); if (xs.length === 2) return Math.pow(xs[0], xs[1]); throw new Error("ARITY pow"); } },
+  root: { arity: 2, fn: (x, n) => { if (n === 0) throw new Error("DOMAIN root"); if (x < 0 && Math.abs(n % 2) !== 1) throw new Error("DOMAIN root"); const sign = x < 0 ? -1 : 1; return sign * Math.pow(Math.abs(x), 1 / n); } },
+  abs: { arity: 1, fn: (x) => Math.abs(x) },
+  floor: { arity: 1, fn: (x) => Math.floor(x) },
+  ceil: { arity: 1, fn: (x) => Math.ceil(x) },
+  round: { arity: 1, fn: (x) => Math.round(x) },
+  sign: { arity: 1, fn: (x) => Math.sign(x) },
+  hypot: { arity: "var", fn: (...xs) => { if (xs.length < 2) throw new Error("ARITY hypot"); return Math.hypot(...xs); } },
+  clamp: { arity: 3, fn: (x, min, max) => { if (min > max) throw new Error("DOMAIN clamp"); return Math.max(min, Math.min(max, x)); } },
+  fact: { arity: 1, fn: (n) => { if (!Number.isInteger(n) || n < 0) throw new Error("DOMAIN fact"); if (n > 170) throw new Error("DOMAIN fact"); let r = 1; for (let i = 2; i <= n; i++) r *= i; return r; } },
+  perm: { arity: 2, fn: (n, k) => { if (![n, k].every(Number.isInteger) || n < 0 || k < 0 || k > n) throw new Error("DOMAIN perm"); let r = 1; for (let i = n - k + 1; i <= n; i++) r *= i; return r; } },
+  comb: { arity: 2, fn: (n, k) => { if (![n, k].every(Number.isInteger) || n < 0 || k < 0 || k > n) throw new Error("DOMAIN comb"); k = Math.min(k, n - k); let num = 1; let den = 1; for (let i = 1; i <= k; i++) { num *= n - k + i; den *= i; } return num / den; } },
+  toRad: { arity: 1, fn: (deg) => deg * (Math.PI / 180) },
+  toDeg: { arity: 1, fn: (rad) => rad * (180 / Math.PI) },
+  mod: { arity: 2, fn: (a, b) => { if (b === 0) throw new Error("DOMAIN mod"); return ((a % b) + b) % b; } },
+  max: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY max"); return Math.max(...xs); } },
+  min: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY min"); return Math.min(...xs); } },
+  avg: { arity: "var", fn: (...xs) => { if (xs.length < 1) throw new Error("ARITY avg"); return xs.reduce((a, b) => a + b, 0) / xs.length; } },
+};
+
+const FUNCTION_NAMES = new Set(Object.keys(FUNCTIONS).map((s) => s.toLowerCase()));
+
+const CONSTANT_NAMES = new Set(Object.keys(CONSTANTS).map((s) => s.toLowerCase()));
+
+const RESERVED = new Set([...Object.keys(FUNCTIONS), ...Object.keys(CONSTANTS)].map((s) => s.toLowerCase()));
+
+const degToRad = (deg) => deg * (Math.PI / 180);
+
+const radToDeg = (rad) => rad * (180 / Math.PI);
+
+const gcd = (a, b) => {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  while (b !== 0) {
+    const t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+};
+
+const createFraction = (num, den = 1) => {
+  if (den === 0) throw new Error("Division by zero");
+  if (den < 0) {
+    num = -num;
+    den = -den;
+  }
+  const g = gcd(Math.abs(num), Math.abs(den));
+  return { num: num / g, den: den / g, isFraction: true };
+};
+
+const fractionToNumber = (f) => {
+  if (f && f.isFraction) return f.num / f.den;
+  return f;
+};
+
+const numberToFraction = (n) => {
+  if (n && n.isFraction) return n;
+  if (!Number.isFinite(n)) return { num: n, den: 1, isFraction: true };
+  if (Number.isInteger(n)) return createFraction(n, 1);
+  
+  const tolerance = 1e-10;
+  const maxDenominator = 1000000;
+  
+  const sign = n < 0 ? -1 : 1;
+  const absN = Math.abs(n);
+  
+  let h1 = 1, h2 = 0;
+  let k1 = 0, k2 = 1;
+  let b = absN;
+  
+  while (k1 <= maxDenominator) {
+    const a = Math.floor(b);
+    const aux = h1;
+    h1 = a * h1 + h2;
+    h2 = aux;
+    const auxK = k1;
+    k1 = a * k1 + k2;
+    k2 = auxK;
+    
+    if (Math.abs(absN - h1 / k1) < tolerance) {
+      return createFraction(sign * h1, k1);
+    }
+    
+    if (b - a < tolerance) break;
+    b = 1 / (b - a);
+    
+    if (!isFinite(b)) break;
+  }
+  
+  const precision = 1e10;
+  const wholePart = Math.floor(n);
+  const decimalPart = n - wholePart;
+  let num = Math.round(decimalPart * precision);
+  let den = precision;
+  const g = gcd(num, den);
+  num = num / g;
+  den = den / g;
+  return createFraction(wholePart * den + num, den);
+};
+
+const addFractions = (a, b) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  const fb = b.isFraction ? b : numberToFraction(b);
+  return createFraction(fa.num * fb.den + fb.num * fa.den, fa.den * fb.den);
+};
+
+const subtractFractions = (a, b) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  const fb = b.isFraction ? b : numberToFraction(b);
+  return createFraction(fa.num * fb.den - fb.num * fa.den, fa.den * fb.den);
+};
+
+const multiplyFractions = (a, b) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  const fb = b.isFraction ? b : numberToFraction(b);
+  return createFraction(fa.num * fb.num, fa.den * fb.den);
+};
+
+const divideFractions = (a, b) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  const fb = b.isFraction ? b : numberToFraction(b);
+  if (fb.num === 0) throw new Error("Division by zero");
+  return createFraction(fa.num * fb.den, fa.den * fb.num);
+};
+
+const negateFraction = (a) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  return createFraction(-fa.num, fa.den);
+};
+
+const intPow = (base, exp) => {
+  if (!Number.isInteger(exp)) throw new Error("Invalid exponent");
+  if (exp < 0) return 1 / intPow(base, -exp);
+  let r = 1;
+  let b = base;
+  let e = exp;
+  while (e > 0) {
+    if (e & 1) r *= b;
+    b *= b;
+    e >>= 1;
+  }
+  return r;
+};
+
+const integerNthRootIfPerfect = (n, k) => {
+  if (!Number.isInteger(n) || !Number.isInteger(k) || k <= 0) return null;
+  if (n < 0) return null;
+  if (n === 0) return 0;
+  if (k === 1) return n;
+  const approx = Math.round(Math.pow(n, 1 / k));
+  const candidates = [approx - 2, approx - 1, approx, approx + 1, approx + 2];
+  for (const c of candidates) {
+    if (c >= 0 && Number.isSafeInteger(c)) {
+      const p = Math.pow(c, k);
+      if (p === n) return c;
+    }
+  }
+  return null;
+};
+
+const powerFraction = (a, b) => {
+  const fa = a.isFraction ? a : numberToFraction(a);
+  const fb0 = b.isFraction ? b : numberToFraction(b);
+  const fb = createFraction(fb0.num, fb0.den);
+
+  if (fb.den === 1 && Number.isInteger(fb.num) && fb.num >= 0 && fb.num <= 100) {
+    let numPow = Math.pow(fa.num, fb.num);
+    let denPow = Math.pow(fa.den, fb.num);
+    if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
+      return createFraction(numPow, denPow);
+    }
+  }
+
+  if (fb.den === 1 && Number.isInteger(fb.num) && fb.num < 0 && fb.num >= -100) {
+    const posExp = Math.abs(fb.num);
+    let numPow = Math.pow(fa.den, posExp);
+    let denPow = Math.pow(fa.num, posExp);
+    if (Number.isInteger(numPow) && Number.isInteger(denPow)) {
+      return createFraction(numPow, denPow);
+    }
+  }
+
+  if (fb.den !== 1 && Number.isInteger(fb.num) && Number.isInteger(fb.den) && Math.abs(fb.num) <= 100 && fb.den <= 100) {
+    const p = fb.num;
+    const q = fb.den;
+
+    if (fa.num === 0) {
+      if (p === 0) return createFraction(1, 1);
+      if (p < 0) throw new Error("Division by zero");
+      return createFraction(0, 1);
+    }
+
+    const negBase = fa.num < 0;
+    if (negBase && (q % 2 === 0)) throw new Error("DOMAIN root");
+
+    const absNum = Math.abs(fa.num);
+    const absDen = Math.abs(fa.den);
+
+    const rNum = integerNthRootIfPerfect(absNum, q);
+    const rDen = integerNthRootIfPerfect(absDen, q);
+
+    if (rNum !== null && rDen !== null) {
+      const signedRootNum = negBase ? -rNum : rNum;
+      const rootFrac = createFraction(signedRootNum, rDen);
+
+      const pp = Math.abs(p);
+      const numPow = intPow(rootFrac.num, pp);
+      const denPow = intPow(rootFrac.den, pp);
+      const powered = createFraction(numPow, denPow);
+
+      if (p < 0) {
+        if (powered.num === 0) throw new Error("Division by zero");
+        return createFraction(powered.den, powered.num);
+      }
+      return powered;
+    }
+  }
+
+  const expVal = fractionToNumber(fb);
+  const result = Math.pow(fractionToNumber(fa), expVal);
+  return numberToFraction(result);
+};
+
+const FRACTION_OPERATORS = {
+  "+": { prec: 1, assoc: "L", arity: 2, fn: addFractions },
+  "-": { prec: 1, assoc: "L", arity: 2, fn: subtractFractions },
+  "*": { prec: 2, assoc: "L", arity: 2, fn: multiplyFractions },
+  "/": { prec: 2, assoc: "L", arity: 2, fn: divideFractions },
+  "^": { prec: 4, assoc: "R", arity: 2, fn: powerFraction },
+  neg: { prec: 4, assoc: "R", arity: 1, fn: negateFraction },
+};
+
+const escapeRegExp = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+const toSuperscript = (str) => {
+  return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+};
+
+const toSubscript = (str) => {
+  return str.split('').map(c => SUBSCRIPT_MAP[c] || c).join('');
+};
+
+const decodeSuperscriptNumber = (s) => {
+  let out = "";
+  for (const ch of s) {
+    const v = REVERSE_SUPERSCRIPT_DIGIT[ch];
+    if (v == null) return null;
+    out += v;
+  }
+  return out;
+};
+
+const decodeSubscriptNumber = (s) => {
+  let out = "";
+  for (const ch of s) {
+    const v = REVERSE_SUBSCRIPT_DIGIT[ch];
+    if (v == null) return null;
+    out += v;
+  }
+  return out;
+};
+
+const makeUnicodeFraction = (numStr, denStr) => {
+  const n = String(numStr).replace(/\s+/g, "");
+  const d = String(denStr).replace(/\s+/g, "");
+  if (!/^[0-9]+$/.test(n) || !/^[0-9]+$/.test(d)) return null;
+  if (d === "0") return null;
+  const num = toSuperscript(n);
+  const den = toSubscript(d);
+  return num + "⁄" + den;
+};
+
+const expandUnicodeFractions = (s) => {
+  return s.replace(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, a, b) => {
+    const na = decodeSuperscriptNumber(a);
+    const nb = decodeSubscriptNumber(b);
+    if (na == null || nb == null) return m;
+    return na + "/" + nb;
+  }).replace(/÷/g, "/");
+};
+
+const formatLogBases = (text, cursorPos) => {
+  let result = text;
+  let newCursorPos = cursorPos;
+
+  const subscriptChars = new Set(Object.values(SUBSCRIPT_MAP));
+  const isSubscript = (ch) => subscriptChars.has(ch);
+
+  const logBasePattern = /log_(\d+)\s*\(/g;
+  let match;
+  let offset = 0;
+
+  const tempResult = result;
+  while ((match = logBasePattern.exec(tempResult)) !== null) {
+    const fullMatch = match[0];
+    const baseDigits = match[1];
+    const matchStart = match.index + offset;
+    const matchEnd = matchStart + fullMatch.length;
+
+    if (cursorPos > matchStart + 4 && cursorPos < matchEnd - 1) {
+      continue;
+    }
+
+    const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+    const replacement = 'log' + subscriptBase + '(';
+    const lenDiff = replacement.length - fullMatch.length;
+
+    result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+    if (cursorPos > matchEnd) {
+      newCursorPos += lenDiff;
+    } else if (cursorPos > matchStart) {
+      newCursorPos = matchStart + replacement.length;
+    }
+
+    offset += lenDiff;
+  }
+
+  const logNumPattern = /log(\d+)\s*\(/g;
+  offset = 0;
+  const tempResult2 = result;
+  logNumPattern.lastIndex = 0;
+
+  while ((match = logNumPattern.exec(tempResult2)) !== null) {
+    const fullMatch = match[0];
+    const baseDigits = match[1];
+    const matchStart = match.index + offset;
+    const matchEnd = matchStart + fullMatch.length;
+
+    const cursorAtEnd = newCursorPos === matchStart + 3 + baseDigits.length;
+    if (cursorAtEnd) {
+      continue;
+    }
+
+    const subscriptBase = baseDigits.split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+    const replacement = 'log' + subscriptBase + '(';
+    const lenDiff = replacement.length - fullMatch.length;
+
+    result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+    if (newCursorPos > matchEnd) {
+      newCursorPos += lenDiff;
+    } else if (newCursorPos > matchStart + 3) {
+      newCursorPos = matchStart + 3 + subscriptBase.length;
+    }
+
+    offset += lenDiff;
+  }
+
+  const variableSubscriptPattern = /([A-Za-zα-ωΑ-Ω])_(\d+)/g;
+  offset = 0;
+  const tempResult3 = result;
+
+  while ((match = variableSubscriptPattern.exec(tempResult3)) !== null) {
+    const matchStart = match.index + offset;
+    const matchEnd = matchStart + match[0].length;
+    const replacement = match[1] + match[2].split('').map(d => SUBSCRIPT_MAP[d] || d).join('');
+    const lenDiff = replacement.length - match[0].length;
+
+    result = result.slice(0, matchStart) + replacement + result.slice(matchEnd);
+
+    if (newCursorPos >= matchEnd) {
+      newCursorPos += lenDiff;
+    } else if (newCursorPos > matchStart + 1) {
+      newCursorPos = Math.max(matchStart + 1, newCursorPos - 1);
+    }
+
+    offset += lenDiff;
+  }
+
+  if (newCursorPos > 0 && newCursorPos <= result.length) {
+    const charBefore = result[newCursorPos - 1];
+    if (!isSubscript(charBefore) && SUBSCRIPT_MAP[charBefore] !== undefined) {
+      const charTwoBefore = newCursorPos >= 2 ? result[newCursorPos - 2] : '';
+      const charAfter = newCursorPos < result.length ? result[newCursorPos] : '';
+
+      let shouldConvert = false;
+
+      if (isSubscript(charAfter)) {
+        shouldConvert = true;
+      }
+
+      if (isSubscript(charTwoBefore)) {
+        shouldConvert = true;
+      }
+
+      let checkPos = newCursorPos - 2;
+      while (checkPos >= 0 && isSubscript(result[checkPos])) {
+        checkPos--;
+      }
+      if (checkPos >= 2 && result.slice(checkPos - 2, checkPos + 1) === 'log') {
+        shouldConvert = true;
+      }
+
+      if (shouldConvert) {
+        const converted = SUBSCRIPT_MAP[charBefore];
+        result = result.slice(0, newCursorPos - 1) + converted + result.slice(newCursorPos);
+      }
+    }
+  }
+
+  return { text: result, cursorPos: newCursorPos };
+};
+
+const formatExponentsInText = (text, cursorPos) => {
+  let result = '';
+  let newCursorPos = cursorPos;
+  let i = 0;
+
+  const superscriptChars = new Set(Object.values(SUPERSCRIPT_MAP));
+  const allSuperscriptChars = new Set([...superscriptChars, ...Object.keys(REVERSE_SUPERSCRIPT_DIGIT)]);
+
+  const isSuperscript = (ch) => allSuperscriptChars.has(ch);
+
+  const canSuperscript = (str) => {
+    for (const ch of str) {
+      if (SUPERSCRIPT_MAP[ch] === undefined && ch !== ' ') return false;
+    }
+    return true;
+  };
+
+  const toSuperscriptFull = (str) => {
+    return str.split('').map(c => SUPERSCRIPT_MAP[c] || c).join('');
+  };
+
+  const findSuperscriptBounds = (txt, pos) => {
+    if (pos <= 0 || pos > txt.length) return null;
+    
+    let start = pos - 1;
+    let end = pos - 1;
+    
+    while (start > 0 && isSuperscript(txt[start - 1])) {
+      start--;
+    }
+    while (end < txt.length - 1 && isSuperscript(txt[end + 1])) {
+      end++;
+    }
+    
+    if (!isSuperscript(txt[start])) return null;
+    
+    const seq = txt.substring(start, end + 1);
+    const hasOpenParen = seq.includes('⁽');
+    const hasCloseParen = seq.includes('⁾');
+    
+    if (hasOpenParen && hasCloseParen) {
+      const openIdx = seq.indexOf('⁽');
+      const closeIdx = seq.lastIndexOf('⁾');
+      if (closeIdx > openIdx) {
+        return { start, end: end + 1, isComplete: true };
+      }
+    }
+    
+    if (hasOpenParen && !hasCloseParen) {
+      return { start, end: end + 1, isComplete: false };
+    }
+    
+    return { start, end: end + 1, isComplete: true };
+  };
+
+  let workingText = text;
+  let workingCursor = cursorPos;
+
+  if (workingCursor > 0 && workingCursor <= workingText.length) {
+    const charBeforeCursor = workingText[workingCursor - 1];
+    
+    const charAfterInsert = workingCursor < workingText.length ? workingText[workingCursor] : '';
+    const insertingInside = isSuperscript(charAfterInsert) && charAfterInsert !== '⁽';
+    if (!isSuperscript(charBeforeCursor) && SUPERSCRIPT_MAP[charBeforeCursor] !== undefined && (insertingInside || /[0-9.]/.test(charBeforeCursor))) {
+      const charTwoBeforeCursor = workingCursor >= 2 ? workingText[workingCursor - 2] : '';
+      const charAfterCursor = workingCursor < workingText.length ? workingText[workingCursor] : '';
+      
+      let shouldConvert = false;
+      
+      if (isSuperscript(charAfterCursor) && charAfterCursor !== '⁽') {
+        shouldConvert = true;
+      }
+      
+      if (isSuperscript(charTwoBeforeCursor) && charTwoBeforeCursor !== '⁾') {
+        shouldConvert = true;
+      }
+      
+      if (charTwoBeforeCursor === '⁾') {
+        shouldConvert = false;
+      }
+      
+      if (shouldConvert) {
+        const converted = SUPERSCRIPT_MAP[charBeforeCursor];
+        workingText = workingText.slice(0, workingCursor - 1) + converted + workingText.slice(workingCursor);
+      }
+    }
+  }
+
+  text = workingText;
+  cursorPos = workingCursor;
+
+  while (i < text.length) {
+    if (text[i] === '^' && !(i > 0 && isSuperscript(text[i - 1]))) {
+      const expStart = i + 1;
+
+      if (expStart < text.length && text[expStart] === '(') {
+        let j = expStart;
+        let depth = 0;
+        while (j < text.length) {
+          if (text[j] === '(') depth++;
+          else if (text[j] === ')') {
+            depth--;
+            if (depth === 0) { j++; break; }
+          }
+          j++;
+        }
+
+        if (depth === 0) {
+          const insideWithParens = text.substring(expStart, j);
+          const cursorInside = cursorPos > expStart && cursorPos < j;
+          
+          if (!cursorInside) {
+            const innerContent = expandUnicodeFractions(insideWithParens.slice(1, -1));
+            if (canSuperscript(innerContent)) {
+              const superscripted = '⁽' + toSuperscriptFull(innerContent) + '⁾';
+              const originalLen = j - i;
+              const replacementLen = superscripted.length;
+
+              if (cursorPos > j) {
+                newCursorPos -= originalLen - replacementLen;
+              }
+
+              result += superscripted;
+              i = j;
+              continue;
+            }
+          }
+        }
+      }
+
+      let expEnd = expStart;
+
+      if (expEnd < text.length && (text[expEnd] === '-' || text[expEnd] === '+')) {
+        expEnd++;
+      }
+
+      while (expEnd < text.length && /[0-9.]/.test(text[expEnd])) {
+        expEnd++;
+      }
+
+      if (expEnd > expStart && ((text[expStart] !== '-' && text[expStart] !== '+') || expEnd > expStart + 1)) {
+        const exponentText = text.substring(expStart, expEnd);
+        const shouldConvert = /[0-9]/.test(exponentText) && !/\.$/.test(exponentText.replace(/^[-+]/, "")) || cursorPos !== expEnd;
+
+        if (shouldConvert) {
+          const exponent = text.substring(expStart, expEnd);
+          const superscripted = toSuperscript(exponent);
+
+          if (cursorPos > i && cursorPos <= expEnd) {
+            const offsetInExp = cursorPos - expStart;
+            newCursorPos = result.length + Math.min(offsetInExp, superscripted.length);
+          } else if (cursorPos > expEnd) {
+            newCursorPos -= (expEnd - i) - superscripted.length;
+          }
+
+          result += superscripted;
+          i = expEnd;
+          continue;
+        }
+      }
+    }
+    result += text[i];
+    i++;
+  }
+
+  return { text: result, cursorPos: Math.max(0, Math.min(newCursorPos, result.length)) };
+};
+
+const applyDivisionSymbolForNonFractions = (text, cursorPos) => {
+  if (cursorPos <= 0) return { text, cursorPos };
+  const idx = cursorPos - 1;
+  if (text[idx] !== '/') return { text, cursorPos };
+  const prev = idx - 1 >= 0 ? text[idx - 1] : "";
+  if (/[0-9]/.test(prev)) return { text, cursorPos };
+  const newText = text.slice(0, idx) + "÷" + text.slice(idx + 1);
+  return { text: newText, cursorPos };
+};
+
+const applySymbolFormatting = (text, cursorPos) => {
+  let formattedText = text;
+  let newCursorPos = cursorPos;
+
+  const decimalAfterFraction = formattedText.substring(0, newCursorPos).match(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄([₀₁₂₃₄₅₆₇₈₉]+)\.$/);
+  const orphanedFraction = formattedText.substring(0, newCursorPos).match(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄$/);
+  if (orphanedFraction && !/^[₀₁₂₃₄₅₆₇₈₉]/.test(formattedText.substring(newCursorPos))) {
+    const plain = decodeSuperscriptNumber(orphanedFraction[1]) + "/";
+    const fractionStart = newCursorPos - orphanedFraction[0].length;
+    formattedText = formattedText.slice(0, fractionStart) + plain + formattedText.slice(newCursorPos);
+    newCursorPos = fractionStart + plain.length;
+  }
+
+  if (decimalAfterFraction) {
+    const plain = decodeSuperscriptNumber(decimalAfterFraction[1]) + "÷" + decodeSubscriptNumber(decimalAfterFraction[2]) + ".";
+    const fractionStart = newCursorPos - decimalAfterFraction[0].length;
+    formattedText = formattedText.slice(0, fractionStart) + plain + formattedText.slice(newCursorPos);
+    newCursorPos = fractionStart + plain.length;
+  }
+
+  const beforeCursor0 = formattedText.substring(0, newCursorPos);
+  const afterCursor0 = formattedText.substring(newCursorPos);
+
+  const afterChar = afterCursor0.length > 0 ? afterCursor0[0] : '';
+
+  const fractionLead = "(^|[^A-Za-z0-9_.·⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉])";
+  const fractionBody = "(\\d*\\.\\d+|\\d+(?:\\.\\d+)?)\\s*([\\/÷])\\s*(\\d*\\.\\d+|\\d+(?:\\.\\d+)?)";
+  const hasNumberAfter = afterChar !== '' && /[0-9.]/.test(afterChar);
+  const needsFormatting = (match) => /^[0-9]+$/.test(match[2]) && /^[0-9]+$/.test(match[4]) || match[3] !== "÷" || /\s/.test(match[0]);
+  let fracMatch = Array.from(beforeCursor0.matchAll(new RegExp(fractionLead + fractionBody + "(?=[^0-9.])", "g"))).find(needsFormatting) || null;
+
+  if (!fracMatch && !hasNumberAfter) {
+    const endMatch = beforeCursor0.match(new RegExp(fractionLead + fractionBody + "$"));
+    if (endMatch && needsFormatting(endMatch)) fracMatch = endMatch;
+  }
+
+  if (fracMatch) {
+    const full = fracMatch[0];
+    const lead = fracMatch[1] || "";
+    const numStr = fracMatch[2];
+    const denStr = fracMatch[4];
+    const isWhole = /^[0-9]+$/.test(numStr) && /^[0-9]+$/.test(denStr);
+    const replacement = isWhole ? makeUnicodeFraction(numStr, denStr) : `${numStr}÷${denStr}`;
+    if (replacement) {
+      const matchStart = fracMatch.index;
+      const matchEnd = matchStart + full.length;
+      const prefix = beforeCursor0.slice(0, matchStart);
+      const suffix = beforeCursor0.slice(matchEnd);
+      const newBefore = prefix + lead + replacement + suffix;
+      formattedText = newBefore + afterCursor0;
+      newCursorPos = newBefore.length;
+    }
+  }
+
+  const divFixed = applyDivisionSymbolForNonFractions(formattedText, newCursorPos);
+  formattedText = divFixed.text;
+  newCursorPos = divFixed.cursorPos;
+
+  for (const { pattern, replacement } of SYMBOL_REPLACEMENTS) {
+    const beforeCursor = formattedText.substring(0, newCursorPos);
+    const afterCursor = formattedText.substring(newCursorPos);
+
+    const match = beforeCursor.match(new RegExp(pattern.source + "$"));
+    if (match) {
+      const matchStart = beforeCursor.length - match[0].length;
+      let newReplacement = replacement;
+
+      if (replacement.includes("$1") && match[1]) {
+        newReplacement = replacement.replace("$1", match[1]);
+      }
+
+      const newBeforeCursor = beforeCursor.substring(0, matchStart) + newReplacement;
+      formattedText = newBeforeCursor + afterCursor;
+      newCursorPos = newBeforeCursor.length;
+      break;
+    }
+  }
+
+  const expFormatted = formatExponentsInText(formattedText, newCursorPos);
+  const logFormatted = formatLogBases(expFormatted.text, expFormatted.cursorPos);
+
+  return { text: logFormatted.text, cursorPos: logFormatted.cursorPos };
+};
+
+const convertSymbolsForEvaluation = (displayExpression) => {
+  let evalExpression = displayExpression;
+
+  evalExpression = evalExpression.replace(/([⁰¹²³⁴⁵⁶⁷⁸⁹]+)⁄([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, a, b) => {
+    const na = decodeSuperscriptNumber(a);
+    const nb = decodeSubscriptNumber(b);
+    if (na == null || nb == null) return m;
+    if (!/^[0-9]+$/.test(na) || !/^[0-9]+$/.test(nb)) return m;
+    if (nb === "0") return m;
+    return "(" + na + "/" + nb + ")";
+  });
+
+  evalExpression = evalExpression.replace(/log([₀₁₂₃₄₅₆₇₈₉]+)\s*\(([^)]+)\)/g, (m, subscriptBase, arg) => {
+    const base = decodeSubscriptNumber(subscriptBase);
+    if (base == null) return m;
+    return "logn(" + arg + ", " + base + ")";
+  });
+
+  evalExpression = evalExpression.replace(/([A-Za-zα-ωΑ-Ω])([₀₁₂₃₄₅₆₇₈₉]+)/g, (m, letter, subscriptDigits, offset, whole) => {
+    if (whole.slice(Math.max(0, offset - 2), offset + 1) === "log") return m;
+    return letter + "_" + decodeSubscriptNumber(subscriptDigits);
+  });
+
+  const superscriptPattern = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᐟᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]+/g;
+  evalExpression = evalExpression.replace(superscriptPattern, (match, offset, whole) => {
+    const nextChar = whole && offset + match.length < whole.length ? whole[offset + match.length] : "";
+    if (nextChar === "⁄") return match;
+    let converted = '^(';
+    for (const char of match) {
+      converted += REVERSE_SUPERSCRIPT_DIGIT[char] || char;
+    }
+    converted += ')';
+    return converted;
+  });
+
+  for (const [symbol, func] of Object.entries(SYMBOL_TO_FUNCTION)) {
+    if (!/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺·⁽⁾ᐟᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂ]/.test(symbol)) {
+      evalExpression = evalExpression.replace(new RegExp(escapeRegExp(symbol), "g"), func);
+    }
+  }
+
+  return evalExpression;
+};
+
+const isDigit = (c) => c >= "0" && c <= "9";
+
+const isAlpha = (c) => /[A-Za-z_]/.test(c);
+
+const isAlnum = (c) => /[A-Za-z0-9_]/.test(c);
+
+const tokenize = (src) => {
+  const tokens = [];
+  const s = src.trim();
+  let i = 0;
+  let absOpen = 0;
+
+  while (i < s.length) {
+    const c = s[i];
+    if (/\s/.test(c)) { i++; continue; }
+
+    if (isDigit(c) || (c === "." && i + 1 < s.length && isDigit(s[i + 1]))) {
+      let num = "";
+
+      if (c === ".") {
+        num += "0.";
+        i++;
+        while (i < s.length && isDigit(s[i])) num += s[i++];
+      } else {
+        while (i < s.length && (isDigit(s[i]) || s[i] === ".")) num += s[i++];
+      }
+
+      if (i < s.length && (s[i] === "e" || s[i] === "E")) {
+        let j = i + 1;
+        let hasSign = false;
+        if (j < s.length && (s[j] === "+" || s[j] === "-")) {
+          hasSign = true;
+          j++;
+        }
+        if (j < s.length && isDigit(s[j])) {
+          num += s[i++];
+          if (hasSign) num += s[i++];
+          while (i < s.length && isDigit(s[i])) num += s[i++];
+        }
+      }
+
+      const parsed = parseFloat(num);
+      if (isNaN(parsed)) throw new Error("Invalid number: " + num);
+      tokens.push({ type: "number", value: parsed });
+      continue;
+    }
+
+    if (c === ".") {
+      i++;
+      continue;
+    }
+
+    if (isAlpha(c)) {
+      let id = "";
+      while (i < s.length && isAlnum(s[i])) id += s[i++];
+      tokens.push({ type: "ident", value: id });
+      continue;
+    }
+
+    if (c === "τ") { tokens.push({ type: "ident", value: "tau" }); i++; continue; }
+    if (c === "⁻") { tokens.push({ type: "op", value: "-" }); i++; continue; }
+    if ("([{".includes(c)) { tokens.push({ type: "lparen" }); i++; continue; }
+    if (")]}".includes(c)) { tokens.push({ type: "rparen" }); i++; continue; }
+    if (c === ",") { tokens.push({ type: "comma" }); i++; continue; }
+
+    if (c === "|") {
+      if (absOpen % 2 === 0) {
+        tokens.push({ type: "function", value: "abs" });
+        tokens.push({ type: "lparen" });
+      } else {
+        tokens.push({ type: "rparen" });
+      }
+      absOpen++;
+      i++;
+      continue;
+    }
+
+    if ("+-*/^".includes(c)) { tokens.push({ type: "op", value: c }); i++; continue; }
+    if (c === "=") { tokens.push({ type: "equals" }); i++; continue; }
+
+    throw new Error("Unexpected character \"" + c + "\"");
+  }
+  return tokens;
+};
+
+const annotateIdentifiers = (tokens) => {
+  const out = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type === "ident") {
+      const lower = String(t.value).toLowerCase();
+      if (FUNCTION_NAMES.has(lower)) {
+        out.push({ type: "function", value: lower });
+      } else if (CONSTANT_NAMES.has(lower)) {
+        out.push({ type: "constant", value: lower });
+      } else {
+        out.push({ type: "ident", value: lower });
+      }
+    } else {
+      out.push(t);
+    }
+  }
+  return out;
+};
+
+const insertImplicitMultiplication = (tokens) => {
+  const out = [];
+  const isValueEnd = (t) => t.type === "number" || t.type === "rparen" || t.type === "ident" || t.type === "constant";
+  const isValueStart = (t) => t.type === "number" || t.type === "lparen" || t.type === "ident" || t.type === "function" || t.type === "constant";
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    out.push(t);
+    const n = tokens[i + 1];
+    if (!n) continue;
+    if (t.type === "function" && n.type === "lparen") continue;
+    if (isValueEnd(t) && isValueStart(n)) {
+      if (!(t.type === "ident" && n.type === "lparen" && FUNCTION_NAMES.has(t.value))) {
+        out.push({ type: "op", value: "*" });
+      }
+    }
+  }
+  return out;
+};
+
+const toRPN = (tokens) => {
+  const output = [];
+  const stack = [];
+  const frames = [];
+  const peek = (arr) => arr[arr.length - 1];
+  const isUnaryPosition = (prev) => {
+    if (!prev) return true;
+    return prev.type === "op" || prev.type === "lparen" || prev.type === "comma" || prev.type === "equals";
+  };
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    const prev = tokens[i - 1];
+
+    if (t.type === "number" || t.type === "ident" || t.type === "constant") {
+      output.push(t);
+      continue;
+    }
+
+    if (t.type === "function") {
+      stack.push(t);
+      continue;
+    }
+
+    if (t.type === "comma") {
+      while (stack.length && peek(stack).type !== "lparen") output.push(stack.pop());
+      if (!stack.length) throw new Error("Misplaced comma or mismatched parentheses");
+      if (frames.length) frames[frames.length - 1].argCount++;
+      continue;
+    }
+
+    if (t.type === "lparen") {
+      stack.push(t);
+      frames.push({ argCount: 1 });
+      continue;
+    }
+
+    if (t.type === "rparen") {
+      while (stack.length && peek(stack).type !== "lparen") output.push(stack.pop());
+      if (!stack.length) throw new Error("Mismatched parentheses");
+      stack.pop();
+      const f = stack[stack.length - 1];
+      const frame = frames.pop();
+      if (f && f.type === "function") {
+        const func = stack.pop();
+        const def = FUNCTIONS[func.value];
+        const argc = def.arity === "var" ? frame.argCount : def.arity;
+        if (def.arity !== "var" && frame.argCount !== def.arity) throw new Error(func.value + " expects " + def.arity + " argument(s)");
+        output.push({ type: "function", value: func.value, argc });
+      }
+      continue;
+    }
+
+    if (t.type === "op") {
+      let op = t.value;
+      if (op === "-" && isUnaryPosition(prev)) op = "neg";
+      const o1 = op;
+      if (!OPERATORS[o1]) throw new Error("Unknown operator \"" + op + "\"");
+      while (stack.length) {
+        const top = peek(stack);
+        if (top.type !== "op") break;
+        const o2 = top.value;
+        const p1 = OPERATORS[o1].prec;
+        const p2 = OPERATORS[o2].prec;
+        if ((OPERATORS[o1].assoc === "L" && p1 <= p2) || (OPERATORS[o1].assoc === "R" && p1 < p2)) {
+          output.push(stack.pop());
+        } else break;
+      }
+      stack.push({ type: "op", value: o1 });
+      continue;
+    }
+
+    if (t.type === "equals") {
+      output.push(t);
+      continue;
+    }
+
+    throw new Error("Invalid token");
+  }
+
+  while (stack.length) {
+    const top = stack.pop();
+    if (top.type === "lparen" || top.type === "rparen") throw new Error("Mismatched parentheses");
+    if (top.type === "function") {
+      const def = FUNCTIONS[top.value];
+      const argc = def.arity === "var" ? 1 : def.arity;
+      output.push({ type: "function", value: top.value, argc });
+    } else output.push(top);
+  }
+  return output;
+};
+
+const evalRPN = (rpn, userVariables = {}, fractionMode = false, currentAngleMode = 'rad') => {
+  const st = [];
+  for (let i = 0; i < rpn.length; i++) {
+    const t = rpn[i];
+
+    if (t.type === "number") {
+      if (fractionMode) {
+        st.push(numberToFraction(t.value));
+      } else {
+        st.push(t.value);
+      }
+      continue;
+    }
+
+    if (t.type === "constant") {
+      const constVal = CONSTANTS[t.value];
+      if (constVal === undefined) {
+        throw new Error("Unknown constant \"" + t.value + "\"");
+      }
+      if (fractionMode) {
+        st.push(numberToFraction(constVal));
+      } else {
+        st.push(constVal);
+      }
+      continue;
+    }
+
+    if (t.type === "ident") {
+      if (Object.prototype.hasOwnProperty.call(userVariables, t.value)) {
+        const val = Number(userVariables[t.value]);
+        if (fractionMode) {
+          st.push(numberToFraction(val));
+        } else {
+          st.push(val);
+        }
+      } else {
+        throw new Error("Unknown variable \"" + t.value + "\"");
+      }
+      continue;
+    }
+
+    if (t.type === "op") {
+      if (fractionMode) {
+        const def = FRACTION_OPERATORS[t.value];
+        if (def.arity === 1) {
+          if (st.length < 1) throw new Error("Stack Underflow.");
+          const a = st.pop();
+          const v = def.fn(a);
+          st.push(v);
+        } else {
+          if (st.length < 2) throw new Error("Stack Underflow.");
+          const b = st.pop();
+          const a = st.pop();
+          const v = def.fn(a, b);
+          st.push(v);
+        }
+      } else {
+        const def = OPERATORS[t.value];
+        if (def.arity === 1) {
+          if (st.length < 1) throw new Error("Stack Underflow.");
+          const a = st.pop();
+          const v = def.fn(a);
+          if (!isFinite(v)) throw new Error("Invalid result");
+          st.push(v);
+        } else {
+          if (st.length < 2) throw new Error("Stack Underflow.");
+          const b = st.pop();
+          const a = st.pop();
+          const v = def.fn(a, b);
+          if (!isFinite(v)) throw new Error("Invalid result");
+          st.push(v);
+        }
+      }
+      continue;
+    }
+
+    if (t.type === "function") {
+      const def = FUNCTIONS[t.value];
+      const argc = def.arity === "var" ? t.argc ?? 1 : def.arity;
+      if (st.length < argc) throw new Error("Stack Underflow.");
+      const args = [];
+      for (let k = 0; k < argc; k++) {
+        const arg = st.pop();
+        if (fractionMode && arg && arg.isFraction) {
+          args.unshift(fractionToNumber(arg));
+        } else {
+          args.unshift(arg);
+        }
+      }
+
+      let processedArgs = args;
+      if (def.isTrig && currentAngleMode === 'deg') {
+        processedArgs = args.map(a => degToRad(a));
+      }
+
+      const v = def.fn(...processedArgs);
+
+      let finalResult = v;
+      if (def.isInverseTrig && currentAngleMode === 'deg') {
+        finalResult = radToDeg(v);
+      }
+
+      if (!isFinite(finalResult)) throw new Error("Invalid result");
+      if (fractionMode) {
+        st.push(numberToFraction(finalResult));
+      } else {
+        st.push(finalResult);
+      }
+      continue;
+    }
+
+    if (t.type === "equals") throw new Error("Unexpected \"=\" In Expression.");
+
+    throw new Error("Invalid RPN Token.");
+  }
+
+  if (st.length !== 1) throw new Error("Invalid Expression.");
+  const val = st[0];
+  if (fractionMode) {
+    if (val && val.isFraction) {
+      if (!isFinite(val.num) || !isFinite(val.den)) throw new Error("Invalid result");
+      return val;
+    }
+    return numberToFraction(val);
+  }
+  if (typeof val !== "number" || !isFinite(val)) throw new Error("Invalid result");
+  return val;
+};
+
+const CalcButton = ({ onClick, children, className = "", title }) => (
+  <button className={"toolkitCalculatorButton " + className} onClick={onClick} title={title}>{children}</button>
+);
+
+const TTButton = ({ title, children, onClick, className = "" }) => (
+  <button
+    className={"toolkitCalculatorButton " + className}
+    onClick={onClick}
+    title={title}
+  >
+    {children}
+  </button>
+);
+
+const Calculator = () => {
+  const navigate = useNavigate();
+  const { token, loading } = useAuth();
+
+  const [expression, setExpression] = useState("");
+  const [history, setHistory] = useState([]);
+  const [variables, setVariables] = useState({});
+  const [decimalPlaces, setDecimalPlaces] = useState(10);
+  const [useSignificantFigures, setUseSignificantFigures] = useState(false);
+  const [significantFigures, setSignificantFigures] = useState(6);
+  const [useScientificNotation, setUseScientificNotation] = useState(false);
+  const [scientificNotationThreshold, setScientificNotationThreshold] = useState(6);
+  const [useFractionMode, setUseFractionMode] = useState(false);
+  const [angleMode, setAngleMode] = useState('rad');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+  const inputRef = useRef(null);
+  const cursorPositionRef = useRef(null);
+
+  const formatResult = (value) => {
+    if (!isFinite(value)) return value.toString();
+
+    if (useScientificNotation) {
+      const absVal = Math.abs(value);
+      if (absVal === 0) return "0";
+      const exp = Math.floor(Math.log10(absVal));
+      if (Math.abs(exp) >= scientificNotationThreshold || (absVal !== 0 && absVal < 1e-6)) {
+        return formatScientificNotation(value);
+      }
+    }
+
+    if (useSignificantFigures) {
+      return parseFloat(value.toPrecision(significantFigures)).toString();
+    } else {
+      if (Number.isInteger(value)) return value.toString();
+      if (Math.abs(value) < 1e-100) return "0";
+      if (Math.abs(value) > 1e12 || Math.abs(value) < 1e-6) {
+        if (useScientificNotation) {
+          return formatScientificNotation(value);
+        }
+        return value.toExponential(decimalPlaces);
+      }
+      return parseFloat(value.toFixed(decimalPlaces)).toString();
+    }
+  };
+
+  const formatFraction = (f) => {
+    if (!f || !f.isFraction) return formatResult(f);
+    if (!Number.isFinite(f.num) || !Number.isFinite(f.den)) return fractionToNumber(f).toString();
+    if (f.den === 1) return f.num.toString();
+    if (Math.abs(f.den) > 1e10 || Math.abs(f.num) > 1e10) {
+      return formatResult(fractionToNumber(f));
+    }
+    return f.num + "/" + f.den;
+  };
+
+  const formatScientificNotation = (value) => {
+    if (value === 0) return "0";
+
+    const exp = Math.floor(Math.log10(Math.abs(value)));
+    const mantissa = value / Math.pow(10, exp);
+
+    let mantissaStr;
+    if (useSignificantFigures) {
+      mantissaStr = parseFloat(mantissa.toPrecision(significantFigures)).toString();
+    } else {
+      mantissaStr = parseFloat(mantissa.toFixed(decimalPlaces)).toString();
+    }
+
+    const expStr = exp.toString().split('').map(c => {
+      if (c === '-') return '⁻';
+      return SUPERSCRIPT_MAP[c] || c;
+    }).join('');
+
+    return mantissaStr + "×10" + expStr;
+  };
+
+  const splitMultiLetterVariables = (tokens) => {
+    const result = [];
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (token.type === "ident" && token.value.length > 1) {
+        const lower = token.value.toLowerCase();
+        if (!RESERVED.has(lower)) {
+          const splitResult = splitVariableString(token.value);
+          if (splitResult.length > 1) {
+            for (let j = 0; j < splitResult.length; j++) {
+              if (j > 0) {
+                result.push({ type: "op", value: "*" });
+              }
+              result.push({ type: "ident", value: splitResult[j] });
+            }
+            continue;
+          }
+        }
+      }
+      result.push(token);
+    }
+    return result;
+  };
+
+  const splitVariableString = (str) => {
+    const allVarNames = Object.keys(variables).sort((a, b) => b.length - a.length);
+    const result = [];
+    let remaining = str.toLowerCase();
+
+    while (remaining.length > 0) {
+      let foundMatch = false;
+
+      for (const varName of allVarNames) {
+        if (remaining.startsWith(varName)) {
+          result.push(varName);
+          remaining = remaining.slice(varName.length);
+          foundMatch = true;
+          break;
+        }
+      }
+
+      if (!foundMatch) {
+        if (/^[a-zA-Z]$/.test(remaining[0])) {
+          result.push(remaining[0]);
+          remaining = remaining.slice(1);
+        } else {
+          return [str];
+        }
+      }
+    }
+
+    return result.length > 1 ? result : [str];
+  };
+
+  const parseAndEvaluate = (expr, allVariables = {}, fractionMode = false, currentAngleMode = 'rad') => {
+    try {
+      const evalExpr = convertSymbolsForEvaluation(expr);
+
+      const tokens = tokenize(evalExpr);
+      const splitTokens = splitMultiLetterVariables(tokens);
+      const annotatedTokens = annotateIdentifiers(splitTokens);
+      const withImplicitMult = insertImplicitMultiplication(annotatedTokens);
+      const rpn = toRPN(withImplicitMult);
+      const val = evalRPN(rpn, allVariables, fractionMode, currentAngleMode);
+      return { value: val, error: null };
+    } catch (error) {
+      const raw = String(error && error.message ? error.message : "Error");
+      if (raw.startsWith("DOMAIN")) return { value: null, error: "Domain Error" };
+      if (raw.startsWith("ARITY pow")) return { value: null, error: "Pow expects one or two arguments." };
+      if (raw.startsWith("ARITY hypot")) return { value: null, error: "Hypot expects at least two arguments." };
+      if (raw.includes("Mismatched parentheses")) return { value: null, error: "Mismatched Parentheses" };
+      if (raw.includes("Stack Underflow")) return { value: null, error: "Malformed Expression" };
+      if (raw.startsWith("Unknown variable")) return { value: null, error: "Unknown Variable" };
+      if (raw.startsWith("Unknown constant")) return { value: null, error: "Unknown Constant" };
+      if (raw.includes("Invalid Expression")) return { value: null, error: "Malformed Expression" };
+      if (raw.includes("Invalid number")) return { value: null, error: "Invalid Number Format" };
+      return { value: null, error: "Error" };
+    }
+  };
+
+  const detectVariables = (equation) => {
+    const ids = [];
+    const evalExpr = convertSymbolsForEvaluation(equation);
+    const tokens = tokenize(evalExpr);
+    const splitTokens = splitMultiLetterVariables(tokens);
+    const annotatedTokens = annotateIdentifiers(splitTokens);
+    for (const t of annotatedTokens) {
+      if (t.type === "ident" && !RESERVED.has(t.value)) ids.push(t.value);
+    }
+    return [...new Set(ids)];
+  };
+
+  const detectVariablesInExpression = (expr) => {
+    try {
+      const foundVariables = [];
+      const evalExpr = convertSymbolsForEvaluation(expr);
+      const tokens = tokenize(evalExpr);
+      const splitTokens = splitMultiLetterVariables(tokens);
+      for (const token of splitTokens) {
+        if (token.type === "ident" && variables[token.value.toLowerCase()]) {
+          foundVariables.push(token.value.toLowerCase());
+        }
+      }
+      return [...new Set(foundVariables)];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const solveEquation = (equation) => {
+    const parts = equation.split("=");
+    if (parts.length !== 2) return equation;
+
+    const leftStr = parts[0].trim();
+    const rightStr = parts[1].trim();
+    const vars = detectVariables(equation);
+    let variable = null;
+
+    if (vars.includes("x")) variable = "x";
+    else if (vars.length === 1) variable = vars[0];
+    else return "Cannot determine a single variable to solve for.";
+
+    const f = (x) => {
+      const allVars = { ...variables, [variable]: x };
+      const l = parseAndEvaluate(leftStr, allVars, false, angleMode);
+      const r = parseAndEvaluate(rightStr, allVars, false, angleMode);
+      if (l.error || r.error) return NaN;
+      const lVal = l.value && l.value.isFraction ? fractionToNumber(l.value) : l.value;
+      const rVal = r.value && r.value.isFraction ? fractionToNumber(r.value) : r.value;
+      return lVal - rVal;
+    };
+
+    const ranges = [[-1e6, 1e6], [-1e3, 1e3], [-100, 100], [-10, 10], [0, 100], [0, 10], [-5, 5]];
+
+    const tryBisection = (a, b, maxIter = 160) => {
+      let fa = f(a), fb = f(b);
+      if (!isFinite(fa) || !isFinite(fb)) return null;
+      if (fa === 0) return a;
+      if (fb === 0) return b;
+      if (fa * fb > 0) return null;
+
+      for (let i = 0; i < maxIter; i++) {
+        const m = (a + b) / 2;
+        const fm = f(m);
+        if (!isFinite(fm)) return null;
+        if (Math.abs(fm) < 1e-12) return m;
+        if (fa * fm < 0) { b = m; fb = fm; } else { a = m; fa = fm; }
+        if (Math.abs(b - a) < 1e-10) return (a + b) / 2;
+      }
+      return (a + b) / 2;
+    };
+
+    const tryNewton = (x0, maxIter = 100) => {
+      let x = x0;
+      for (let i = 0; i < maxIter; i++) {
+        const fx = f(x);
+        if (!isFinite(fx)) return null;
+        if (Math.abs(fx) < 1e-12) return x;
+        const h = 1e-6;
+        const fpx = (f(x + h) - f(x - h)) / (2 * h);
+        if (!isFinite(fpx) || Math.abs(fpx) < 1e-14) return null;
+        const nx = x - fx / fpx;
+        if (!isFinite(nx)) return null;
+        if (Math.abs(nx - x) < 1e-10) return nx;
+        x = nx;
+      }
+      return null;
+    };
+
+    for (const [a, b] of ranges) {
+      const m = tryBisection(a, b);
+      if (m !== null && isFinite(m)) return variable + " = " + formatResult(m);
+    }
+
+    const seeds = [0, 1, -1, 2, -2, 5, -5, 10, -10, 100, -100];
+    for (const s of seeds) {
+      const r = tryNewton(s);
+      if (r !== null && isFinite(r)) return variable + " = " + formatResult(r);
+    }
+
+    return "No real solution found.";
+  };
+
+  const handleVariableAssignment = (expr) => {
+    const parts = expr.split("=");
+    if (parts.length !== 2) return false;
+
+    const varName = convertSymbolsForEvaluation(parts[0]).trim().toLowerCase();
+    const valueExpr = parts[1].trim();
+
+    if (!varName.match(/^[a-z_][a-z0-9_]*$/)) return false;
+
+    if (RESERVED.has(varName)) {
+      setHistory((prev) => [...prev, { expression: expr, result: "Cannot override the function \"" + varName + "\"." }]);
+      return true;
+    }
+
+    const result = parseAndEvaluate(valueExpr, variables, false, angleMode);
+    if (result.error) return false;
+
+    const numVal = result.value && result.value.isFraction ? fractionToNumber(result.value) : result.value;
+    setVariables(prev => ({ ...prev, [varName]: numVal }));
+    return true;
+  };
+
+  const handleEnter = () => {
+    if (!expression.trim()) return;
+
+    const originalExpression = expression.trim();
+    let result = "";
+
+    if (originalExpression.includes("=")) {
+      if (handleVariableAssignment(originalExpression)) {
+        const parts = originalExpression.split("=");
+        const varName = convertSymbolsForEvaluation(parts[0]).trim().toLowerCase();
+        const value = variables[varName] || parseAndEvaluate(parts[1].trim(), variables, false, angleMode).value;
+        const numVal = value && value.isFraction ? fractionToNumber(value) : value;
+        result = varName + " = " + formatResult(numVal);
+      } else {
+        result = solveEquation(originalExpression);
+      }
+    } else {
+      const { value, error } = parseAndEvaluate(originalExpression, variables, useFractionMode, angleMode);
+      if (!error) {
+        if (useFractionMode && value && value.isFraction) {
+          result = formatFraction(value);
+        } else {
+          result = formatResult(value);
+        }
+      } else {
+        result = error;
+      }
+    }
+
+    setHistory((prev) => [...prev, { expression: formatExponentsInText(originalExpression, 0).text, result }]);
+    setExpression("");
+    cursorPositionRef.current = 0;
+  };
+
+  const setCursorPosition = (pos) => {
+    if (inputRef.current) {
+      requestAnimationFrame(() => {
+        inputRef.current.focus();
+        inputRef.current.setSelectionRange(pos, pos);
+      });
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    const cursorPos = e.target.selectionStart;
+
+    cursorPositionRef.current = cursorPos;
+
+    const formatted = applySymbolFormatting(newValue, cursorPos);
+    setExpression(formatted.text);
+
+    if (formatted.text !== newValue || formatted.cursorPos !== cursorPos) {
+      setTimeout(() => {
+        setCursorPosition(formatted.cursorPos);
+      }, 0);
+    }
+  };
+
+  const appendToExpression = (value) => {
+    const currentPos = inputRef.current?.selectionStart || expression.length;
+    const newExpression = expression.slice(0, currentPos) + value + expression.slice(currentPos);
+    const newCursorPos = currentPos + value.length;
+
+    const formatted = applySymbolFormatting(newExpression, newCursorPos);
+    setExpression(formatted.text);
+
+    setTimeout(() => {
+      setCursorPosition(formatted.cursorPos);
+    }, 10);
+  };
+
+  const deleteLast = () => {
+    const currentPos = inputRef.current?.selectionStart || expression.length;
+    if (currentPos > 0) {
+      const newExpression = expression.slice(0, currentPos - 1) + expression.slice(currentPos);
+      const formatted = applySymbolFormatting(newExpression, currentPos - 1);
+      setExpression(formatted.text);
+      setCursorPosition(formatted.cursorPos);
+    }
+  };
+
+  const clearExpression = () => {
+    setExpression("");
+    setCursorPosition(0);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.target.tagName === "INPUT") {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleEnter();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        clearExpression();
+      }
+      return;
+    }
+
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleEnter();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      clearExpression();
+    } else if (e.key.length === 1) {
+      e.preventDefault();
+      appendToExpression(e.key);
+      inputRef.current?.focus();
+    }
+  };
+
+  const activeVariables = expression ? detectVariablesInExpression(expression) : [];
+  const variableCount = Object.keys(variables).length;
+
+  useEffect(() => {
+    if (!loading && !token) navigate("/login");
+  }, [token, loading, navigate]);
+
+  return (
+    <div className="toolkitCalculatorApp" onKeyDown={handleKeyPress} tabIndex={0}>
+      <Nav activePage="calculator" />
+
+      {loading ? (
+        <div className="toolkitCalculatorCellHeaderContainer" style={{ justifyContent: "center" }}>
+          <div className="loading-wrapper">
+            <div className="loading-circle" />
+            <label className="loading-title">
+              Loading
+            </label>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="toolkitCalculatorContainer">
+            <div className="toolkitCalculatorToolBar">
+              <div className="toolkitCalculatorTitle">
+                <FontAwesomeIcon icon={faCalculator} />
+                <span>Calculator</span>
+              </div>
+
+              <div className="toolkitCalculatorStatusGroup">
+                <span className="toolkitCalculatorStatusItem">
+                  <span>{angleMode === "deg" ? "Degrees" : "Radians"}</span>
+                </span>
+                <span className="toolkitCalculatorStatusItem">
+                  <span>{useFractionMode ? "Fraction" : "Decimal"}</span>
+                </span>
+                <span className="toolkitCalculatorStatusItem">
+                  <span>{useSignificantFigures ? `${significantFigures} Significant Figures` : `${decimalPlaces} Decimal Places`}</span>
+                </span>
+                {useScientificNotation && (
+                  <span className="toolkitCalculatorStatusItem">
+                    <span>Scientific At 10^{scientificNotationThreshold}</span>
+                  </span>
+                )}
+                <span className="toolkitCalculatorStatusItem">
+                  <span>{variableCount} {variableCount === 1 ? "Variable" : "Variables"}</span>
+                </span>
+              </div>
+
+              <span className="toolkitCalculatorToolBarSpacer" />
+
+              <button
+                className="toolkitCalculatorOperationsButton"
+                onClick={() => setShowSettingsModal(true)}
+                title="Settings"
+              >
+                <FontAwesomeIcon icon={faGear} />
+                <span>Settings</span>
+              </button>
+            </div>
+
+            <div className="toolkitCalculatorHistory">
+              {history.length === 0 ? (
+                <div className="toolkitCalculatorHistoryEmpty">No Calculations Yet</div>
+              ) : (
+                history.slice().reverse().map((item, index) => (
+                  <div key={index} className="toolkitCalculatorHistoryItem">
+                    <span className="toolkitCalculatorHistoryExpression">{item.expression}</span>
+                    <span className="toolkitCalculatorHistoryArrow">→</span>
+                    <span className="toolkitCalculatorHistoryResult">{item.result}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="toolkitCalculatorInputBar">
+              <div className="toolkitCalculatorInputWrapper">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className="toolkitCalculatorInput"
+                  value={expression}
+                  onChange={handleInputChange}
+                  placeholder={angleMode === "deg"
+                    ? "Enter an expression in degrees, such as sin(30), cos(180), or tan(45)."
+                    : "Enter an expression in radians, such as sin(π/6), cos(π), or tan(π/4)."}
+                  autoFocus
+                />
+              </div>
+              {activeVariables.length > 0 && (
+                <div className="toolkitCalculatorStatusGroup">
+                  {activeVariables.map((varName) => (
+                    <span key={varName} className="toolkitCalculatorStatusItem toolkitCalculatorStatusVariable">
+                      <span>{varName} = {formatResult(variables[varName])}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="toolkitCalculatorKeyboard">
+              <section className="toolkitCalculatorPanel">
+                <div className="toolkitCalculatorPanelHeader">
+                  <span className="toolkitCalculatorPanelTitle">Keypad</span>
+                </div>
+                <div className="toolkitCalculatorKeyGrid">
+                  <CalcButton onClick={() => appendToExpression("1")} className="toolkitCalculatorNumber">1</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("2")} className="toolkitCalculatorNumber">2</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("3")} className="toolkitCalculatorNumber">3</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("4")} className="toolkitCalculatorNumber">4</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("5")} className="toolkitCalculatorNumber">5</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("6")} className="toolkitCalculatorNumber">6</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("7")} className="toolkitCalculatorNumber">7</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("8")} className="toolkitCalculatorNumber">8</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("9")} className="toolkitCalculatorNumber">9</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("(")} className="toolkitCalculatorOperator">(</CalcButton>
+                  <CalcButton onClick={() => appendToExpression(")")} className="toolkitCalculatorOperator">)</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("{")} className="toolkitCalculatorOperator">{"{"}</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("}")} className="toolkitCalculatorOperator">{"}"}</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("[")} className="toolkitCalculatorOperator">[</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("]")} className="toolkitCalculatorOperator">]</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("+")} className="toolkitCalculatorOperator">+</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("-")} className="toolkitCalculatorOperator">-</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("/")} className="toolkitCalculatorOperator">÷</CalcButton>
+                  <CalcButton onClick={() => appendToExpression(".")} className="toolkitCalculatorOperator">.</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("=")} className="toolkitCalculatorOperator">=</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("*")} className="toolkitCalculatorOperator">×</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("|")} className="toolkitCalculatorOperator">|</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("^")} className="toolkitCalculatorOperator">^</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("+-")} className="toolkitCalculatorOperator">±</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("e")} className="toolkitCalculatorOperator">E</CalcButton>
+                </div>
+              </section>
+
+              <section className="toolkitCalculatorPanel">
+                <div className="toolkitCalculatorPanelHeader">
+                  <span className="toolkitCalculatorPanelTitle">Functions</span>
+                </div>
+                <div className="toolkitCalculatorKeyGrid toolkitCalculatorFunctionGrid">
+                  <TTButton title="Compute the principal square root of a number." onClick={() => appendToExpression("sqrt(")} className="toolkitCalculatorFunction">√</TTButton>
+                  <TTButton title="Compute the cube root of a number." onClick={() => appendToExpression("cbrt(")} className="toolkitCalculatorFunction">∛</TTButton>
+                  <TTButton title="Insert the mathematical constant pi (≈3.14159)." onClick={() => appendToExpression("pi")} className="toolkitCalculatorFunction">π</TTButton>
+                  <TTButton title="Insert the mathematical constant tau (2π)." onClick={() => appendToExpression("tau")} className="toolkitCalculatorFunction">τ</TTButton>
+                  <TTButton title="Raise a number to a power; with one argument, it squares the input." onClick={() => appendToExpression("pow(")} className="toolkitCalculatorFunction">pow</TTButton>
+                  <TTButton title="Compute the natural logarithm of a positive number." onClick={() => appendToExpression("ln(")} className="toolkitCalculatorFunction">ln</TTButton>
+                  <TTButton title="Compute the base-10 logarithm of a positive number." onClick={() => appendToExpression("log(")} className="toolkitCalculatorFunction">log</TTButton>
+                  <TTButton title={`Return the sine of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("sin(")} className="toolkitCalculatorFunction">sin</TTButton>
+                  <TTButton title={`Return the cosine of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("cos(")} className="toolkitCalculatorFunction">cos</TTButton>
+                  <TTButton title={`Return the tangent of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("tan(")} className="toolkitCalculatorFunction">tan</TTButton>
+                  <TTButton title={`Return the secant of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("sec(")} className="toolkitCalculatorFunction">sec</TTButton>
+                  <TTButton title={`Return the cosecant of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("csc(")} className="toolkitCalculatorFunction">csc</TTButton>
+                  <TTButton title={`Return the cotangent of an angle in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("cot(")} className="toolkitCalculatorFunction">cot</TTButton>
+                  <TTButton title={`Return the arcsine in ${angleMode === 'deg' ? 'degrees' : 'radians'}; the domain is −1 to 1.`} onClick={() => appendToExpression("asin(")} className="toolkitCalculatorFunction">asin</TTButton>
+                  <TTButton title={`Return the arccosine in ${angleMode === 'deg' ? 'degrees' : 'radians'}; the domain is −1 to 1.`} onClick={() => appendToExpression("acos(")} className="toolkitCalculatorFunction">acos</TTButton>
+                  <TTButton title={`Return the arctangent in ${angleMode === 'deg' ? 'degrees' : 'radians'}.`} onClick={() => appendToExpression("atan(")} className="toolkitCalculatorFunction">atan</TTButton>
+                  <TTButton title={`Return the arcsecant in ${angleMode === 'deg' ? 'degrees' : 'radians'}; the domain excludes (−1, 1).`} onClick={() => appendToExpression("asec(")} className="toolkitCalculatorFunction">asec</TTButton>
+                  <TTButton title={`Return the arccosecant in ${angleMode === 'deg' ? 'degrees' : 'radians'}; the domain excludes (−1, 1).`} onClick={() => appendToExpression("acsc(")} className="toolkitCalculatorFunction">acsc</TTButton>
+                  <TTButton title={`Return the arccotangent in ${angleMode === 'deg' ? 'degrees' : 'radians'}; acot(0) is ${angleMode === 'deg' ? '90°' : 'π⁄2'}.`} onClick={() => appendToExpression("acot(")} className="toolkitCalculatorFunction">acot</TTButton>
+                  <TTButton title="Return the hyperbolic sine." onClick={() => appendToExpression("sinh(")} className="toolkitCalculatorFunction">sinh</TTButton>
+                  <TTButton title="Return the hyperbolic cosine." onClick={() => appendToExpression("cosh(")} className="toolkitCalculatorFunction">cosh</TTButton>
+                  <TTButton title="Return the hyperbolic tangent." onClick={() => appendToExpression("tanh(")} className="toolkitCalculatorFunction">tanh</TTButton>
+                  <TTButton title="Return e raised to the given power." onClick={() => appendToExpression("exp(")} className="toolkitCalculatorFunction">exp</TTButton>
+                  <TTButton title="Return the logarithm of x with base b." onClick={() => appendToExpression("logn(")} className="toolkitCalculatorFunction">logn</TTButton>
+                  <TTButton title="Return the n-th root of x, x^(1/n)." onClick={() => appendToExpression("root(")} className="toolkitCalculatorFunction">root</TTButton>
+                  <TTButton title="Return the sign of a number as −1, 0, or 1." onClick={() => appendToExpression("sign(")} className="toolkitCalculatorFunction">sign</TTButton>
+                  <TTButton title="Return the Euclidean norm √(x₁² + … + xₙ²)." onClick={() => appendToExpression("hypot(")} className="toolkitCalculatorFunction">hypot</TTButton>
+                  <TTButton title="Clamp x to the closed interval [min, max]." onClick={() => appendToExpression("clamp(")} className="toolkitCalculatorFunction">clamp</TTButton>
+                  <TTButton title="Return the factorial of n." onClick={() => appendToExpression("fact(")} className="toolkitCalculatorFunction">fact</TTButton>
+                  <TTButton title="Return the number of permutations, P(n, k)." onClick={() => appendToExpression("perm(")} className="toolkitCalculatorFunction">perm</TTButton>
+                  <TTButton title="Return the number of combinations, C(n, k)." onClick={() => appendToExpression("comb(")} className="toolkitCalculatorFunction">comb</TTButton>
+                  <TTButton title="Convert degrees to radians." onClick={() => appendToExpression("toRad(")} className="toolkitCalculatorFunction">toRad</TTButton>
+                  <TTButton title="Convert radians to degrees." onClick={() => appendToExpression("toDeg(")} className="toolkitCalculatorFunction">toDeg</TTButton>
+                  <TTButton title="Return the absolute value." onClick={() => appendToExpression("abs(")} className="toolkitCalculatorFunction">abs</TTButton>
+                </div>
+              </section>
+
+              <section className="toolkitCalculatorPanel">
+                <div className="toolkitCalculatorPanelHeader">
+                  <span className="toolkitCalculatorPanelTitle">Variables</span>
+                </div>
+                <div className="toolkitCalculatorControlGrid">
+                  <CalcButton onClick={() => appendToExpression("x")} className="toolkitCalculatorVariable">x</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("a")} className="toolkitCalculatorVariable">a</CalcButton>
+                  <CalcButton onClick={deleteLast} className="toolkitCalculatorControl" title="Delete the last character.">
+                    <FontAwesomeIcon icon={faDeleteLeft} />
+                  </CalcButton>
+                  <CalcButton onClick={() => appendToExpression("y")} className="toolkitCalculatorVariable">y</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("b")} className="toolkitCalculatorVariable">b</CalcButton>
+                  <CalcButton onClick={clearExpression} className="toolkitCalculatorControl">Clear</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("z")} className="toolkitCalculatorVariable">z</CalcButton>
+                  <CalcButton onClick={() => appendToExpression("c")} className="toolkitCalculatorVariable">c</CalcButton>
+                  <CalcButton onClick={handleEnter} className="toolkitCalculatorEnter">Enter</CalcButton>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          {showSettingsModal && (
+            <div className="toolkitCalculatorModalOverlay" onClick={() => setShowSettingsModal(false)}>
+              <div className="toolkitCalculatorModal" onClick={(e) => e.stopPropagation()}>
+                <div className="toolkitCalculatorModalHeader">
+                  <span className="toolkitCalculatorModalTitle">Calculator Settings</span>
+                  <button
+                    className="toolkitCalculatorModalCloseButton"
+                    onClick={() => setShowSettingsModal(false)}
+                    title="Close"
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                </div>
+
+                <div className="toolkitCalculatorModalContent">
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">Fraction Mode</div>
+                    <div className="toolkitCalculatorSettingsButtonGroup">
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${!useFractionMode ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseFractionMode(false)}
+                      >
+                        Decimal
+                      </button>
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${useFractionMode ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseFractionMode(true)}
+                      >
+                        Fraction
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">Angle Mode</div>
+                    <div className="toolkitCalculatorSettingsButtonGroup">
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${angleMode === "rad" ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setAngleMode("rad")}
+                      >
+                        Radians
+                      </button>
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${angleMode === "deg" ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setAngleMode("deg")}
+                      >
+                        Degrees
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">Rounding Mode</div>
+                    <div className="toolkitCalculatorSettingsButtonGroup">
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${!useSignificantFigures ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseSignificantFigures(false)}
+                      >
+                        Decimal Places
+                      </button>
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${useSignificantFigures ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseSignificantFigures(true)}
+                      >
+                        Significant Figures
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">
+                      <span>{useSignificantFigures ? "Significant Figures" : "Decimal Places"}</span>
+                      <span className="toolkitCalculatorSettingsValue">
+                        {useSignificantFigures ? significantFigures : decimalPlaces}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={useSignificantFigures ? "1" : "0"}
+                      max="15"
+                      value={useSignificantFigures ? significantFigures : decimalPlaces}
+                      onChange={(e) => useSignificantFigures ? setSignificantFigures(parseInt(e.target.value)) : setDecimalPlaces(parseInt(e.target.value))}
+                      className="toolkitCalculatorSlider"
+                    />
+                  </div>
+
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">Scientific Notation</div>
+                    <div className="toolkitCalculatorSettingsButtonGroup">
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${!useScientificNotation ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseScientificNotation(false)}
+                      >
+                        Off
+                      </button>
+                      <button
+                        className={`toolkitCalculatorOperationsButton ${useScientificNotation ? "toolkitCalculatorOperationsButtonActive" : ""}`}
+                        onClick={() => setUseScientificNotation(true)}
+                      >
+                        On
+                      </button>
+                    </div>
+                  </div>
+
+                  {useScientificNotation && (
+                    <div className="toolkitCalculatorSettingsSection">
+                      <div className="toolkitCalculatorSettingsLabel">
+                        <span>Use Scientific Notation When Exponent ≥</span>
+                        <span className="toolkitCalculatorSettingsValue">{scientificNotationThreshold}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="12"
+                        value={scientificNotationThreshold}
+                        onChange={(e) => setScientificNotationThreshold(parseInt(e.target.value))}
+                        className="toolkitCalculatorSlider"
+                      />
+                    </div>
+                  )}
+
+                  <div className="toolkitCalculatorSettingsSection">
+                    <div className="toolkitCalculatorSettingsLabel">Variables</div>
+                    <div className="toolkitCalculatorVariablesList">
+                      {variableCount === 0 ? (
+                        <div className="toolkitCalculatorVariablesEmpty">No variables are set. Type x = 5 to set one.</div>
+                      ) : (
+                        Object.entries(variables).map(([name, value]) => (
+                          <div key={name} className="toolkitCalculatorVariableItem">
+                            <span className="toolkitCalculatorVariableName">{name}</span>
+                            <span className="toolkitCalculatorVariableValue">{formatResult(value)}</span>
+                            <button
+                              onClick={() => setVariables(prev => { const newVars = { ...prev }; delete newVars[name]; return newVars; })}
+                              className="toolkitCalculatorVariableDeleteButton"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default Calculator;

@@ -2,29 +2,29 @@ import React from "react";
 import PropTypes from "prop-types";
 import "../styles/helperStyles/Unavailable.css";
 
-const DinoLabsUnavailable = ({ screenSize }) => {
+const Unavailable = ({ screenSize }) => {
   const safeScreenSize = typeof screenSize === "number" ? screenSize : 0;
 
   return (
-    <div className="dinolabsUnavailableContainer">
-      <div className="dinolabsUnavailableWrapper">
-        <div className="dinolabsUnavailableContent">
+    <div className="unavailableUnavailableContainer">
+      <div className="unavailableUnavailableWrapper">
+        <div className="unavailableUnavailableContent">
           <img
-            className="dinolabsUnavailableImage"
+            className="unavailableUnavailableImage"
             src="./DinoLabsLogo-White.png"
             alt="Dino Labs Logo"
             onError={(e) => {
               e.target.src = "/fallback-logo.png"; 
             }}
           />
-          <div className="dinolabsUnavailableTextStack">
-            <h1 className="dinolabsUnavailableTitle">
+          <div className="unavailableUnavailableTextStack">
+            <h1 className="unavailableUnavailableTitle">
               Dino Labs Unavailable
             </h1>
-            <p className="dinolabsUnavailableMessage">
+            <p className="unavailableUnavailableMessage">
               The platform is currently unavailable at this screen size.
             </p>
-            <p className="dinolabsUnavailableSubMessage">
+            <p className="unavailableUnavailableSubMessage">
               Please sign in on a {safeScreenSize < 700 ? "larger" : "smaller"} screen to continue.
             </p>
           </div>
@@ -34,12 +34,12 @@ const DinoLabsUnavailable = ({ screenSize }) => {
   );
 };
 
-DinoLabsUnavailable.propTypes = {
+Unavailable.propTypes = {
   screenSize: PropTypes.number,
 };
 
-DinoLabsUnavailable.defaultProps = {
+Unavailable.defaultProps = {
   screenSize: 0,
 };
 
-export default DinoLabsUnavailable;
+export default Unavailable;

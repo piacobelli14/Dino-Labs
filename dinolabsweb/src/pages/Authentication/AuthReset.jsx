@@ -145,7 +145,7 @@ const Reset = () => {
         <div className="resetPageWrapper">
             <DinoLabsNav activePage="sat"/>
             <div className="resetCellHeaderContainer" 
-                style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)" }}
+                style={{ background: "linear-gradient(135deg, #08090c 0%, #0d0f13 50%, #13151a 100%)" }}
             > 
                 {!isTouchDevice && (
                     <video

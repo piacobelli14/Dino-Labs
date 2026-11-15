@@ -1,0 +1,748 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.toolkitLatexLabApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.toolkitLatexLabCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitLatexLabToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.toolkitLatexLabTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.toolkitLatexLabTitle svg {
+  color: #4ecdc4;
+}
+
+.toolkitLatexLabStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitLatexLabStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.toolkitLatexLabStatusItem:last-child {
+  border-right: none;
+}
+
+.toolkitLatexLabStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitLatexLabStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.toolkitLatexLabStatusAccent,
+.toolkitLatexLabStatusAccent svg {
+  color: #4ecdc4;
+}
+
+.toolkitLatexLabShell {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  overflow: hidden;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitLatexLabSidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid #3d4354;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.toolkitLatexLabSection,
+.toolkitLatexLabCard {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-bottom: 24px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.toolkitLatexLabSectionTitle,
+.toolkitLatexLabCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  flex-shrink: 0;
+}
+
+.toolkitLatexLabSectionTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitLatexLabCardTitle {
+  justify-content: space-between;
+}
+
+.toolkitLatexLabSection > :not(.toolkitLatexLabSectionTitle) {
+  margin: 14px 24px 0;
+}
+
+.toolkitLatexLabCard > :not(.toolkitLatexLabCardTitle) {
+  margin: 16px 24px 0;
+}
+
+.toolkitLatexLabSectionTitle + *,
+.toolkitLatexLabCardTitle + * {
+  margin-top: 20px !important;
+}
+
+.toolkitLatexLabMain {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.toolkitLatexLabMainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px;
+  align-items: stretch;
+}
+
+.toolkitLatexLabCardWide {
+  grid-column: 1 / -1;
+}
+
+.toolkitLatexLabRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.toolkitLatexLabLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitLatexLabRowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.toolkitLatexLabValue {
+  padding: 4px 9px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.toolkitLatexLabBtn,
+.toolkitLatexLabPresetBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.toolkitLatexLabBtn {
+  border-color: #4ecdc4;
+}
+
+.toolkitLatexLabBtn.toolkitLatexLabSubtle {
+  border-color: #3d4354;
+  color: #9aa3b5;
+}
+
+.toolkitLatexLabPresetBtn {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.74rem;
+  color: #cdd4e4;
+}
+
+.toolkitLatexLabBtn:hover:not(:disabled),
+.toolkitLatexLabPresetBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitLatexLabBtn:focus,
+.toolkitLatexLabPresetBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitLatexLabPresetBtn.active {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.toolkitLatexLabBtn:disabled,
+.toolkitLatexLabPresetBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toolkitLatexLabPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toolkitLatexLabPresets > .toolkitLatexLabPresetBtn {
+  flex: 1 1 calc(50% - 3px);
+}
+
+.toolkitLatexLabRow input[type="range"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolkitLatexLabCardAction {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.toolkitLatexLabEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 200px;
+  text-align: center;
+}
+
+.toolkitLatexLabEmpty svg {
+  font-size: 28px;
+  color: #3d4354;
+}
+
+.toolkitLatexLabEmpty p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #6f7789;
+}
+
+.toolkitLatexLabCode {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  background: #12151b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #cdd4e4;
+  white-space: pre;
+}
+
+.toolkitLatexLabExportBlock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitLatexLabExportHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid #3d4354;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+}
+
+.toolkitLatexLabExportTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitLatexLabExportActions {
+  display: flex;
+  gap: 8px;
+}
+
+.toolkitLatexLabExportActions .toolkitLatexLabBtn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.74rem;
+  border-color: #3d4354;
+}
+
+.toolkitLatexLabStatusError {
+  color: #ff6b6b;
+}
+
+.toolkitLatexLabMono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+.toolkitLatexLabTextArea {
+  width: 100%;
+  min-height: 200px;
+  padding: 0.8rem 1rem;
+  box-sizing: border-box;
+  resize: vertical;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  color: #ebf0f8;
+  color-scheme: dark;
+  caret-color: #4ecdc4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitLatexLabTextArea::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.toolkitLatexLabTextArea:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitLatexLabTextAreaSmall {
+  min-height: 96px;
+}
+
+.toolkitLatexLabCard > .toolkitLatexLabTextArea {
+  width: auto;
+  align-self: stretch;
+}
+
+.toolkitLatexLabCardMeta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+}
+
+.toolkitLatexLabCardTitle > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.toolkitLatexLabCardTitle > span:first-child svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitLatexLabCardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.toolkitLatexLabWarningText {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.toolkitLatexLabWarningText {
+  color: #fbbf24;
+}
+
+.toolkitLatexLabWarningText svg {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.toolkitLatexLabSourceArea {
+  flex: 1;
+  min-height: 280px;
+}
+
+.toolkitLatexLabSymbolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 6px;
+}
+
+.toolkitLatexLabSymbolBtn {
+  height: 38px;
+  padding: 0;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 1rem;
+  font-family: "Times New Roman", "STIX Two Math", serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolkitLatexLabSymbolBtn:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitLatexLabPreview {
+  flex: 1;
+  min-height: 280px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 8px 16px;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  background: #12151b;
+  color: #ebf0f8;
+}
+
+.toolkitLatexLabPreviewLight {
+  background: #ffffff;
+  color: #12151b;
+  border-color: #cdd4e4;
+}
+
+.toolkitLatexLabEquation {
+  padding: 10px 0;
+  border-bottom: 1px dashed #3d4354;
+  overflow-x: auto;
+}
+
+.toolkitLatexLabEquation:last-child {
+  border-bottom: none;
+}
+
+.toolkitLatexLabPreviewLight .toolkitLatexLabEquation {
+  border-bottom-color: #cdd4e4;
+}
+
+.toolkitLatexLabEquationError .katex-error {
+  color: #ff6b6b !important;
+}
+
+.toolkitLatexLabEquationMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ff6b6b;
+}
+
+.toolkitLatexLabExportGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.toolkitLatexLabExportGrid .toolkitLatexLabCode {
+  max-height: 200px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.toolkitLatexLabSidebar,
+.toolkitLatexLabMain,
+.toolkitLatexLabCode,
+.toolkitLatexLabTextArea,
+.toolkitLatexLabPreview {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.toolkitLatexLabSidebar::-webkit-scrollbar,
+.toolkitLatexLabMain::-webkit-scrollbar,
+.toolkitLatexLabCode::-webkit-scrollbar,
+.toolkitLatexLabTextArea::-webkit-scrollbar,
+.toolkitLatexLabPreview::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.toolkitLatexLabSidebar::-webkit-scrollbar-track,
+.toolkitLatexLabMain::-webkit-scrollbar-track,
+.toolkitLatexLabCode::-webkit-scrollbar-track,
+.toolkitLatexLabTextArea::-webkit-scrollbar-track,
+.toolkitLatexLabPreview::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toolkitLatexLabSidebar::-webkit-scrollbar-thumb,
+.toolkitLatexLabMain::-webkit-scrollbar-thumb,
+.toolkitLatexLabCode::-webkit-scrollbar-thumb,
+.toolkitLatexLabTextArea::-webkit-scrollbar-thumb,
+.toolkitLatexLabPreview::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.toolkitLatexLabSidebar::-webkit-scrollbar-thumb:hover,
+.toolkitLatexLabMain::-webkit-scrollbar-thumb:hover,
+.toolkitLatexLabCode::-webkit-scrollbar-thumb:hover,
+.toolkitLatexLabTextArea::-webkit-scrollbar-thumb:hover,
+.toolkitLatexLabPreview::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1200px) {
+  .toolkitLatexLabMainGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .toolkitLatexLabShell {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .toolkitLatexLabSidebar {
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid #3d4354;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitLatexLabMain {
+    overflow: visible;
+  }
+
+  .toolkitLatexLabMainGrid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitLatexLabToolBar {
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolkitLatexLabBtn,
+.toolkitLatexLabPresetBtn,
+.toolkitLatexLabTextArea {
+    transition: none;
+  }
+}
+
+.toolkitLatexLabRow input[type="range"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+
+.toolkitLatexLabRow input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+.toolkitLatexLabRow input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.toolkitLatexLabRow input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.toolkitLatexLabRow input[type="range"]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.toolkitLatexLabRow input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+}
+
+.toolkitLatexLabRow input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.toolkitLatexLabRow input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.toolkitLatexLabRow input[type="range"]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+.toolkitLatexLabSection {
+  overflow: visible;
+}
+
+.toolkitLatexLabSection > .toolkitLatexLabSectionTitle {
+  border-radius: 5px 5px 0 0;
+}

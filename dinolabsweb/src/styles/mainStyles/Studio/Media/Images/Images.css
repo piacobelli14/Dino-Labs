@@ -1,0 +1,1218 @@
+.imageImageEditorWrapper {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    overflow: scroll;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.imageImageEditorContentCropIndicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 400;
+}
+
+.imageImageEditorToolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    min-height: 100%; 
+    max-height: 100%; 
+    min-width: 40%;
+    max-width: 40%;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+    border-right: 1px solid #3d4354 !important;
+    overflow: visible;
+}
+
+.imageImageEditorContainerWrapper {
+    min-width: 60%;
+    max-width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+}
+
+.imageImageEditorContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.imageImageEditorContainerInnerStack {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden !important;
+}
+
+.imageImageEditorCellWrapper, 
+.imageImageEditorCellWrapperCollapsed,
+.imageImageEditorCellWrapperLayers, 
+.imageImageEditorCellWrapperLayersCollapsed,
+.imageImageEditorCellWrapperStackNonLayers, 
+.imageImageEditorCellWrapperStackNonLayersLong {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%; 
+    width: 100%;
+    padding-bottom: 0;
+    position: relative; 
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    margin: 0; 
+    gap: 0; 
+    overflow: visible;
+}
+
+.imageImageEditorCellWrapperCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.imageImageEditorCellWrapperStackNonLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: auto; 
+    box-sizing: border-box;
+}
+
+.imageImageEditorCellWrapperStackNonLayersLong {
+    min-height: calc(100% - 60px); 
+    max-height: calc(100% - 60px); 
+    height: calc(100% - 60px); 
+    overflow: auto; 
+    box-sizing: border-box;
+    gap: 0; 
+    overflow-x: hidden; 
+    overflow-y: visible; 
+}
+
+.imageImageEditorCellWrapperLayers {
+    min-height: 50%; 
+    max-height: 50%; 
+    height: 50%; 
+    overflow: scroll; 
+    border-top: none; 
+    box-sizing: border-box;
+}
+
+.imageImageEditorCellWrapperLayersCollapsed {
+    min-height: 60px; 
+    max-height: 60px; 
+    height: 60px; 
+    overflow: hidden; 
+    border-top: none; 
+    box-sizing: border-box;
+    border-bottom: none; 
+}
+
+.imageImageEditorHeaderFlex, 
+.imageImageEditorHeaderFlexDark {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 16px;
+    min-height: 60px;
+    max-height: 60px;
+    margin-bottom: 16px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    border-bottom: 2px solid #3d4354 !important;
+}
+
+.imageImageEditorHeaderFlexDark {
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+    position: sticky; 
+    top: 0; 
+    z-index: 900; 
+}
+
+.imageImageEditorCellTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.imageImageEditorCellFlexStackSplitWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    padding: 0 0 0 16px !important;
+    overflow: scroll; 
+}
+
+.imageImageEditorCellFlexStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box; 
+    min-width: 100%;
+    max-width: 100%;
+    overflow: scroll; 
+    padding: 0 16px 16px 16px !important;
+}
+
+.imageImageEditorCellFlexStackHalf {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 46%;
+}
+
+.imageImageEditorTextArea {
+    min-width: 100%; 
+    max-width: 100%;
+    height: 60px; 
+    box-sizing: border-box;
+    padding: 0.8rem 1rem; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8; 
+    border: 1px solid #3d4354; 
+    border-radius: 6px; 
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); 
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    transition: all 0.2s ease;
+}
+
+.imageImageEditorTextArea:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.imageImageEditorTextArea:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.imageImageEditorLargeStack,
+.imageImageEditorMiniStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.imageImageEditorLargeStack {
+    min-width: 40%;
+    max-width: 40%;
+}
+
+.imageImageEditorMiniStack {
+    min-width: 30%;
+    max-width: 30%;
+}
+
+.imageImageEditorPositionInput,
+.imageImageEditorPositionInputMini,
+.imageImageEditorPositionInputFlexed,
+.imageImageEditorPositionInputFlexedMini,
+.imageImageEditorCSSInput {
+    padding: 0.8rem 0.8rem;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+.imageImageEditorPositionInput::placeholder,
+.imageImageEditorPositionInputMini::placeholder,
+.imageImageEditorPositionInputFlexed::placeholder,
+.imageImageEditorPositionInputFlexedMini::placeholder,
+.imageImageEditorCSSInput::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.imageImageEditorPositionInput:hover,
+.imageImageEditorPositionInputMini:hover,
+.imageImageEditorPositionInputFlexed:hover,
+.imageImageEditorPositionInputFlexedMini:hover,
+.imageImageEditorCSSInput:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.imageImageEditorPositionInput:focus,
+.imageImageEditorPositionInputMini:focus,
+.imageImageEditorPositionInputFlexed:focus,
+.imageImageEditorPositionInputFlexedMini:focus,
+.imageImageEditorCSSInput:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.imageImageEditorPositionInputFlexed {
+    width: 35%;
+    max-width: 35%;
+    min-width: 35%;
+}
+
+.imageImageEditorPositionInputFlexedMini {
+    width: 20%;
+    max-width: 20%;
+    min-width: 20%;
+}
+
+.imageImageEditorPositionInput {
+    max-width: 40%;
+}
+
+.imageImageEditorPositionInputMini {
+    max-width: 20%;
+}
+
+.imageImageEditorCSSInput {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.imageImageEditorCellFlexTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    opacity: 1;
+    margin: 8px 0;
+}
+
+.imageImageEditorCellFlexTitle span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin-left: 8px;
+}
+
+.imageImageEditorCellFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-width: 100%;
+    gap: 4%;
+}
+
+.imageImageEditorCellFlexSubStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px; 
+    width: 100%; 
+}
+
+.imageImageEditorCellFlexSubRow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0;
+    width: 100%;
+    gap: 4%;
+}
+
+.imageImageEditorCellFlexSupplement {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+}
+
+.imageImageEditorCellMiniInputWrapper {
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px; 
+    min-width: 30%; 
+    max-width: 30%; 
+}
+
+.imageImageEditorBrushSizeFlex {
+    width: 80%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5%;
+}
+
+.imageImageEditorToolButton,
+.imageImageEditorToolButtonBig,
+.imageImageEditorToolButtonBigger,
+.imageImageEditorToolButtonHeader,
+.imageImageEditorToolButtonText,
+.imageImageEditorToolButtonMini, 
+.imageImageEditorToolSelect {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-sizing: border-box !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.8rem 0.8rem !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.imageImageEditorToolButton {
+    min-width: 10%;
+    max-width: 10%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.imageImageEditorToolButtonBig {
+    min-width: 50%;
+    max-width: 50%;
+    padding: 0.8rem 0.8rem !important;
+}
+
+.imageImageEditorToolButtonBigger {
+    min-width: 40%;
+    max-width: 40%;
+    padding: 0.8rem 0.8rem !important;
+    gap: 8px;
+}
+
+.imageImageEditorToolButtonHeader {
+    width: auto;
+    padding: 0.8rem 0.8rem !important;
+    max-height: 55%;
+}
+
+.imageImageEditorToolButtonText {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.imageImageEditorToolButtonMini {
+    min-width: 15%;
+    max-width: 15%;
+    padding: 0.8rem 0.8rem;
+}
+
+.imageImageEditorToolButton:hover,
+.imageImageEditorToolButtonBig:hover,
+.imageImageEditorToolButtonBigger:hover,
+.imageImageEditorToolButtonHeader:hover,
+.imageImageEditorToolButtonText:hover,
+.imageImageEditorToolButtonMini:hover,
+.imageImageEditorToolSelect:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    outline: none;
+}
+
+.imageImageEditorToolButton:focus,
+.imageImageEditorToolButtonBig:focus,
+.imageImageEditorToolButtonBigger:focus,
+.imageImageEditorToolButtonHeader:focus,
+.imageImageEditorToolButtonText:focus,
+.imageImageEditorToolButtonMini:focus,
+.imageImageEditorToolSelect:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+}
+
+.imageImageEditorColorPicker {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.imageImageEditorColorPicker:hover {
+    
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    border-color: #4ecdc4;
+}
+
+.imageConfrmationCheck {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0 0 0; 
+}
+
+.imageConfrmationCheck span {
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    margin: 0; 
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    overflow: hidden; 
+    white-space: nowrap;
+    padding: 0 8px; 
+}
+
+.imageImageResizer {
+    position: absolute;
+    cursor: move;
+}
+
+.imageImageEditorContent {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+    max-width: none;
+    max-height: none;
+}
+
+.imageImageEditorResizeHandle {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #000;
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.imageImageEditorResizeHandle.top-left,
+.imageImageEditorResizeHandle.bottom-left,
+.imageImageEditorResizeHandle.top-right,
+.imageImageEditorResizeHandle.bottom-right,
+.imageImageEditorRotationHandle.top-left,
+.imageImageEditorRotationHandle.bottom-left,
+.imageImageEditorRotationHandle.top-right,
+.imageImageEditorRotationHandle.bottom-right {
+    cursor: grab;
+}
+
+.imageImageEditorResizeHandle:hover {
+    opacity: 0.6;
+}
+
+.imageImageEditorCropRectangle .imageImageEditorResizeHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+}
+
+.imageImageEditorRotationHandle {
+    background: rgba(31, 174, 245, 0.8);
+    border: white;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.imageCornerInputGridWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.imageCornerInputFlex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.imageImageEditorModeIndicator {
+    width: 33%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.imageImageEditorModeIndicator span {
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+.imageVideoInputBottomBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    min-height: 10%;
+    max-height: 10%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 4;
+    box-sizing: border-box;
+    padding: 0 16px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%) !important;
+    border-top: 1px solid #3d4354 !important;
+}
+
+.imageClipSliderTrack {
+    background-color: rgba(92, 43, 226, 0.2);
+    pointer-events: none;
+    height: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.imageClipSliderBar {
+    background-color: rgba(229, 75, 75, 0.8);
+    width: 12px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+}
+
+.imageVideoContentFlexBig,
+.imageVideoContentFlexSmall {
+    width: 33%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.imageVideoContentFlexBig {
+    width: auto;
+    justify-content: center;
+    overflow: scroll;
+}
+
+.imageVideoContentFlexSmall {
+    width: auto;
+}
+
+.imageVideoButton,
+.imageVideoButtonHelper,
+.imageVideoButtonSupplementLeading,
+.imageVideoButtonSupplementTrailing,
+.imageVideoButtonX {
+    background-color: transparent;
+    padding: 0;
+    color: #6f7789;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+.imageVideoButton {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.imageVideoButtonHelper {
+    font-size: 16px;
+    opacity: 1.0;
+}
+
+.imageVideoButtonSupplementLeading,
+.imageVideoButtonSupplementTrailing {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.imageVideoButtonX {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    opacity: 0.8;
+}
+
+.imageVideoButtonSupplementLeading {
+    margin-right: 8px;
+}
+
+.imageVideoButtonSupplementTrailing {
+    margin-left: 8px;
+    margin-right: 16px;
+}
+
+.imageVideoButton:hover,
+.imageVideoButtonHelper:hover,
+.imageVideoButtonSupplementLeading:hover,
+.imageVideoButtonSupplementTrailing:hover,
+.imageVideoButtonX:hover {
+    color: #ebf0f8;
+    
+    outline: none;
+    border: none;
+}
+
+.imageVideoButton:focus,
+.imageVideoButtonHelper:focus,
+.imageVideoButtonSupplementLeading:focus,
+.imageVideoButtonSupplementTrailing:focus,
+.imageVideoButtonX:focus {
+    outline: none;
+    border: none;
+}
+
+.imageAudioWaveformDisplayBig,
+.imageAudioWaveformDisplaySmall {
+    width: 100%;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-bottom: 1px solid #3d4354;
+    overflow: visible;
+    position: relative;
+}
+
+.imageAudioWaveformDisplayBig {
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+    border: 1px solid #3d4354;
+}
+
+.imageAudioWaveformDisplaySmall {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    border: 1px solid #3d4354;
+    padding: 16px;
+}
+
+.imageAudioWaveformDisplayFlex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 25%;
+    min-height: 25%;
+    max-height: 25%;
+}
+
+.imageImageEditorTextOverlay {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ebf0f8;
+    border-color: #3d4354;
+    border-width: 1px;
+    border-radius: 6px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.imageImageEditorTextDragSectionTop,
+.imageImageEditorTextDragSectionBottom {
+    width: 100%;
+    height: 10%;
+    background-color: #3d4354;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+}
+
+.imageImageEditorTextSpace {
+    height: calc(100% - 20%);
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    padding: 8px;
+}
+
+.imageImageEditorTextSpace:hover,
+.imageImageEditorTextSpace:focus {
+    border: none;
+    outline: none;
+}
+
+.imageImageEditorTextCloseButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    color: #ebf0f8;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.imageImageEditorTextResizeHandle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 40%;
+    background-color: #3d4354;
+    cursor: nwse-resize;
+}
+
+.imageTextEditorLayerList, 
+.imageTextEditorHistoryTimeline {
+    width: 100%; 
+    box-sizing: border-box;
+    padding: 0; 
+    margin: 0; 
+    height: 100%; 
+    overflow: scroll;
+}
+
+.imageTextEditorLayerList li, 
+.imageTextEditorHistoryItem {
+    width: 100%; 
+    overflow: scroll;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0;
+    cursor: pointer;
+    border-bottom: 1px solid #3d4354; 
+    transition: all 0.2s ease;
+    padding: 0; 
+}
+
+.imageTextEditorLayerList li:hover, 
+.imageTextEditorHistoryItem:hover {
+    background: rgba(78, 205, 196, 0.15);
+    transform: translateX(1px);
+}
+
+.imageTextEditorLayerListFlex {
+    display: flex; 
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px; 
+    padding: 0.6rem 0 0 0; 
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}
+
+.imageLayerItem {
+    width: 100%; 
+    min-width: 100%; 
+    max-width: 100%; 
+}
+
+.imageTextEditorLayerList li small, 
+.imageTextEditorHistoryItem small {
+    font-size: 0.7rem !important; 
+    font-weight: 700; 
+    color: #6f7789;
+    padding: 0; 
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+     width: 100%; 
+    min-width: 100%; 
+    max-width: 100%;
+}
+
+.imageImageEditorSliderWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 8px;
+}
+
+.imageImageEditorCellGroup .imageImageEditorSliderWrapper {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+}
+
+.imageImageEditorCellGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 0 12px 16px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+}
+
+.imageImageEditorCellGroup .imageImageEditorCellFlex {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 8px;
+}
+
+.imageImageEditorCellGroup .imageImageEditorCellFlex > * {
+    min-width: 0;
+}
+
+.imageImageEditorCellGroup .imageImageEditorToolButton {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.4rem;
+    min-width: 2.4rem;
+    max-width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 !important;
+}
+
+.imageImageEditorCellGroup .imageImageEditorToolButtonBig {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: none;
+    height: 2.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.imageImageEditorCellGroup .imageImageEditorCellFlexStack {
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0;
+    overflow: visible;
+}
+
+.imageImageEditorShapeSurface {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    cursor: crosshair;
+}
+
+.imageImageEditorShapeLayer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.imageImageEditorSaveBanner {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 30;
+    padding: 10px 14px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.imageImageEditorAdjustmentCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 16px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerList li {
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px !important;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-bottom: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerList li:hover {
+    border-color: #4ecdc4;
+    background: linear-gradient(160deg, #262b38 0%, #171b24 100%);
+    transform: none;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerListFlex {
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerListFlex .imageImageEditorToolButton {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.1rem;
+    min-width: 2.1rem;
+    max-width: 2.1rem;
+    height: 2.1rem;
+    padding: 0 !important;
+    font-size: 0.72rem;
+}
+
+.imageImageEditorCellWrapperLayers .imageImageEditorPositionInput {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 2.1rem;
+    padding: 0 8px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.imageImageEditorCellWrapperLayers .imageTextEditorLayerList:empty {
+    display: none;
+}
+
+.imageImageEditorCellWrapperLayers .imageImageEditorHeaderFlexDark {
+    margin-bottom: 16px;
+}
+
+.imageImageEditorSlider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 6px;
+  margin: 0;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+
+.imageImageEditorSlider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+.imageImageEditorSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.imageImageEditorSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.imageImageEditorSlider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.imageImageEditorSlider::-moz-range-track {
+  height: 6px;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+}
+
+.imageImageEditorSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.imageImageEditorSlider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.imageImageEditorSlider::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+.imageConfrmationCheck input[type="checkbox"] {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #13151a;
+  border: 2px solid #3d4354;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.imageConfrmationCheck input[type="checkbox"]:checked {
+  background: #4ecdc4;
+  border-color: #4ecdc4;
+}
+
+.imageConfrmationCheck input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: solid #08090c;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.imageImageEditorCellFlexStack:has(.dropdown) {
+  overflow: visible;
+}

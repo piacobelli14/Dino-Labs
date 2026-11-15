@@ -1,0 +1,921 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.toolkitRegexLabApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.toolkitRegexLabCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitRegexLabToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.toolkitRegexLabTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.toolkitRegexLabTitle svg {
+  color: #4ecdc4;
+}
+
+.toolkitRegexLabStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitRegexLabStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.toolkitRegexLabStatusItem:last-child {
+  border-right: none;
+}
+
+.toolkitRegexLabStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitRegexLabStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.toolkitRegexLabStatusAccent,
+.toolkitRegexLabStatusAccent svg {
+  color: #4ecdc4;
+}
+
+.toolkitRegexLabShell {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  overflow: hidden;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitRegexLabSidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid #3d4354;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.toolkitRegexLabSection,
+.toolkitRegexLabCard {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-bottom: 24px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.toolkitRegexLabSectionTitle,
+.toolkitRegexLabCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  flex-shrink: 0;
+}
+
+.toolkitRegexLabSectionTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitRegexLabCardTitle {
+  justify-content: space-between;
+}
+
+.toolkitRegexLabSection > :not(.toolkitRegexLabSectionTitle) {
+  margin: 14px 24px 0;
+}
+
+.toolkitRegexLabCard > :not(.toolkitRegexLabCardTitle) {
+  margin: 16px 24px 0;
+}
+
+.toolkitRegexLabSectionTitle + *,
+.toolkitRegexLabCardTitle + * {
+  margin-top: 20px !important;
+}
+
+.toolkitRegexLabMain {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.toolkitRegexLabMainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px;
+  align-items: stretch;
+}
+
+.toolkitRegexLabCardWide {
+  grid-column: 1 / -1;
+}
+
+.toolkitRegexLabRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.toolkitRegexLabLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitRegexLabBtn,
+.toolkitRegexLabPresetBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.toolkitRegexLabBtn {
+  border-color: #4ecdc4;
+}
+
+.toolkitRegexLabBtn.toolkitRegexLabSubtle {
+  border-color: #3d4354;
+  color: #9aa3b5;
+}
+
+.toolkitRegexLabPresetBtn {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.74rem;
+  color: #cdd4e4;
+}
+
+.toolkitRegexLabBtn:hover:not(:disabled),
+.toolkitRegexLabPresetBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitRegexLabBtn:focus,
+.toolkitRegexLabPresetBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitRegexLabPresetBtn.active {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+}
+
+.toolkitRegexLabBtn:disabled,
+.toolkitRegexLabPresetBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toolkitRegexLabPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toolkitRegexLabPresets > .toolkitRegexLabPresetBtn {
+  flex: 1 1 calc(50% - 3px);
+}
+
+.toolkitRegexLabCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #cdd4e4;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toolkitRegexLabRow input[type="range"] {
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.toolkitRegexLabRow input[type="range"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolkitRegexLabRow input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border: 2px solid #12151b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.toolkitRegexLabRow input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border: 2px solid #12151b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.toolkitRegexLabInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  color-scheme: dark;
+  caret-color: #4ecdc4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitRegexLabInput::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.toolkitRegexLabInput:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitRegexLabInput:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.toolkitRegexLabInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolkitRegexLabCardAction {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.toolkitRegexLabEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 200px;
+  text-align: center;
+}
+
+.toolkitRegexLabEmpty svg {
+  font-size: 28px;
+  color: #3d4354;
+}
+
+.toolkitRegexLabEmpty p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #6f7789;
+}
+
+.toolkitRegexLabCode {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  background: #12151b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #cdd4e4;
+  white-space: pre;
+}
+
+.toolkitRegexLabExportBlock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitRegexLabExportHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid #3d4354;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+}
+
+.toolkitRegexLabExportTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitRegexLabExportActions {
+  display: flex;
+  gap: 8px;
+}
+
+.toolkitRegexLabExportActions .toolkitRegexLabBtn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.74rem;
+  border-color: #3d4354;
+}
+
+.toolkitRegexLabStatusError {
+  color: #ff6b6b;
+}
+
+.toolkitRegexLabMono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+}
+
+.toolkitRegexLabTextArea {
+  width: 100%;
+  min-height: 200px;
+  padding: 0.8rem 1rem;
+  box-sizing: border-box;
+  resize: vertical;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  color: #ebf0f8;
+  color-scheme: dark;
+  caret-color: #4ecdc4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitRegexLabTextArea::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.toolkitRegexLabTextArea:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitRegexLabCard > .toolkitRegexLabTextArea {
+  width: auto;
+  align-self: stretch;
+}
+
+.toolkitRegexLabCardMeta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+}
+
+.toolkitRegexLabCardTitle > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.toolkitRegexLabCardTitle > span:first-child svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitRegexLabCardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.toolkitRegexLabErrorText,
+.toolkitRegexLabWarningText,
+.toolkitRegexLabHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.toolkitRegexLabErrorText {
+  color: #ff6b6b;
+}
+
+.toolkitRegexLabWarningText {
+  color: #fbbf24;
+}
+
+.toolkitRegexLabHint {
+  color: #9aa3b5;
+}
+
+.toolkitRegexLabErrorText svg,
+.toolkitRegexLabWarningText svg,
+.toolkitRegexLabHint svg {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.toolkitRegexLabOutput {
+  margin: 0;
+  min-height: 200px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 14px 16px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  background: #12151b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #ebf0f8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.toolkitRegexLabTableWrap {
+  max-height: 380px;
+  overflow: auto;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitRegexLabTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.toolkitRegexLabTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 12px;
+  text-align: left;
+  white-space: nowrap;
+  color: #ebf0f8;
+  background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%);
+  border-bottom: 1px solid #3d4354;
+  border-right: 1px solid #3d4354;
+}
+
+.toolkitRegexLabTable td {
+  padding: 8px 12px;
+  color: #cdd4e4;
+  background-color: rgba(30, 41, 59, 0.3);
+  border-bottom: 1px solid #3d4354;
+  border-right: 1px solid #3d4354;
+  white-space: pre-wrap;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.toolkitRegexLabTable tr {
+  cursor: pointer;
+}
+
+.toolkitRegexLabTable tr:hover td {
+  background-color: rgba(78, 205, 196, 0.08);
+}
+
+.toolkitRegexLabRowSelected td {
+  background-color: rgba(78, 205, 196, 0.14) !important;
+  box-shadow: inset 0 0 0 0 transparent;
+}
+
+.toolkitRegexLabMuted {
+  color: #6f7789;
+  font-style: italic;
+}
+
+.toolkitRegexLabPatternField {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 0.8rem;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.toolkitRegexLabPatternField:focus-within {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitRegexLabPatternFieldError {
+  border-color: rgba(255, 107, 107, 0.6);
+}
+
+.toolkitRegexLabPatternSlash {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #6f7789;
+}
+
+.toolkitRegexLabPatternInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4ecdc4;
+  caret-color: #4ecdc4;
+}
+
+.toolkitRegexLabPatternInput::placeholder {
+  color: #6f7789;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 700;
+}
+
+.toolkitRegexLabReference {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.toolkitRegexLabReferenceRow {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3d4354;
+  outline: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toolkitRegexLabReferenceRow:last-child {
+  border-bottom: none;
+}
+
+.toolkitRegexLabReferenceRow:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.toolkitRegexLabReferenceRow code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.76rem;
+  color: #4ecdc4;
+}
+
+.toolkitRegexLabReferenceRow span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #cdd4e4;
+}
+
+.toolkitRegexLabHighlight {
+  max-height: 360px;
+  overflow: auto;
+  padding: 14px 16px;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  background: #12151b;
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: #cdd4e4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.toolkitRegexLabMark {
+  padding: 1px 0;
+  border-radius: 3px;
+  background: rgba(78, 205, 196, 0.22);
+  box-shadow: inset 0 -2px 0 0 #4ecdc4;
+  color: #ebf0f8;
+  cursor: pointer;
+}
+
+.toolkitRegexLabMarkAlt {
+  background: rgba(251, 191, 36, 0.18);
+  box-shadow: inset 0 -2px 0 0 #fbbf24;
+}
+
+.toolkitRegexLabMarkEmpty {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  background: #4ecdc4;
+}
+
+.toolkitRegexLabMarkSelected {
+  outline: 2px solid #4ecdc4;
+  outline-offset: 1px;
+}
+
+.toolkitRegexLabSpinner {
+  color: #4ecdc4;
+}
+
+.toolkitRegexLabSidebar,
+.toolkitRegexLabMain,
+.toolkitRegexLabCode,
+.toolkitRegexLabTextArea,
+.toolkitRegexLabHighlight,
+.toolkitRegexLabReference,
+.toolkitRegexLabTableWrap,
+.toolkitRegexLabOutput {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.toolkitRegexLabSidebar::-webkit-scrollbar,
+.toolkitRegexLabMain::-webkit-scrollbar,
+.toolkitRegexLabCode::-webkit-scrollbar,
+.toolkitRegexLabTextArea::-webkit-scrollbar,
+.toolkitRegexLabHighlight::-webkit-scrollbar,
+.toolkitRegexLabReference::-webkit-scrollbar,
+.toolkitRegexLabTableWrap::-webkit-scrollbar,
+.toolkitRegexLabOutput::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.toolkitRegexLabSidebar::-webkit-scrollbar-track,
+.toolkitRegexLabMain::-webkit-scrollbar-track,
+.toolkitRegexLabCode::-webkit-scrollbar-track,
+.toolkitRegexLabTextArea::-webkit-scrollbar-track,
+.toolkitRegexLabHighlight::-webkit-scrollbar-track,
+.toolkitRegexLabReference::-webkit-scrollbar-track,
+.toolkitRegexLabTableWrap::-webkit-scrollbar-track,
+.toolkitRegexLabOutput::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toolkitRegexLabSidebar::-webkit-scrollbar-thumb,
+.toolkitRegexLabMain::-webkit-scrollbar-thumb,
+.toolkitRegexLabCode::-webkit-scrollbar-thumb,
+.toolkitRegexLabTextArea::-webkit-scrollbar-thumb,
+.toolkitRegexLabHighlight::-webkit-scrollbar-thumb,
+.toolkitRegexLabReference::-webkit-scrollbar-thumb,
+.toolkitRegexLabTableWrap::-webkit-scrollbar-thumb,
+.toolkitRegexLabOutput::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.toolkitRegexLabSidebar::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabMain::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabCode::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabTextArea::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabHighlight::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabReference::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabTableWrap::-webkit-scrollbar-thumb:hover,
+.toolkitRegexLabOutput::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1200px) {
+  .toolkitRegexLabMainGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .toolkitRegexLabShell {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .toolkitRegexLabSidebar {
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid #3d4354;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitRegexLabMain {
+    overflow: visible;
+  }
+
+  .toolkitRegexLabMainGrid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitRegexLabToolBar {
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolkitRegexLabBtn,
+.toolkitRegexLabPresetBtn,
+.toolkitRegexLabInput,
+.toolkitRegexLabTextArea {
+    transition: none;
+  }
+}
+
+.toolkitRegexLabCheckbox input[type="checkbox"] {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #13151a;
+  border: 2px solid #3d4354;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolkitRegexLabCheckbox input[type="checkbox"]:checked {
+  background: #4ecdc4;
+  border-color: #4ecdc4;
+}
+
+.toolkitRegexLabCheckbox input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: solid #08090c;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.toolkitRegexLabCheckbox input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

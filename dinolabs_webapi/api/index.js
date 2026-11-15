@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -7,20 +5,26 @@ const compression = require("compression");
 const bodyParser = require("body-parser");
 const { pool, startup, connectionManager } = require("./config/db");
 const errorLogger = require("./middleware/errorLogger");
-const playgroundCalendar = require("./routes/dinolabs-playground/dinolabs-playground-calendar");
-const playgroundDatabase = require("./routes/dinolabs-playground/dinolabs-playground-database");
+const calendarRoutes = require("./routes/calendar.js");
+const databaseRoutes = require("./routes/database.js");
+
+const googleConnectivity = require("./routes/connectivity/google-connectivity.js");
+const githubConnectivity = require("./routes/connectivity/github-connectivity.js");
+
+
+
+require("dotenv").config();
 
 const ALLOWED_ORIGINS = [
-  "https://dino-auth.vercel.app",
+  "https://ut-health-parallax-web-hub.vercel.app",
   "https://dino-labs.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
-  "http://localhost:5176"
 ];
 
 const REDIRECT_MAP = {
-  dinosat: "https://dino-labs.vercel.app/login",
+  parallaxwebhub: "https://ut-health-parallax-web-hub.vercel.app/login",
 };
 
 const app = express();
@@ -29,19 +33,66 @@ app.set("trust proxy", 1);
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(compression());
-app.use(cors({
-  origin: ALLOWED_ORIGINS,
-  optionsSuccessStatus: 200,
-  methods: ["POST", "GET", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+app.use(
+  cors({
+    origin: ALLOWED_ORIGINS,
+    optionsSuccessStatus: 200,
+    methods: ["POST", "GET", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(bodyParser.json({ limit: "10mb" }));
 
-app.use("/", playgroundCalendar);
-app.use("/", playgroundDatabase);
+app.use("/", calendarRoutes);
+app.use("/", databaseRoutes);
+app.use("/", githubConnectivity);
+app.use("/", googleConnectivity);
 
 app.get("/", (req, res) => {
   res.sendFile(path.resolve(__dirname, "public", "catchall.html"));
+});
+
+app.get("/verify", async (req, res) => {
+  const { token, software } = req.query;
+
+  if (!token) {
+    return res.sendFile(path.resolve(__dirname, "public", "verify.html"));
+  }
+
+  try {
+    const updateResult = await pool.query(
+      `
+          UPDATE users
+          SET verified = TRUE,
+             verification_token = NULL
+          WHERE verification_token = $1
+          RETURNING username
+      `,
+      [token]
+    );
+
+    if (updateResult.rowCount === 0) {
+      return res.sendFile(path.resolve(__dirname, "public", "verify.html"));
+    }
+
+    const redirectUrl = REDIRECT_MAP[software];
+
+    if (!redirectUrl) {
+      return res
+        .status(400)
+        .send(
+          "<html><body><h1>The provided software parameter is not recognized.</h1></body></html>"
+        );
+    }
+
+    res.redirect(redirectUrl);
+  } catch (error) {
+    res
+      .status(500)
+      .send(
+        "<html><body><h1>An error occurred during verification. Please try again later.</h1></body></html>"
+      );
+  }
 });
 
 app.get("/health/connections", async (req, res) => {

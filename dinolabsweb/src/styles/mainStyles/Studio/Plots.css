@@ -1,0 +1,37 @@
+@media (min-width: 700px) and (max-width: 5399px) {
+    .demoPlotTitle {
+        font-size: 1.2vw;
+        font-weight: 900;
+        color: #ebf0f8;
+        width: 100%;
+        text-align: center;
+        margin-top: 1vw;
+        text-shadow: 0 0 1.5px rgba(0, 0, 0, 0.6);
+    }
+
+    .demoPlotSubTitle {
+        font-size: 0.8vw;
+        font-weight: 500;
+        color: #ebf0f8;
+        width: 100%;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    .demoPlotTitleSupplement {
+        font-size: 1.4vw;
+        font-weight: 600;
+        color: #aab4c8;
+        width: 100%;
+        text-align: left;
+        margin-top: 1vw;
+        text-shadow: 0 0 1.5px rgba(0, 0, 0, 0.6);
+    }
+
+    .demoPlotSubTitleSupplement {
+        font-size: 0.9vw;
+        font-weight: 500;
+        color: #6f7789;
+        margin-top: 0.2vw;
+    }
+}

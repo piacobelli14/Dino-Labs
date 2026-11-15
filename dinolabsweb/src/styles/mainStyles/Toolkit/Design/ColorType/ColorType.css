@@ -1,0 +1,880 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.tookitColorTypeLabApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.tookitColorTypeLabCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.tookitColorTypeLabToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.tookitColorTypeLabTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.tookitColorTypeLabTitle svg {
+  color: #4ecdc4;
+}
+
+.tookitColorTypeLabStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.tookitColorTypeLabStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.tookitColorTypeLabStatusItem:last-child {
+  border-right: none;
+}
+
+.tookitColorTypeLabStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tookitColorTypeLabStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.tookitColorTypeLabStatusAccent,
+.tookitColorTypeLabStatusAccent svg {
+  color: #4ecdc4;
+}
+
+.tookitColorTypeLabStatusDot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #3d4354;
+}
+
+.tookitColorTypeLabShell {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  overflow: hidden;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.tookitColorTypeLabSidebar {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-right: 1px solid #3d4354;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.tookitColorTypeLabSection,
+.tookitColorTypeLabCard {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-bottom: 24px;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.tookitColorTypeLabSectionTitle,
+.tookitColorTypeLabCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  flex-shrink: 0;
+}
+
+.tookitColorTypeLabSectionTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.tookitColorTypeLabCardTitle {
+  justify-content: space-between;
+}
+
+.tookitColorTypeLabSection > :not(.tookitColorTypeLabSectionTitle) {
+  margin: 14px 24px 0;
+}
+
+.tookitColorTypeLabCard > :not(.tookitColorTypeLabCardTitle) {
+  margin: 16px 24px 0;
+}
+
+.tookitColorTypeLabSectionTitle + *,
+.tookitColorTypeLabCardTitle + * {
+  margin-top: 20px !important;
+}
+
+.tookitColorTypeLabMain {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tookitColorTypeLabMainGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px;
+  align-items: stretch;
+}
+
+.tookitColorTypeLabCardWide {
+  grid-column: 1 / -1;
+}
+
+.tookitColorTypeLabRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tookitColorTypeLabLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.tookitColorTypeLabSmall {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  font-variant-numeric: tabular-nums;
+}
+
+.tookitColorTypeLabMini {
+  font-size: 0.7rem;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.tookitColorTypeLabActions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tookitColorTypeLabActions > * {
+  flex: 1 1 0;
+  min-width: max-content;
+}
+
+.tookitColorTypeLabRowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tookitColorTypeLabValue {
+  padding: 4px 9px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tookitColorTypeLabBtn {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.tookitColorTypeLabBtn {
+  border-color: #4ecdc4;
+}
+
+.tookitColorTypeLabBtn.tookitColorTypeLabSubtle {
+  border-color: #3d4354;
+  color: #9aa3b5;
+}
+
+.tookitColorTypeLabBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitColorTypeLabBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tookitColorTypeLabBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tookitColorTypeLabRow input[type="range"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tookitColorTypeLabInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  color-scheme: dark;
+  caret-color: #4ecdc4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tookitColorTypeLabInput::placeholder {
+  color: #6f7789;
+  font-weight: 700;
+}
+
+.tookitColorTypeLabInput:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitColorTypeLabInput:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.tookitColorTypeLabInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tookitColorTypeLabFileField {
+  height: auto;
+  padding: 6px;
+}
+
+.tookitColorTypeLabFileField::file-selector-button {
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.74rem;
+}
+
+.tookitColorTypeLabFileField::file-selector-button:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitColorTypeLabColorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tookitColorTypeLabColorChip {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px #12151b;
+  transition: all 0.2s ease;
+}
+
+.tookitColorTypeLabColorChip:hover {
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+}
+
+.tookitColorTypeLabCode {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  background: #12151b;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #cdd4e4;
+  white-space: pre;
+}
+
+.tookitColorTypeLabExportBlock {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.tookitColorTypeLabExportHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid #3d4354;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+}
+
+.tookitColorTypeLabExportTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.tookitColorTypeLabExportActions {
+  display: flex;
+  gap: 8px;
+}
+
+.tookitColorTypeLabExportActions .tookitColorTypeLabBtn {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.74rem;
+  border-color: #3d4354;
+}
+
+.color-picker-tippy {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.color-picker-tippy .tippy-content {
+  padding: 0 !important;
+}
+
+.color-picker-tippy .tippy-arrow {
+  display: none;
+}
+
+.tookitColorTypeLabPreviewImage {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #3d4354;
+}
+
+.tookitColorTypeLabSwatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.tookitColorTypeLabSwatchRow .tookitColorTypeLabSwatch {
+  flex: 1 1 76px;
+  min-height: 40px;
+}
+
+.tookitColorTypeLabSwatchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.tookitColorTypeLabSwatch {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 50px;
+  padding: 6px;
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tookitColorTypeLabSwatch:hover {
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.tookitColorTypeLabSwatch:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+}
+
+.tookitColorTypeLabContrastStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tookitColorTypeLabContrastTop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tookitColorTypeLabContrastValue {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  font-variant-numeric: tabular-nums;
+}
+
+.tookitColorTypeLabContrastBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tookitColorTypeLabBadge {
+  padding: 4px 9px;
+  border-radius: 5px;
+  border: 1px solid #3d4354;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tookitColorTypeLabBadge.good {
+  border-color: rgba(78, 205, 196, 0.5);
+  color: #4ecdc4;
+}
+
+.tookitColorTypeLabBadge.bad {
+  border-color: rgba(255, 107, 107, 0.45);
+  color: #ff6b6b;
+}
+
+.tookitColorTypeLabContrastPreview {
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid #3d4354;
+}
+
+.tookitColorTypeLabContrastPairs,
+.tookitColorTypeLabContrastRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tookitColorTypeLabContrastChip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #3d4354;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tookitColorTypeLabGradientBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 110px;
+  border-radius: 6px;
+  border: 1px solid #3d4354;
+}
+
+.tookitColorTypeLabGradientText {
+  padding: 5px 11px;
+  border-radius: 5px;
+  background: rgba(10, 12, 16, 0.6);
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.tookitColorTypeLabBrandGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tookitColorTypeLabBrandColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tookitColorTypeLabBrandColumn .tookitColorTypeLabSwatchGrid {
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+}
+
+.tookitColorTypeLabBrandLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.tookitColorTypeLabTypeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  color: #ebf0f8;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+}
+
+.tookitColorTypeLabTypeSample {
+  font-size: 20px;
+  line-height: 1.35;
+  color: #ebf0f8;
+}
+
+.tookitColorTypeLabScaleList {
+  display: flex;
+  flex-direction: column;
+}
+
+.tookitColorTypeLabScaleItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-top: 1px solid #3d4354;
+  min-width: 0;
+}
+
+.tookitColorTypeLabScaleMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tookitColorTypeLabScaleName {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #ebf0f8;
+}
+
+.tookitColorTypeLabScaleVal {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9aa3b5;
+  font-variant-numeric: tabular-nums;
+}
+
+.tookitColorTypeLabScaleText {
+  color: #cdd4e4;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tookitColorTypeLabCard > .tookitColorTypeLabExportBlock + .tookitColorTypeLabExportBlock {
+  margin-top: 12px;
+}
+
+.tookitColorTypeLabSidebar,
+.tookitColorTypeLabMain,
+.tookitColorTypeLabCode,
+.tookitColorTypeLabSwatchRow {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.tookitColorTypeLabSidebar::-webkit-scrollbar,
+.tookitColorTypeLabMain::-webkit-scrollbar,
+.tookitColorTypeLabCode::-webkit-scrollbar,
+.tookitColorTypeLabSwatchRow::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.tookitColorTypeLabSidebar::-webkit-scrollbar-track,
+.tookitColorTypeLabMain::-webkit-scrollbar-track,
+.tookitColorTypeLabCode::-webkit-scrollbar-track,
+.tookitColorTypeLabSwatchRow::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tookitColorTypeLabSidebar::-webkit-scrollbar-thumb,
+.tookitColorTypeLabMain::-webkit-scrollbar-thumb,
+.tookitColorTypeLabCode::-webkit-scrollbar-thumb,
+.tookitColorTypeLabSwatchRow::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.tookitColorTypeLabSidebar::-webkit-scrollbar-thumb:hover,
+.tookitColorTypeLabMain::-webkit-scrollbar-thumb:hover,
+.tookitColorTypeLabCode::-webkit-scrollbar-thumb:hover,
+.tookitColorTypeLabSwatchRow::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1200px) {
+  .tookitColorTypeLabMainGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .tookitColorTypeLabShell {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .tookitColorTypeLabSidebar {
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid #3d4354;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .tookitColorTypeLabMain {
+    overflow: visible;
+  }
+
+  .tookitColorTypeLabMainGrid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .tookitColorTypeLabToolBar {
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tookitColorTypeLabBtn,
+.tookitColorTypeLabInput,
+.tookitColorTypeLabColorChip,
+.tookitColorTypeLabSwatch {
+    transition: none;
+  }
+}
+
+.tookitColorTypeLabRow input[type="range"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}
+
+.tookitColorTypeLabRow input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+  border-radius: 3px;
+}
+
+.tookitColorTypeLabRow input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tookitColorTypeLabRow input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.tookitColorTypeLabRow input[type="range"]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.tookitColorTypeLabRow input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #16181d;
+  border: 2px solid #323746;
+  border-radius: 3px;
+}
+
+.tookitColorTypeLabRow input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ecdc4;
+  border: 2px solid #08090c;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tookitColorTypeLabRow input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.45);
+}
+
+.tookitColorTypeLabRow input[type="range"]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+.tookitColorTypeLabSection {
+  overflow: visible;
+}
+
+.tookitColorTypeLabSection > .tookitColorTypeLabSectionTitle {
+  border-radius: 5px 5px 0 0;
+}

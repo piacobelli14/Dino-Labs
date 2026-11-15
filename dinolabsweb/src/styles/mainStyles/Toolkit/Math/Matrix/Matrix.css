@@ -1,0 +1,729 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.toolkitMatrixApp {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #0a0c10 0%, #0e1116 50%, #141821 100%);
+  color: #ebf0f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+.toolkitMatrixCellHeaderContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.toolkitMatrixContainer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  position: relative;
+}
+
+.toolkitMatrixToolBar {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border-bottom: 1px solid #3d4354;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 4;
+}
+
+.toolkitMatrixTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-right: 1rem;
+  color: #ebf0f8;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+.toolkitMatrixTitle svg {
+  color: #4ecdc4;
+}
+
+.toolkitMatrixStatusGroup {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.toolkitMatrixStatusItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+  border-right: 1px solid #3d4354;
+}
+
+.toolkitMatrixStatusItem:last-child {
+  border-right: none;
+}
+
+.toolkitMatrixStatusItem > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitMatrixStatusItem svg {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: #6f7789;
+}
+
+.toolkitMatrixPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  box-shadow: 0 0 10px black;
+  overflow: hidden;
+}
+
+.toolkitMatrixPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 56px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  background: #12151b;
+  flex-shrink: 0;
+}
+
+.toolkitMatrixPanelTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitMatrixPanelTitle svg {
+  color: #6f7789;
+  font-size: 0.8rem;
+}
+
+.toolkitMatrixWorkspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.toolkitMatrixSidebar {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 1px solid #3d4354;
+  background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+}
+
+.toolkitMatrixMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.toolkitMatrixPanel {
+  flex-shrink: 0;
+}
+
+.toolkitMatrixPanelBody {
+  padding: 16px 24px 24px;
+}
+
+.toolkitMatrixDimGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.toolkitMatrixField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.toolkitMatrixFieldLabel {
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitMatrixBtnGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.toolkitMatrixBtnGrid > .toolkitMatrixBtnWide {
+  grid-column: 1 / -1;
+}
+
+.toolkitMatrixScalarRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.toolkitMatrixImportBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolkitMatrixNum {
+  width: 100%;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  height: 40px;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  caret-color: #4ecdc4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitMatrixNum::placeholder {
+  color: #6f7789;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.toolkitMatrixNum:hover {
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitMatrixNum:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.toolkitMatrixTextArea {
+  width: 100%;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  border-radius: 6px;
+  min-height: 110px;
+  padding: 0.8rem 1rem;
+  resize: vertical;
+  line-height: 1.4;
+  box-sizing: border-box;
+  outline: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  caret-color: #4ecdc4;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitMatrixTextArea::placeholder {
+  color: #6f7789;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.toolkitMatrixTextArea:hover {
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitMatrixTextArea:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.toolkitMatrixBtn {
+  min-width: 0;
+  height: 40px;
+  background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+  border: 1px solid #3d4354;
+  outline: none;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolkitMatrixBtn:hover {
+  background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+  border-color: #4ecdc4;
+  color: #12151b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.toolkitMatrixBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.toolkitMatrixBtn:focus {
+  outline: none;
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.toolkitMatrixBtnNumber {
+  color: #ebf0f8;
+}
+
+.toolkitMatrixBtnOperator {
+  color: #4ecdc4;
+}
+
+.toolkitMatrixBtnFunction {
+  color: #cdd4e4;
+}
+
+.toolkitMatrixBtnVariable {
+  color: #fbbf24;
+}
+
+.toolkitMatrixBtnControl {
+  color: #9aa3b5;
+}
+
+.toolkitMatrixBtnEnter {
+  border-color: #4ecdc4;
+  color: #ebf0f8;
+}
+
+.toolkitMatrixBtnWide {
+  grid-column: 1 / -1;
+}
+
+.toolkitMatrixBtnCompact {
+  height: 30px;
+  padding: 0 0.7rem;
+  font-size: 0.74rem;
+}
+
+.toolkitMatrixBtnTiny {
+  height: 28px;
+  padding: 0 0.6rem;
+  font-size: 0.7rem;
+}
+
+.toolkitMatrixGrids {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.toolkitMatrixMatrixDims {
+  padding: 5px 11px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+  white-space: nowrap;
+}
+
+.toolkitMatrixMatrixGridWrap {
+  padding: 16px 24px 24px;
+  overflow-x: auto;
+}
+
+.toolkitMatrixMatrixGrid {
+  --mx-cell-bg: rgba(30, 41, 59, 0.3);
+  display: grid;
+  gap: 0;
+  width: max-content;
+  min-width: 100%;
+  border-top: 1px solid #3d4354;
+  border-left: 1px solid #3d4354;
+}
+
+.toolkitMatrixCellInput {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: none;
+  border-right: 1px solid #3d4354;
+  border-bottom: 1px solid #3d4354;
+  border-radius: 0;
+  outline: none;
+  color: #ebf0f8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: box-shadow 0.2s ease;
+}
+
+.toolkitMatrixCellInput:hover {
+  box-shadow: inset 0 0 0 1px rgba(78, 205, 196, 0.5);
+}
+
+.toolkitMatrixCellInput:focus {
+  box-shadow: inset 0 0 0 2px #4ecdc4;
+}
+
+.toolkitMatrixCellInput[readonly] {
+  cursor: default;
+  color: #cdd4e4;
+}
+
+.toolkitMatrixCellInput[readonly]:focus {
+  box-shadow: none;
+}
+
+.toolkitMatrixResultActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.toolkitMatrixLastOp {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #9aa3b5;
+}
+
+.toolkitMatrixResultGridWrap .toolkitMatrixMatrixBox {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.toolkitMatrixResultGridWrap .toolkitMatrixPanelHeader {
+  min-height: 34px;
+  background: transparent;
+  border-bottom: none;
+}
+
+.toolkitMatrixResultGridWrap .toolkitMatrixPanelTitle {
+  color: #9aa3b5;
+}
+
+.toolkitMatrixResultGridWrap .toolkitMatrixMatrixGridWrap {
+  padding-top: 4px;
+}
+
+.toolkitMatrixOpsLog {
+  border-top: 1px solid #3d4354;
+}
+
+.toolkitMatrixOpsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitMatrixOpsTitle svg {
+  color: #6f7789;
+  font-size: 0.74rem;
+}
+
+.toolkitMatrixOpsList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.toolkitMatrixOpsItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  border-bottom: 1px solid #3d4354;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #cdd4e4;
+  transition: all 0.2s ease;
+}
+
+.toolkitMatrixOpsItem:last-child {
+  border-bottom: none;
+}
+
+.toolkitMatrixOpsItem:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.toolkitMatrixOpsIndex {
+  min-width: 28px;
+  padding: 3px 8px;
+  border: 1px solid #3d4354;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.66rem;
+  color: #9aa3b5;
+  text-align: center;
+}
+
+.toolkitMatrixHistoryList {
+  display: flex;
+  flex-direction: column;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.toolkitMatrixHistoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #3d4354;
+  transition: all 0.2s ease;
+}
+
+.toolkitMatrixHistoryItem:last-child {
+  border-bottom: none;
+}
+
+.toolkitMatrixHistoryItem:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.toolkitMatrixHistoryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.toolkitMatrixHistoryLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ebf0f8;
+}
+
+.toolkitMatrixPillGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolkitMatrixHistoryGrid {
+  overflow-x: auto;
+}
+
+.toolkitMatrixMatrixGridMini {
+  display: grid;
+  width: max-content;
+  border-top: 1px solid #3d4354;
+  border-left: 1px solid #3d4354;
+}
+
+.toolkitMatrixCellMini {
+  padding: 4px 8px;
+  border-right: 1px solid #3d4354;
+  border-bottom: 1px solid #3d4354;
+  background-color: rgba(30, 41, 59, 0.3);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #cdd4e4;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.toolkitMatrixHistoryEmpty {
+  padding: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #6f7789;
+  text-align: center;
+}
+
+.toolkitMatrixSidebar,
+.toolkitMatrixMain,
+.toolkitMatrixMatrixGridWrap,
+.toolkitMatrixOpsList,
+.toolkitMatrixHistoryList,
+.toolkitMatrixHistoryGrid,
+.toolkitMatrixTextArea {
+  scrollbar-width: thin;
+  scrollbar-color: #3d4354 transparent;
+}
+
+.toolkitMatrixSidebar::-webkit-scrollbar,
+.toolkitMatrixMain::-webkit-scrollbar,
+.toolkitMatrixMatrixGridWrap::-webkit-scrollbar,
+.toolkitMatrixOpsList::-webkit-scrollbar,
+.toolkitMatrixHistoryList::-webkit-scrollbar,
+.toolkitMatrixHistoryGrid::-webkit-scrollbar,
+.toolkitMatrixTextArea::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.toolkitMatrixSidebar::-webkit-scrollbar-track,
+.toolkitMatrixMain::-webkit-scrollbar-track,
+.toolkitMatrixMatrixGridWrap::-webkit-scrollbar-track,
+.toolkitMatrixOpsList::-webkit-scrollbar-track,
+.toolkitMatrixHistoryList::-webkit-scrollbar-track,
+.toolkitMatrixHistoryGrid::-webkit-scrollbar-track,
+.toolkitMatrixTextArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toolkitMatrixSidebar::-webkit-scrollbar-thumb,
+.toolkitMatrixMain::-webkit-scrollbar-thumb,
+.toolkitMatrixMatrixGridWrap::-webkit-scrollbar-thumb,
+.toolkitMatrixOpsList::-webkit-scrollbar-thumb,
+.toolkitMatrixHistoryList::-webkit-scrollbar-thumb,
+.toolkitMatrixHistoryGrid::-webkit-scrollbar-thumb,
+.toolkitMatrixTextArea::-webkit-scrollbar-thumb {
+  background: #3d4354;
+  border-radius: 2px;
+}
+
+.toolkitMatrixSidebar::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixMain::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixMatrixGridWrap::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixOpsList::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixHistoryList::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixHistoryGrid::-webkit-scrollbar-thumb:hover,
+.toolkitMatrixTextArea::-webkit-scrollbar-thumb:hover {
+  background: #4ecdc4;
+}
+
+@media (max-width: 1100px) {
+  .toolkitMatrixGrids {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .toolkitMatrixWorkspace {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .toolkitMatrixSidebar {
+    width: 100%;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid #3d4354;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitMatrixMain {
+    overflow: visible;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .toolkitMatrixToolBar {
+    padding: 12px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolkitMatrixBtn,
+.toolkitMatrixNum,
+.toolkitMatrixTextArea,
+.toolkitMatrixCellInput,
+.toolkitMatrixOpsItem,
+.toolkitMatrixHistoryItem {
+    transition: none;
+  }
+}

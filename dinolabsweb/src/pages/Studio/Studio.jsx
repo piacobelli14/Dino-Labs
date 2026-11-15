@@ -1,0 +1,4059 @@
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faCode, faAngleRight, faAngleDown, faWandMagicSparkles, faPlusSquare,
+    faMinusSquare, faRetweet, faA, faMagnifyingGlass, faMagnifyingGlassPlus,
+    faFolderOpen, faFileCirclePlus, faFolderPlus, faCopy, faPaste,
+    faPenToSquare, faTrash, faLink, faEye, faEyeSlash, faPlug, faAngleLeft, faTerminal
+} from "@fortawesome/free-solid-svg-icons";
+import { faGithub, faGoogleDrive } from "@fortawesome/free-brands-svg-icons";
+import Tippy from "@tippyjs/react";
+import { FixedSizeList as List } from "react-window";
+import { openDB } from "idb";
+import { fileTypeMap } from "./FileTypeMap.jsx";
+import { showDialog } from "../../helpers/Alert.jsx";
+import Nav from "../../helpers/Nav.jsx";
+import Loading from "../../helpers/Loading.jsx";
+import Unavailable from "../../helpers/Unavailable.jsx";
+import NoFileSelected from "./NoFileSelected.jsx";
+import useAuth from "../../UseAuth.jsx";
+import Markdown from "./Code/Markdown.jsx";
+import Tabular from "./Data/Data.jsx";
+import Text from "./Documents/Text/Text.jsx";
+import Slides from "./Documents/Slides/Slides.jsx";
+import PDF from "./Documents/PDF/PDF.jsx";
+import Image from "./Media/Images/Images.jsx";
+import Video from "./Media/Video/Video.jsx";
+import Audio from "./Media/Audio/Audio.jsx";
+import ThreeD from "./ThreeD/ThreeD.jsx";
+import Account from "../Account/Account.jsx";
+import "../../styles/mainStyles/Studio/Studio.css";
+import "../../styles/mainStyles/Studio/Code/Markdown.css";
+import "../../styles/mainStyles/Studio/Code/MirrorThemes/DefaultTheme.css";
+import "../../styles/mainStyles/Studio/Code/MirrorThemes/DarkTheme.css";
+import "../../styles/mainStyles/Studio/Code/MirrorThemes/LightTheme.css";
+import "../../styles/helperStyles/Tooltip.css";
+import "../../styles/helperStyles/LoadingSpinner.css";
+import "../../styles/helperStyles/HighlightKill.css";
+import "tippy.js/dist/tippy.css";
+
+const RESTORE_FLAG = "studioRestoreInFlight";
+const WORKBOOK_HARD_BYTE_CEILING = 12 * 1024 * 1024;
+const WORKBOOK_EXTENSIONS = ["xlsx", "xlsm", "xlsb", "xls", "ods", "fods", "numbers", "dbf", "prn", "dif", "slk"];
+const TABULAR_EXTENSIONS = ["csv", "tsv", "tab", "psv", ...WORKBOOK_EXTENSIONS];
+const PACKAGED_TEXT_EXTENSIONS = ["docx", "odt", "doc"];
+const PRESENTATION_EXTENSIONS = ["pptx", "pptm", "potx", "potm", "ppsx", "ppsm", "ppt", "pot", "pps"];
+const TEXT_EXTENSIONS = ["txt", "text", "md", "markdown", "mdown", "log", "rst", "tex", "nfo", "rtf", "doc", ...PACKAGED_TEXT_EXTENSIONS];
+const RESTORE_SETTLE_MS = 8000;
+const LAYOUT_STORAGE_KEY = "studioLayout";
+const DEFAULT_LAYOUT = { nav: true, sidebar: true };
+const LAYOUT_TOGGLES = [["nav", "Nav"], ["sidebar", "Sidebar"]];
+const CONNECTOR_NAVIGATION_KEY = "studioConnectorNavigation";
+const readConnectorNavigation = () => {
+    try {
+        return JSON.parse(localStorage.getItem(CONNECTOR_NAVIGATION_KEY) || "{}") || {};
+    } catch {
+        return {};
+    }
+};
+const DRIVE_EXPORT_EXTENSIONS = {
+    "application/vnd.google-apps.document": "docx",
+    "application/vnd.google-apps.spreadsheet": "xlsx",
+    "application/vnd.google-apps.presentation": "pptx"
+};
+const DRIVE_ICON_COLORS = {
+    "application/vnd.google-apps.document": "#4285f4",
+    "application/vnd.google-apps.spreadsheet": "#34a853",
+    "application/vnd.google-apps.presentation": "#fbbc04"
+};
+const STUDIO_CONNECTORS = [
+    { id: "google-drive", label: "Google Drive", icon: faGoogleDrive, tint: "rgba(66, 133, 244, 0.18)", color: "#8ab4f8" },
+    { id: "github", label: "GitHub", icon: faGithub, tint: "rgba(235, 240, 248, 0.1)", color: "#ebf0f8" }
+];
+
+const SHEET_ENTRY_PATTERN = /^(?:xl\/worksheets\/.*\.(?:xml|bin)|content\.xml|.*\.iwa)$/i;
+const SHEET_UNCOMPRESSED_CEILING = 60 * 1024 * 1024;
+
+async function largestSheetBytes(file) {
+    const tailBytes = Math.min(file.size, 66560);
+    const tail = new DataView(await file.slice(file.size - tailBytes, file.size).arrayBuffer());
+
+    let eocd = -1;
+
+    for (let i = tail.byteLength - 22; i >= 0; i--) {
+        if (tail.getUint32(i, true) === 0x06054b50) {
+            eocd = i;
+            break;
+        }
+    }
+
+    if (eocd < 0) return null;
+
+    const directorySize = tail.getUint32(eocd + 12, true);
+    const directoryOffset = tail.getUint32(eocd + 16, true);
+
+    if (directoryOffset + directorySize > file.size) return null;
+
+    const dir = new DataView(await file.slice(directoryOffset, directoryOffset + directorySize).arrayBuffer());
+    const decoder = new TextDecoder("utf-8");
+
+    let cursor = 0;
+    let largest = 0;
+
+    while (cursor + 46 <= dir.byteLength) {
+        if (dir.getUint32(cursor, true) !== 0x02014b50) break;
+
+        const uncompressed = dir.getUint32(cursor + 24, true);
+        const nameLength = dir.getUint16(cursor + 28, true);
+        const extraLength = dir.getUint16(cursor + 30, true);
+        const commentLength = dir.getUint16(cursor + 32, true);
+        const name = decoder.decode(new Uint8Array(dir.buffer, dir.byteOffset + cursor + 46, nameLength));
+
+        if (SHEET_ENTRY_PATTERN.test(name) && uncompressed > largest) largest = uncompressed;
+
+        cursor += 46 + nameLength + extraLength + commentLength;
+    }
+
+    return largest;
+}
+
+export default function Studio() {
+    const navigate = useNavigate();
+    const { token, userID, organizationID, loading } = useAuth();
+
+    const mediaExtensions = {
+        image: ["png", "jpg", "jpeg", "gif", "svg", "bmp"],
+        video: ["mp4", "mkv", "avi", "mov", "webm"],
+        audio: ["mp3", "wav", "flac"],
+        pdf: ["pdf"],
+        threeD: ["stl", "3mf", "obj", "ply", "off", "gltf", "glb", "dae", "x3d", "amf", "blend"]
+    };
+
+    const defaultKeyBinds = {
+        save: "s",
+        undo: "z",
+        redo: "y",
+        cut: "x",
+        copy: "c",
+        paste: "v",
+        search: "f",
+        selectAll: "a"
+    };
+
+    const MAX_CONCURRENCY = typeof navigator !== "undefined" && navigator.hardwareConcurrency ? Math.max(4, Math.min(12, navigator.hardwareConcurrency * 2)) : 8;
+    const REMINDER_CHECK_INTERVAL = 60000;
+
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [screenSize, setScreenSize] = useState(window.innerWidth);
+    const [directoryWidth, setDirectoryWidth] = useState(20);
+    const [layoutVisibility, setLayoutVisibility] = useState(() => {
+        try {
+            return { ...DEFAULT_LAYOUT, ...JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || "{}") };
+        } catch {
+            return DEFAULT_LAYOUT;
+        }
+    });
+    const [contentWidth, setContentWidth] = useState(80);
+    const [paneWidths, setPaneWidths] = useState({ pane1: 50, pane2: 50 });
+    const [isDraggingWidth, setIsDraggingWidth] = useState(false);
+    const [isDraggingPane, setIsDraggingPane] = useState(false);
+    const [repositoryFiles, setRepositoryFiles] = useState([]);
+    const [openedDirectories, setOpenedDirectories] = useState({});
+    const [rootDirectoryName, setRootDirectoryName] = useState("");
+    const [rootDirectoryHandle, setRootDirectoryHandle] = useState(null);
+    const [isRootOpen, setIsRootOpen] = useState(false);
+    const [panes, setPanes] = useState([{ openedTabs: [], activeTabId: null }]);
+    const [activePaneIndex, setActivePaneIndex] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [unsavedChanges, setUnsavedChanges] = useState({});
+    const [saveStatusMessage, setSaveStatusMessage] = useState(null);
+    const [originalContents, setOriginalContents] = useState({});
+    const [modifiedContents, setModifiedContents] = useState({});
+    const [isNavigatorState, setIsNavigatorState] = useState(() => !readConnectorNavigation().isConnectorsState);
+    const [isNavigatorLoading, setIsNavigatorLoading] = useState(false);
+    const [isSearchState, setIsSearchState] = useState(false);
+    const [connectorNavigation] = useState(readConnectorNavigation);
+    const [isConnectorsState, setIsConnectorsState] = useState(Boolean(connectorNavigation.isConnectorsState));
+    const [activeConnector, setActiveConnector] = useState(connectorNavigation.activeConnector || null);
+    const [isDriveConnected, setIsDriveConnected] = useState(false);
+    const [driveEmail, setDriveEmail] = useState("");
+    const [driveQuery, setDriveQuery] = useState("");
+    const [driveFiles, setDriveFiles] = useState([]);
+    const [isDriveLoading, setIsDriveLoading] = useState(false);
+    const [driveError, setDriveError] = useState("");
+    const [drivePath, setDrivePath] = useState(Array.isArray(connectorNavigation.drivePath) ? connectorNavigation.drivePath : []);
+    const [driveSearching, setDriveSearching] = useState(false);
+    const [isGithubConnected, setIsGithubConnected] = useState(false);
+    const [githubLogin, setGithubLogin] = useState("");
+    const [githubQuery, setGithubQuery] = useState("");
+    const [githubRepos, setGithubRepos] = useState([]);
+    const [githubRepo, setGithubRepo] = useState(connectorNavigation.githubRepo || null);
+    const [githubPath, setGithubPath] = useState(connectorNavigation.githubPath || "");
+    const [githubEntries, setGithubEntries] = useState([]);
+    const [isGithubLoading, setIsGithubLoading] = useState(false);
+    const [githubError, setGithubError] = useState("");
+    const [globalSearchQuery, setGlobalSearchQuery] = useState("");
+    const [globalReplaceTerm, setGlobalReplaceTerm] = useState("");
+    const [globalSearchResults, setGlobalSearchResults] = useState([]);
+    const [isCaseSensitiveSearch, setIsCaseSensitiveSearch] = useState(true);
+    const [isGlobalSearching, setIsGlobalSearching] = useState(false);
+    const [isGlobalReplacing, setIsGlobalReplacing] = useState(false);
+    const [globalOperationProgress, setGlobalOperationProgress] = useState(null);
+    const [isPlotRendered, setIsPlotRendered] = useState(false);
+    const [collapsedFiles, setCollapsedFiles] = useState({});
+    const [keyBinds, setKeyBinds] = useState(defaultKeyBinds);
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [colorTheme, setColorTheme] = useState("default");
+    const [personalUsageByDay, setPersonalUsageByDay] = useState([]);
+    const [usageLanguages, setUsageLanguages] = useState([]);
+    const [contextMenuVisible, setContextMenuVisible] = useState(false);
+    const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+    const [contextMenuTarget, setContextMenuTarget] = useState(null);
+    const [dragOverId, setDragOverId] = useState(null);
+    const [navigatorListHeight, setNavigatorListHeight] = useState(0);
+    const [searchListHeight, setSearchListHeight] = useState(0);
+    const navigatorListWrapperRef = useRef(null);
+    const searchListWrapperRef = useRef(null);
+    const [copiedItem, setCopiedItem] = useState(null);
+    const [pendingHydrate, setPendingHydrate] = useState(false);
+    const [fsOpLoading, setFsOpLoading] = useState(false);
+    const [todaysEventsCount, setTodaysEventsCount] = useState(0);
+    const [calendarEvents, setCalendarEvents] = useState([]);
+    const [shownReminders, setShownReminders] = useState(new Set());
+    const [externalDragOver, setExternalDragOver] = useState(null);
+    const [isExternalDragOverNavigator, setIsExternalDragOverNavigator] = useState(false);
+
+    const hasOpenFile = panes.some((pane) => pane.openedTabs.length > 0);
+
+    const debounceRef = useRef(null);
+    const panesRef = useRef(panes);
+    const directoryRef = useRef(null);
+    const contentRef = useRef(null);
+    const editorRefs = useRef({});
+    const contextMenuRef = useRef(null);
+    const repositoryFilesRef = useRef(repositoryFiles);
+    const openedDirectoriesRef = useRef(openedDirectories);
+    const saveStateDebounceRef = useRef(null);
+    const alertInFlightRef = useRef(false);
+    const fsOpLoadingRef = useRef(fsOpLoading);
+    const searchTokenRef = useRef(0);
+    const activeSearchCount = useRef(0);
+    const needsSearchRef = useRef(false);
+    const reminderIntervalRef = useRef(null);
+
+    const dbPromise = openDB("StudioDB", 1, {
+        upgrade(db) {
+            db.createObjectStore("handles", { keyPath: "id" });
+        }
+    });
+
+    const stateDBPromise = openDB("StudioStateDB", 1, {
+        upgrade(db) {
+            db.createObjectStore("state", { keyPath: "id" });
+        }
+    });
+
+    const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const normalizePath = (p) => p.replace(/\/+/g, "/").replace(/\/$/, "");
+    const samePath = (a, b) => normalizePath(a) === normalizePath(b);
+    const splitPath = (p) => {
+        const parts = p.split("/");
+        const name = parts.pop();
+        return { parent: parts.join("/") || "/", name };
+    };
+    const prefixPath = (rootDirectoryName, path) => (path.startsWith(rootDirectoryName) ? path : `${rootDirectoryName}/${path}`);
+
+    const canonicalTabId = (path) => {
+        if (!path) {
+            return path;
+        }
+
+        const normalized = normalizePath(path);
+
+        if (!rootDirectoryName) {
+            return normalized;
+        }
+
+        return normalized.startsWith(`${rootDirectoryName}/`) || normalized === rootDirectoryName
+            ? normalized
+            : normalizePath(`${rootDirectoryName}/${normalized}`);
+    };
+
+    const locateTab = (paneList, path) => {
+        const target = canonicalTabId(path);
+
+        for (let index = 0; index < paneList.length; index++) {
+            const tab = paneList[index].openedTabs.find((entry) => canonicalTabId(entry.id) === target);
+
+            if (tab) {
+                return { paneIndex: index, tab };
+            }
+        }
+
+        return null;
+    };
+    const getVirtualizedItemHeight = (size) => (size < 700 ? 24 : size < 1300 ? 28 : size < 2200 ? 32 : size < 3900 ? 36 : 40);
+
+    const pLimit = (concurrency = 8) => {
+        let active = 0;
+        const queue = [];
+        const next = () => {
+            if (!queue.length || active >= concurrency) return;
+            active++;
+            const { fn, resolve, reject } = queue.shift();
+            (async () => {
+                try {
+                    resolve(await fn());
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    active--;
+                    next();
+                }
+            })();
+        };
+        return (fn) => new Promise((resolve, reject) => {
+            queue.push({ fn, resolve, reject });
+            next();
+        });
+    };
+
+    const pLimiter = pLimit(MAX_CONCURRENCY);
+
+    const highlightResultSnippet = (text, searchTerm, isCaseSensitive) => {
+        if (!searchTerm) return text;
+        const re = new RegExp(`(${escapeRegExp(searchTerm)})`, isCaseSensitive ? "g" : "gi");
+        return text.replace(re, "<span class='searchHighlight'>$1</span>");
+    };
+
+    const getFileTypeInfo = (filename) => {
+        const lower = filename.toLowerCase();
+        let ext;
+        if (lower === "dockerfile") ext = "dockerfile";
+        else if (lower === "makefile") ext = "makefile";
+        else if (lower.startsWith(".git")) ext = "git";
+        else {
+            const parts = filename.split(".");
+            ext = parts.length > 1 ? parts.pop().toLowerCase() : "default";
+        }
+        return fileTypeMap[ext] || { language: "Unknown", icon: "unknownExtension.svg", category: "other" };
+    };
+
+    const getFileIcon = (filename) => {
+        const { icon } = getFileTypeInfo(filename);
+        return <img src={`/language-images/${icon || "unknownExtension.svg"}`} alt={`${filename} icon`} className="directoryListItemFileIcon" />;
+    };
+
+    const isSearchableFile = (filename) => {
+        const { category } = getFileTypeInfo(filename);
+        const ext = filename.split(".").pop()?.toLowerCase() || "";
+
+        if (WORKBOOK_EXTENSIONS.includes(ext) || PACKAGED_TEXT_EXTENSIONS.includes(ext)) return false;
+
+        return !["image", "video", "audio", "pdf", "threeD"].includes(category);
+    };
+
+    const findNode = (nodes, fullPath) => {
+        for (const n of nodes) {
+            if (n.fullPath === fullPath) return n;
+            if (n.type === "directory" && n.files) {
+                const res = findNode(n.files, fullPath);
+                if (res) return res;
+            }
+        }
+        return null;
+    };
+
+    const findDirNode = (nodes, fullPath) => {
+        for (const n of nodes) {
+            if (n.type === "directory") {
+                if (n.fullPath === fullPath) return n;
+                if (n.files) {
+                    const res = findDirNode(n.files, fullPath);
+                    if (res) return res;
+                }
+            }
+        }
+        return null;
+    };
+
+    const cloneNodeWithNewPrefix = (node, oldPrefix, newPrefix) => {
+        const fix = (n) => {
+            const newFullPath = n.fullPath.replace(oldPrefix, newPrefix);
+            const newName = newFullPath.split("/").pop();
+            const next = { ...n, fullPath: newFullPath, name: newName };
+            if (n.type === "directory" && Array.isArray(n.files)) next.files = n.files.map(fix);
+            return next;
+        };
+        return fix(node);
+    };
+
+    const removeNodeFromTree = (nodes, targetPath) => {
+        let removed = null;
+        const recur = (arr) => {
+            const out = [];
+            for (const n of arr) {
+                if (n.fullPath === targetPath) {
+                    removed = n;
+                    continue;
+                }
+                if (n.type === "directory" && n.files) {
+                    const { next, removedNode } = recur(n.files);
+                    if (removedNode) removed = removedNode;
+                    out.push({ ...n, files: next });
+                } else out.push(n);
+            }
+            return { next: out, removedNode: removed };
+        };
+        const { next } = recur(nodes);
+        return { nextTree: next, removedNode: removed };
+    };
+
+    const insertNodeIntoTree = (nodes, parentPath, nodeToInsert) =>
+        nodes.map((n) => {
+            if (n.type === "directory") {
+                if (n.fullPath === parentPath) {
+                    const files = Array.isArray(n.files) ? n.files.slice() : [];
+                    files.push(nodeToInsert);
+                    return { ...n, files };
+                }
+                if (n.files) return { ...n, files: insertNodeIntoTree(n.files, parentPath, nodeToInsert) };
+            }
+            return n;
+        });
+
+    const updateSingleFileNodePath = (node, newFullPath) => ({ ...node, fullPath: newFullPath, name: newFullPath.split("/").pop() });
+    const insertFileAtParent = insertNodeIntoTree;
+    const deleteNodeFromTree = (nodes, targetPath) => removeNodeFromTree(nodes, targetPath).nextTree;
+
+    const insertNodeAtRoot = (nodes, nodeToInsert) => {
+        return [...nodes, nodeToInsert];
+    };
+
+    const insertNodeAtPath = (nodes, parentPath, nodeToInsert, rootName) => {
+        if (parentPath === rootName) {
+            return insertNodeAtRoot(nodes, nodeToInsert);
+        }
+        return insertNodeIntoTree(nodes, parentPath, nodeToInsert);
+    };
+
+    const loadDirectoryContents = async (directoryHandle, parentPath) => {
+        const results = [];
+        for await (const [name, entry] of directoryHandle.entries()) {
+            const fullPath = `${parentPath}/${name}`;
+            if (entry.kind === "directory") {
+                results.push({ name, type: "directory", handle: entry, fullPath, files: undefined });
+            } else {
+                results.push({ name: entry.name, type: "file", handle: entry, fullPath });
+            }
+        }
+        return results;
+    };
+
+    const updateTreeWithDirectoryContents = (tree, targetPath, children) =>
+        tree.map((node) => {
+            if (node.fullPath === targetPath) return { ...node, files: children };
+            if (node.type === "directory" && node.files)
+                return { ...node, files: updateTreeWithDirectoryContents(node.files, targetPath, children) };
+            return node;
+        });
+
+    const deepCopyDirectoryFast = async (srcDir, destDir) => {
+        const tasks = [];
+        const walk = async (s, d) => {
+            for await (const [name, entry] of s.entries()) {
+                if (entry.kind === "file") {
+                    tasks.push(
+                        pLimiter(async () => {
+                            const file = await entry.getFile();
+                            const destFile = await d.getFileHandle(name, { create: true });
+                            const w = await destFile.createWritable();
+                            await w.write(file);
+                            await w.close();
+                        })
+                    );
+                } else {
+                    const newSub = await d.getDirectoryHandle(name, { create: true });
+                    tasks.push(pLimiter(async () => walk(entry, newSub)));
+                }
+            }
+        };
+        await walk(srcDir, destDir);
+        await Promise.all(tasks);
+    };
+
+    const overwriteFileAtomic = async (targetDirHandle, itemName, sourceFile) => {
+        const destFileHandle = await targetDirHandle.getFileHandle(itemName, { create: true });
+        const w = await destFileHandle.createWritable();
+        await w.write(sourceFile);
+        await w.close();
+    };
+
+    const overwriteDirectoryAtomic = async (targetDirHandle, itemName, srcDirHandle) => {
+        try {
+            await targetDirHandle.removeEntry(itemName, { recursive: true });
+        } catch { }
+        const destHandle = await targetDirHandle.getDirectoryHandle(itemName, { create: true });
+        await deepCopyDirectoryFast(srcDirHandle, destHandle);
+    };
+
+    const fsEntryExists = async (dirHandle, name, type) => {
+        try {
+            if (type === "file") await dirHandle.getFileHandle(name, { create: false });
+            else await dirHandle.getDirectoryHandle(name, { create: false });
+            return true;
+        } catch (error) {
+            return error?.name !== "NotFoundError";
+        }
+    };
+
+    const filterTreeBySearch = (nodes, query) => {
+        const q = query.toLowerCase();
+        const walk = (list) =>
+            list.reduce((acc, n) => {
+                if (n.type === "file") {
+                    if (n.name.toLowerCase().includes(q)) acc.push(n);
+                } else if (n.type === "directory") {
+                    const kids = n.files ? walk(n.files) : [];
+                    if (n.name.toLowerCase().includes(q) || kids.length) acc.push({ ...n, files: kids });
+                }
+                return acc;
+            }, []);
+        return walk(nodes);
+    };
+
+    async function* readLines(file) {
+        const stream = file.stream();
+        const reader = stream.pipeThrough(new TextDecoderStream("utf-8", { fatal: false })).getReader();
+        let buffer = "";
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    if (buffer.length > 0) yield buffer;
+                    return;
+                }
+                buffer += value;
+                let nlIndex;
+                while ((nlIndex = buffer.indexOf("\n")) >= 0) {
+                    yield buffer.slice(0, nlIndex);
+                    buffer = buffer.slice(nlIndex + 1);
+                }
+            }
+        } finally {
+            reader.releaseLock();
+        }
+    }
+
+    async function* walkSearchableFiles(dirHandle, path) {
+        for await (const [name, entry] of dirHandle.entries()) {
+            const full = normalizePath(`${path}/${name}`);
+            if (entry.kind === "file") {
+                if (isSearchableFile(name)) yield { fullPath: full, handle: entry };
+            } else if (entry.kind === "directory") {
+                yield* walkSearchableFiles(entry, full);
+            }
+        }
+    }
+
+    async function countSearchableFiles(dirHandle) {
+        let count = 0;
+        for await (const [name, entry] of dirHandle.entries()) {
+            if (entry.kind === "file") {
+                if (isSearchableFile(name)) count++;
+            } else if (entry.kind === "directory") {
+                count += await countSearchableFiles(entry);
+            }
+        }
+        return count;
+    }
+
+    const guardedShowDialog = useCallback(async (opts) => {
+        while (alertInFlightRef.current) await new Promise((r) => setTimeout(r, 25));
+        alertInFlightRef.current = true;
+        const wasLoading = fsOpLoadingRef.current;
+        if (wasLoading) setFsOpLoading(false);
+        try {
+            return await showDialog(opts);
+        } finally {
+            if (wasLoading) setFsOpLoading(true);
+            alertInFlightRef.current = false;
+        }
+    }, []);
+
+    const saveStateToDB = async (state) => {
+        try {
+            const db = await stateDBPromise;
+            await db.put("state", { id: "state", data: state, savedAt: Date.now() });
+        } catch { }
+    };
+
+    const clearStateFromDB = async () => {
+        try {
+            const db = await stateDBPromise;
+            await db.delete("state", "state");
+        } catch { }
+    };
+
+    const loadStateFromDB = async () => {
+        try {
+            const db = await stateDBPromise;
+            const record = await db.get("state", "state");
+
+            if (!record?.data) {
+                return null;
+            }
+
+            if (sessionStorage.getItem(RESTORE_FLAG) === "pending") {
+                sessionStorage.removeItem(RESTORE_FLAG);
+                await clearStateFromDB();
+                return null;
+            }
+
+            sessionStorage.setItem(RESTORE_FLAG, "pending");
+
+            return record.data;
+        } catch {
+            return null;
+        }
+    };
+
+    const saveHandle = async (id, handle) => {
+        if (!handle) return;
+        const db = await dbPromise;
+        await db.put("handles", { id, handle });
+    };
+
+    const loadHandle = async (id) => {
+        const db = await dbPromise;
+        const item = await db.get("handles", id);
+        if (!item) return null;
+        const handle = item.handle;
+        let permission = await handle.queryPermission({ mode: "readwrite" });
+        if (permission !== "granted") {
+            permission = await handle.requestPermission({ mode: "readwrite" });
+            if (permission !== "granted") return null;
+        }
+        return handle;
+    };
+
+    const saveRootHandle = async () => {
+        if (!rootDirectoryHandle) return;
+        const db = await dbPromise;
+        await db.put("handles", { id: "root", handle: rootDirectoryHandle });
+    };
+
+    const loadRootHandle = async () => {
+        const db = await dbPromise;
+        const item = await db.get("handles", "root");
+        if (!item) return null;
+        const handle = item.handle;
+        let permission = await handle.queryPermission({ mode: "readwrite" });
+        if (permission !== "granted") {
+            permission = await handle.requestPermission({ mode: "readwrite" });
+            if (permission !== "granted") return null;
+        }
+        return handle;
+    };
+
+    const resolveHandleFromPath = async (rootHandle, relativePath) => {
+        if (!rootHandle || !relativePath) return null;
+        const parts = relativePath.split("/").filter(Boolean);
+        let current = rootHandle;
+        for (const part of parts.slice(0, -1)) {
+            try {
+                current = await current.getDirectoryHandle(part);
+            } catch {
+                return null;
+            }
+        }
+        const fileName = parts.pop();
+        if (!fileName) return null;
+        try {
+            return await current.getFileHandle(fileName);
+        } catch {
+            return null;
+        }
+    };
+
+    const getDirectoryHandleByPath = async (path) => {
+        const fullPath = prefixPath(rootDirectoryName, path);
+        if (!rootDirectoryHandle || fullPath === rootDirectoryName || fullPath === `${rootDirectoryName}/`) return rootDirectoryHandle;
+        const parts = fullPath.replace(`${rootDirectoryName}/`, "").split("/").filter(Boolean);
+        let currentHandle = rootDirectoryHandle;
+        for (const part of parts) {
+            try {
+                currentHandle = await currentHandle.getDirectoryHandle(part, { create: false });
+            } catch {
+                return null;
+            }
+        }
+        return currentHandle;
+    };
+
+    const getFileHandleByPath = async (files, filePath) => {
+        const prefixedPath = prefixPath(rootDirectoryName, filePath);
+        for (const file of files) {
+            if (file.type === "file" && file.fullPath === prefixedPath) return file.handle;
+            if (file.type === "directory" && file.files) {
+                const handle = await getFileHandleByPath(file.files, filePath);
+                if (handle) return handle;
+            }
+        }
+        return null;
+    };
+
+    const fetchTodaysEvents = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/calendar-events`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ userID, organizationID })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCalendarEvents(data.events);
+                const today = new Date();
+                const todayEvents = data.events.filter(event => {
+                    const eventDate = new Date(event.startDate);
+                    return (
+                        eventDate.getDate() === today.getDate() &&
+                        eventDate.getMonth() === today.getMonth() &&
+                        eventDate.getFullYear() === today.getFullYear()
+                    );
+                });
+                setTodaysEventsCount(todayEvents.length);
+            }
+        } catch { }
+    };
+
+    const authRef = useRef({ token, userID, organizationID });
+    authRef.current = { token, userID, organizationID };
+
+    const connectorRequestQuery = () => `orgid=${encodeURIComponent(authRef.current.organizationID || "")}&username=${encodeURIComponent(authRef.current.userID || "")}`;
+
+    const connectorAuthHeaders = () => ({ Authorization: `Bearer ${authRef.current.token}` });
+
+    const fetchDriveStatus = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/google-drive/status?${connectorRequestQuery()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) return false;
+            const data = await response.json();
+            setIsDriveConnected(Boolean(data.connected));
+            setDriveEmail(data.email || "");
+            return Boolean(data.connected);
+        } catch {
+            return false;
+        }
+    };
+
+    const loadDriveFiles = async (searchText, path = drivePath) => {
+        setIsDriveLoading(true);
+        setDriveError("");
+        setDriveSearching(Boolean(searchText));
+        const parent = path.length ? path[path.length - 1].id : "root";
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/google-drive/files?${connectorRequestQuery()}&query=${encodeURIComponent(searchText || "")}&parent=${encodeURIComponent(parent)}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                setDriveFiles([]);
+                setDriveError(data.message || "Google Drive could not be reached.");
+                if (data.reconnect) {
+                    setIsDriveConnected(false);
+                    setDriveEmail("");
+                    await guardedShowDialog({ title: "Google Drive", message: data.message });
+                }
+                return;
+            }
+            setDriveFiles(Array.isArray(data.files) ? data.files : []);
+        } catch {
+            setDriveFiles([]);
+            setDriveError("Google Drive could not be reached.");
+        } finally {
+            setIsDriveLoading(false);
+        }
+    };
+
+    const connectDrive = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/google-drive/auth-url?${connectorRequestQuery()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                await guardedShowDialog({ title: "Google Drive", message: "The Google Drive sign in could not be started. Try again in a moment." });
+                return;
+            }
+            const data = await response.json();
+            const popup = window.open(data.url, "GoogleDriveAuth", "width=540,height=680");
+            const poll = setInterval(async () => {
+                if (popup && popup.closed) {
+                    clearInterval(poll);
+                    const connected = await fetchDriveStatus();
+                    if (connected) loadDriveFiles(driveQuery);
+                }
+            }, 1200);
+        } catch { }
+    };
+
+    const disconnectDrive = async () => {
+        const result = await guardedShowDialog({
+            title: "Disconnect Google Drive",
+            message: "Open Google Drive files will stay open, but they can no longer be saved back to Google Drive. Are you sure you want to disconnect?",
+            showCancel: true
+        });
+        if (result === null) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/google-drive/disconnect?${connectorRequestQuery()}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch { }
+        setIsDriveConnected(false);
+        setDriveEmail("");
+        setDriveFiles([]);
+        setDrivePath([]);
+        setDriveSearching(false);
+    };
+
+    const openDriveFolder = (folder) => {
+        const next = [...drivePath, { id: folder.id, name: folder.name }];
+        setDrivePath(next);
+        setDriveQuery("");
+        loadDriveFiles("", next);
+    };
+
+    const driveBack = () => {
+        if (driveSearching) {
+            setDriveQuery("");
+            loadDriveFiles("", drivePath);
+            return;
+        }
+        if (drivePath.length) {
+            const next = drivePath.slice(0, -1);
+            setDrivePath(next);
+            loadDriveFiles("", next);
+            return;
+        }
+        setActiveConnector(null);
+    };
+
+    const driveBytes = async (data) => {
+        if (data instanceof Blob) return new Uint8Array(await data.arrayBuffer());
+        if (data instanceof ArrayBuffer) return new Uint8Array(data);
+        if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+        if (typeof data === "string") return new TextEncoder().encode(data);
+        return new Uint8Array(0);
+    };
+
+    const connectorConnected = (connectorId) => (connectorId === "google-drive" ? isDriveConnected : connectorId === "github" ? isGithubConnected : false);
+
+    const connectorAccount = (connectorId) => (connectorId === "google-drive" ? driveEmail : connectorId === "github" ? githubLogin : "");
+
+    const createConnectorWritable = (downloadBytes, uploadBytes) => async (options) => {
+        let buffer = options && options.keepExistingData ? new Uint8Array(await downloadBytes()) : new Uint8Array(0);
+        let cursor = 0;
+        const writeAt = (bytes, position) => {
+            const end = position + bytes.length;
+            if (end > buffer.length) {
+                const grown = new Uint8Array(end);
+                grown.set(buffer);
+                buffer = grown;
+            }
+            buffer.set(bytes, position);
+            cursor = end;
+        };
+        return {
+            write: async (chunk) => {
+                if (chunk && typeof chunk === "object" && !(chunk instanceof Blob) && !(chunk instanceof ArrayBuffer) && !ArrayBuffer.isView(chunk) && typeof chunk.type === "string") {
+                    if (chunk.type === "write") writeAt(await driveBytes(chunk.data), typeof chunk.position === "number" ? chunk.position : cursor);
+                    if (chunk.type === "truncate") {
+                        buffer = buffer.slice(0, chunk.size || 0);
+                        cursor = Math.min(cursor, buffer.length);
+                    }
+                    if (chunk.type === "seek") cursor = chunk.position || 0;
+                    return;
+                }
+                writeAt(await driveBytes(chunk), cursor);
+            },
+            seek: async (position) => {
+                cursor = position;
+            },
+            truncate: async (size) => {
+                buffer = buffer.slice(0, size);
+                cursor = Math.min(cursor, buffer.length);
+            },
+            close: async () => {
+                await uploadBytes(buffer);
+            },
+            abort: async () => { }
+        };
+    };
+
+    const buildDriveHandle = (file) => {
+        const exportExtension = DRIVE_EXPORT_EXTENSIONS[file.mimeType];
+        const mappedName = exportExtension && !file.name.toLowerCase().endsWith(`.${exportExtension}`) ? `${file.name}.${exportExtension}` : file.name;
+        const contentUrl = () => `${import.meta.env.VITE_API_BASE_URL}/google-drive/files/${file.id}/content?${connectorRequestQuery()}`;
+        const downloadDriveFile = async () => {
+            const response = await fetch(contentUrl(), { headers: connectorAuthHeaders() });
+            if (!response.ok) throw new Error("The file could not be downloaded from Google Drive.");
+            return response.arrayBuffer();
+        };
+        const uploadDriveFile = async (buffer) => {
+            const response = await fetch(contentUrl(), {
+                method: "PUT",
+                headers: { ...connectorAuthHeaders(), "Content-Type": "application/octet-stream" },
+                body: buffer
+            });
+            if (!response.ok) throw new Error("The file could not be saved to Google Drive.");
+        };
+        return {
+            name: mappedName,
+            connector: { kind: "google-drive", file: { id: file.id, name: file.name, mimeType: file.mimeType } },
+            getFile: async () => new File([await downloadDriveFile()], mappedName, { lastModified: Date.now() }),
+            createWritable: createConnectorWritable(downloadDriveFile, uploadDriveFile),
+            queryPermission: async () => "granted",
+            requestPermission: async () => "granted"
+        };
+    };
+
+    const buildGithubHandle = (repo, entry) => {
+        const fileName = entry.name;
+        const fileQuery = () => `${connectorRequestQuery()}&owner=${encodeURIComponent(repo.owner)}&repo=${encodeURIComponent(repo.name)}&path=${encodeURIComponent(entry.path)}`;
+        const branchQuery = `&branch=${encodeURIComponent(repo.defaultBranch || "")}`;
+        const refQuery = `&ref=${encodeURIComponent(repo.defaultBranch || "")}`;
+        const downloadGithubFile = async () => {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/file?${fileQuery()}${refQuery}`, { headers: connectorAuthHeaders() });
+            if (!response.ok) throw new Error("The file could not be downloaded from GitHub.");
+            return response.arrayBuffer();
+        };
+        const uploadGithubFile = async (buffer) => {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/file?${fileQuery()}${branchQuery}`, {
+                method: "PUT",
+                headers: { ...connectorAuthHeaders(), "Content-Type": "application/octet-stream" },
+                body: buffer
+            });
+            if (!response.ok) throw new Error("The file could not be committed to GitHub.");
+        };
+        return {
+            name: fileName,
+            connector: { kind: "github", repo: { id: repo.id, owner: repo.owner, name: repo.name, fullName: repo.fullName, defaultBranch: repo.defaultBranch }, entry: { name: entry.name, path: entry.path } },
+            getFile: async () => new File([await downloadGithubFile()], fileName, { lastModified: Date.now() }),
+            createWritable: createConnectorWritable(downloadGithubFile, uploadGithubFile),
+            queryPermission: async () => "granted",
+            requestPermission: async () => "granted"
+        };
+    };
+
+    const fetchGithubStatus = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/status?${connectorRequestQuery()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) return false;
+            const data = await response.json();
+            setIsGithubConnected(Boolean(data.connected));
+            setGithubLogin(data.login || "");
+            return Boolean(data.connected);
+        } catch {
+            return false;
+        }
+    };
+
+    const loadGithubRepos = async (searchText) => {
+        setIsGithubLoading(true);
+        setGithubError("");
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/repos?${connectorRequestQuery()}&query=${encodeURIComponent(searchText || "")}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                setGithubRepos([]);
+                setGithubError(data.message || "GitHub could not be reached.");
+                return;
+            }
+            setGithubRepos(Array.isArray(data.repos) ? data.repos : []);
+        } catch {
+            setGithubRepos([]);
+            setGithubError("GitHub could not be reached.");
+        } finally {
+            setIsGithubLoading(false);
+        }
+    };
+
+    const loadGithubEntries = async (repo, dirPath) => {
+        setIsGithubLoading(true);
+        setGithubError("");
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/contents?${connectorRequestQuery()}&owner=${encodeURIComponent(repo.owner)}&repo=${encodeURIComponent(repo.name)}&path=${encodeURIComponent(dirPath || "")}&ref=${encodeURIComponent(repo.defaultBranch || "")}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                setGithubEntries([]);
+                setGithubError(data.message || "GitHub could not be reached.");
+                return;
+            }
+            setGithubEntries(Array.isArray(data.entries) ? data.entries : []);
+        } catch {
+            setGithubEntries([]);
+            setGithubError("GitHub could not be reached.");
+        } finally {
+            setIsGithubLoading(false);
+        }
+    };
+
+    const connectGithub = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/auth-url?${connectorRequestQuery()}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                await guardedShowDialog({ title: "GitHub", message: "The GitHub sign in could not be started. Try again in a moment." });
+                return;
+            }
+            const data = await response.json();
+            const popup = window.open(data.url, "GithubAuth", "width=540,height=680");
+            const poll = setInterval(async () => {
+                if (popup && popup.closed) {
+                    clearInterval(poll);
+                    const connected = await fetchGithubStatus();
+                    if (connected) loadGithubRepos(githubQuery);
+                }
+            }, 1200);
+        } catch { }
+    };
+
+    const disconnectGithub = async () => {
+        const result = await guardedShowDialog({
+            title: "Disconnect GitHub",
+            message: "Open GitHub files will stay open, but they can no longer be committed back to GitHub. Are you sure you want to disconnect?",
+            showCancel: true
+        });
+        if (result === null) return;
+        try {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/github/disconnect?${connectorRequestQuery()}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch { }
+        setIsGithubConnected(false);
+        setGithubLogin("");
+        setGithubRepos([]);
+        setGithubRepo(null);
+        setGithubPath("");
+        setGithubEntries([]);
+    };
+
+    const restoreConnectorHandle = (connector) => {
+        if (!connector) return null;
+        if (connector.kind === "google-drive" && connector.file) return buildDriveHandle(connector.file);
+        if (connector.kind === "github" && connector.repo && connector.entry) return buildGithubHandle(connector.repo, connector.entry);
+        return null;
+    };
+
+    const openDriveFile = (file) => {
+        const driveHandle = buildDriveHandle(file);
+        openFile(driveHandle, driveHandle.name, `google-drive/${file.id}/${driveHandle.name}`);
+    };
+
+    const openGithubFile = (entry) => {
+        if (!githubRepo) return;
+        const githubHandle = buildGithubHandle(githubRepo, entry);
+        openFile(githubHandle, githubHandle.name, `github/${githubRepo.owner}/${githubRepo.name}/${entry.path}`);
+    };
+
+    const checkForReminders = useCallback(async () => {
+        if (!calendarEvents.length) return;
+        const now = new Date();
+        const currentTime = now.getTime();
+        for (const event of calendarEvents) {
+            const eventStart = new Date(event.startDate);
+            const reminderTime = eventStart.getTime() - (event.reminder * 60 * 1000);
+            const eventId = event.id;
+            const reminderKey = `${eventId}-${reminderTime}`;
+            if (currentTime >= reminderTime &&
+                currentTime < eventStart.getTime() &&
+                !shownReminders.has(reminderKey)) {
+                setShownReminders(prev => new Set([...prev, reminderKey]));
+                const timeUntilEvent = Math.ceil((eventStart.getTime() - currentTime) / (60 * 1000));
+                const message = timeUntilEvent <= 1
+                    ? `Event "${event.title}" is starting now.`
+                    : `Event "${event.title}" is starting in ${timeUntilEvent} minute${timeUntilEvent === 1 ? "" : "s"}.`;
+                await guardedShowDialog({
+                    title: "Event Reminder",
+                    message: message,
+                    showCancel: false
+                });
+            }
+        }
+    }, [calendarEvents, shownReminders, guardedShowDialog]);
+
+    const rescanPaths = async (paths) => {
+        if (!rootDirectoryHandle || !rootDirectoryName) return;
+        const unique = Array.from(new Set(paths.filter(Boolean)));
+        if (!unique.length) return;
+        const needFull = unique.some((p) => p === rootDirectoryName);
+        let tree = repositoryFilesRef.current;
+        let didFull = false;
+        for (const p of unique) {
+            if (didFull) break;
+            if (p === rootDirectoryName) {
+                try {
+                    const full = await loadDirectoryContents(rootDirectoryHandle, rootDirectoryName);
+                    repositoryFilesRef.current = full;
+                    setRepositoryFiles(full);
+                } catch { }
+                didFull = true;
+                break;
+            }
+            const node = findDirNode(tree, p);
+            if (!node || !node.handle) {
+                try {
+                    const full = await loadDirectoryContents(rootDirectoryHandle, rootDirectoryName);
+                    repositoryFilesRef.current = full;
+                    setRepositoryFiles(full);
+                } catch { }
+                didFull = true;
+                break;
+            }
+            try {
+                const children = await loadDirectoryContents(node.handle, node.fullPath);
+                const oldChildrenMap = new Map((node.files || []).map(c => [c.name, c]));
+                const enhancedChildren = children.map(child => {
+                    if (child.type !== "directory") return child;
+                    const oldChild = oldChildrenMap.get(child.name);
+                    if (oldChild && oldChild.files !== undefined) {
+                        return { ...child, files: oldChild.files };
+                    }
+                    return child;
+                });
+                tree = updateTreeWithDirectoryContents(tree, node.fullPath, enhancedChildren);
+            } catch {
+                try {
+                    const full = await loadDirectoryContents(rootDirectoryHandle, rootDirectoryName);
+                    repositoryFilesRef.current = full;
+                    setRepositoryFiles(full);
+                } catch { }
+                didFull = true;
+                break;
+            }
+        }
+        if (!didFull) {
+            repositoryFilesRef.current = tree;
+            setRepositoryFiles(tree);
+        }
+    };
+
+    const withFsOverlay = async (fn) => {
+        setFsOpLoading(true);
+        try {
+            return await fn();
+        } finally {
+            setFsOpLoading(false);
+        }
+    };
+
+    const rescanAndSync = async (affected) => rescanPaths(Array.isArray(affected) ? affected : [affected].filter(Boolean));
+
+    const getFileSystemHandlesFromDataTransfer = async (dataTransfer) => {
+        const items = Array.from(dataTransfer.items);
+        const handles = [];
+        for (const item of items) {
+            if (item.kind === "file" && typeof item.getAsFileSystemHandle === "function") {
+                try {
+                    const handle = await item.getAsFileSystemHandle();
+                    if (handle) {
+                        handles.push(handle);
+                    }
+                } catch { }
+            }
+        }
+        return handles;
+    };
+
+    const handleExternalFileDrop = async (e, targetPath) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setExternalDragOver(null);
+        setIsExternalDragOverNavigator(false);
+
+        if (fsOpLoading) return;
+
+        const handles = await getFileSystemHandlesFromDataTransfer(e.dataTransfer);
+        const legacyFiles = Array.from(e.dataTransfer.files);
+
+        if (!rootDirectoryHandle) {
+            if (handles.length > 0) {
+                const dirHandle = handles.find(h => h.kind === "directory");
+                if (dirHandle) {
+                    try {
+                        setIsNavigatorLoading(true);
+                        const rootName = dirHandle.name;
+                        setPanes([{ openedTabs: [], activeTabId: null }]);
+                        setActivePaneIndex(0);
+                        setUnsavedChanges({});
+                        setOriginalContents({});
+                        setModifiedContents({});
+                        setPaneWidths({ pane1: 50, pane2: 50 });
+                        setRootDirectoryHandle(dirHandle);
+                        setRootDirectoryName(rootName);
+                        setRepositoryFiles(await loadDirectoryContents(dirHandle, rootName));
+                        setIsRootOpen(true);
+                        setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
+                    } catch { } finally {
+                        setIsNavigatorLoading(false);
+                    }
+                    return;
+                }
+                for (const handle of handles) {
+                    if (handle.kind === "file") {
+                        openFile(handle, handle.name);
+                    }
+                }
+                return;
+            }
+            return;
+        }
+
+        if (handles.length === 0 && legacyFiles.length === 0) return;
+
+        const targetDirHandle = await getDirectoryHandleByPath(targetPath);
+        if (!targetDirHandle) return;
+
+        if (handles.length > 0) {
+            const existingItems = [];
+            for (const handle of handles) {
+                const itemType = handle.kind === "directory" ? "directory" : "file";
+                const exists = await fsEntryExists(targetDirHandle, handle.name, itemType);
+                if (exists) {
+                    existingItems.push(handle.name);
+                }
+            }
+
+            let overwrite = false;
+            if (existingItems.length > 0) {
+                const message = existingItems.length === 1
+                    ? `An item named "${existingItems[0]}" already exists. Do you want to overwrite it?`
+                    : `${existingItems.length} items already exist. Do you want to overwrite them?`;
+                const result = await guardedShowDialog({
+                    title: "Overwrite Items?",
+                    message: message,
+                    showCancel: true
+                });
+                if (result === null) return;
+                overwrite = true;
+            }
+
+            await withFsOverlay(async () => {
+                try {
+                    for (const handle of handles) {
+                        const itemName = handle.name;
+                        const fullPath = normalizePath(`${targetPath}/${itemName}`);
+
+                        if (handle.kind === "file") {
+                            const file = await handle.getFile();
+                            const newNode = { name: itemName, type: "file", handle: null, fullPath };
+
+                            setRepositoryFiles((prev) => {
+                                let working = prev;
+                                if (overwrite && existingItems.includes(itemName)) {
+                                    working = deleteNodeFromTree(working, fullPath);
+                                }
+                                return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+                            });
+
+                            await overwriteFileAtomic(targetDirHandle, itemName, file);
+                        } else if (handle.kind === "directory") {
+                            const newNode = { name: itemName, type: "directory", handle: null, fullPath, files: [] };
+
+                            setRepositoryFiles((prev) => {
+                                let working = prev;
+                                if (overwrite && existingItems.includes(itemName)) {
+                                    working = deleteNodeFromTree(working, fullPath);
+                                }
+                                return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+                            });
+
+                            if (overwrite) {
+                                await overwriteDirectoryAtomic(targetDirHandle, itemName, handle);
+                            } else {
+                                const newDirHandle = await targetDirHandle.getDirectoryHandle(itemName, { create: true });
+                                await deepCopyDirectoryFast(handle, newDirHandle);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    await guardedShowDialog({
+                        title: "System Alert",
+                        message: "An error occurred while adding the items. Please try again.",
+                        showCancel: false
+                    });
+                } finally {
+                    await rescanAndSync([targetPath]);
+                }
+            });
+            return;
+        }
+
+        if (legacyFiles.length > 0) {
+            const existingFiles = [];
+            for (const file of legacyFiles) {
+                const exists = await fsEntryExists(targetDirHandle, file.name, "file");
+                if (exists) {
+                    existingFiles.push(file.name);
+                }
+            }
+
+            let overwrite = false;
+            if (existingFiles.length > 0) {
+                const message = existingFiles.length === 1
+                    ? `A file named "${existingFiles[0]}" already exists. Do you want to overwrite it?`
+                    : `${existingFiles.length} files already exist. Do you want to overwrite them?`;
+                const result = await guardedShowDialog({
+                    title: "Overwrite Files?",
+                    message: message,
+                    showCancel: true
+                });
+                if (result === null) return;
+                overwrite = true;
+            }
+
+            await withFsOverlay(async () => {
+                try {
+                    for (const file of legacyFiles) {
+                        const fullPath = normalizePath(`${targetPath}/${file.name}`);
+                        const newNode = { name: file.name, type: "file", handle: null, fullPath };
+
+                        setRepositoryFiles((prev) => {
+                            let working = prev;
+                            if (overwrite && existingFiles.includes(file.name)) {
+                                working = deleteNodeFromTree(working, fullPath);
+                            }
+                            return insertNodeAtPath(working, targetPath, newNode, rootDirectoryName);
+                        });
+
+                        await overwriteFileAtomic(targetDirHandle, file.name, file);
+                    }
+                } catch (error) {
+                    await guardedShowDialog({
+                        title: "System Alert",
+                        message: "An error occurred while adding the files. Please try again.",
+                        showCancel: false
+                    });
+                } finally {
+                    await rescanAndSync([targetPath]);
+                }
+            });
+        }
+    };
+
+    const handleExternalDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleExternalDragEnter = (e, targetPath) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer.types.includes("Files")) {
+            setExternalDragOver(targetPath);
+            if (targetPath === rootDirectoryName) {
+                setIsExternalDragOverNavigator(true);
+            }
+        }
+    };
+
+    const handleExternalDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+            setExternalDragOver(null);
+            setIsExternalDragOverNavigator(false);
+        }
+    };
+
+    const handleNavigatorDragEnter = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer.types.includes("Files")) {
+            setIsExternalDragOverNavigator(true);
+        }
+    };
+
+    const handleNavigatorDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+            setIsExternalDragOverNavigator(false);
+        }
+    };
+
+    const flattenTree = (files, parentPath = "", level = 0, isParentVisible = true) => {
+        const output = [];
+        const stack = [];
+        for (let i = files.length - 1; i >= 0; i--) {
+            stack.push({ item: files[i], level, isParentVisible, parentPath, highlight: false });
+        }
+        while (stack.length) {
+            const { item, level, isParentVisible, parentPath, highlight } = stack.pop();
+            const directoryKey = prefixPath("", item.fullPath || `${parentPath}/${item.name}`);
+            const isDir = item.type === "directory";
+            const isOpen = Boolean(openedDirectories[directoryKey] && item.files);
+            const isVisible = isParentVisible && (isRootOpen || parentPath === "");
+            const shouldHighlight = highlight || (isDir && isOpen);
+            output.push({
+                id: directoryKey,
+                name: item.name,
+                type: item.type,
+                fullPath: directoryKey,
+                level,
+                isVisible,
+                isOpen: isDir ? isOpen : false,
+                handle: item.handle,
+                highlight: shouldHighlight
+            });
+            if (isDir && isOpen && item.files && item.files.length > 0) {
+                for (let i = item.files.length - 1; i >= 0; i--) {
+                    stack.push({
+                        item: item.files[i],
+                        level: level + 1,
+                        isParentVisible: isVisible && isOpen,
+                        parentPath: directoryKey,
+                        highlight: shouldHighlight
+                    });
+                }
+            }
+        }
+        return output;
+    };
+
+    const flattenSearchResults = (resultsByFile, collapsedMap) => {
+        const output = [];
+        Object.entries(resultsByFile).forEach(([filePath, results]) => {
+            const isCollapsed = collapsedMap[filePath] || false;
+            output.push({
+                type: "directory",
+                fullPath: filePath,
+                level: 0,
+                isVisible: true,
+                isOpen: !isCollapsed
+            });
+            if (!isCollapsed)
+                results.forEach((res) => output.push({
+                    type: "file",
+                    fullPath: filePath,
+                    level: 1,
+                    isVisible: true,
+                    lineNumber: res.lineNumber,
+                    lineContent: res.lineContent
+                }));
+        });
+        return output;
+    };
+
+    const tabPatch = (paneIndex, tabId, patch) =>
+        setPanes((prev) => {
+            const next = [...prev];
+            next[paneIndex].openedTabs = next[paneIndex].openedTabs.map((t) => (t.id === tabId ? { ...t, ...patch } : t));
+            return next;
+        });
+
+    const hydratePathDeep = useCallback(async (path) => {
+        if (!rootDirectoryHandle || !rootDirectoryName) return;
+        if (!path.startsWith(rootDirectoryName)) return;
+        const parts = path.split("/").filter(Boolean);
+        if (parts[0] !== rootDirectoryName) return;
+        let currentTree = repositoryFilesRef.current;
+        const ensureLoaded = async (nodePath) => {
+            const node = findDirNode(currentTree, nodePath);
+            if (node && node.files === undefined && node.handle) {
+                try {
+                    const children = await loadDirectoryContents(node.handle, node.fullPath);
+                    currentTree = updateTreeWithDirectoryContents(currentTree, nodePath, children);
+                    repositoryFilesRef.current = currentTree;
+                    setRepositoryFiles(currentTree);
+                } catch { }
+            }
+        };
+        await ensureLoaded(rootDirectoryName);
+        let currentPath = parts[0];
+        for (let i = 1; i < parts.length; i++) {
+            const parentPath = currentPath;
+            await ensureLoaded(parentPath);
+            currentPath = `${currentPath}/${parts[i]}`;
+            await ensureLoaded(currentPath);
+        }
+    }, [rootDirectoryHandle, rootDirectoryName]);
+
+    const hydrateAllOpenedDirectories = useCallback(async () => {
+        if (!rootDirectoryHandle || !rootDirectoryName) return;
+        const paths = Object.keys(openedDirectoriesRef.current).filter((p) => openedDirectoriesRef.current[p]).sort((a, b) => a.split("/").length - b.split("/").length);
+        for (const p of paths) {
+            try {
+                await hydratePathDeep(p);
+            } catch { }
+        }
+    }, [rootDirectoryHandle, rootDirectoryName, hydratePathDeep]);
+
+    const flattenedDirectoryList = useMemo(() => {
+        if (!rootDirectoryName) return [];
+        const filteredTree = searchQuery ? filterTreeBySearch(repositoryFiles, searchQuery) : repositoryFiles;
+        return flattenTree(filteredTree);
+    }, [repositoryFiles, openedDirectories, isRootOpen, rootDirectoryName, searchQuery]);
+
+    const flattenedSearchList = useMemo(() => {
+        if (!globalSearchResults.length) return [];
+        const resultsByFile = globalSearchResults.reduce((acc, r) => {
+            (acc[r.filePath] ??= []).push(r);
+            return acc;
+        }, {});
+        return flattenSearchResults(resultsByFile, collapsedFiles);
+    }, [globalSearchResults, collapsedFiles]);
+
+    const isActiveTabCodeFile = useMemo(() => {
+        const currentPane = panes[activePaneIndex];
+        if (!currentPane || !currentPane.activeTabId) return true;
+        const currentTab = currentPane.openedTabs.find((t) => t.id === currentPane.activeTabId);
+        if (!currentTab) return true;
+        const fileExt = currentTab.name.split(".").pop()?.toLowerCase() || "";
+        return (!currentTab.isMedia && !currentTab.isAccount) && ![...TEXT_EXTENSIONS, ...TABULAR_EXTENSIONS, ...PRESENTATION_EXTENSIONS].includes(fileExt);
+    }, [panes, activePaneIndex]);
+
+    const terminalAvailable = typeof window.dinolabsOpenTerminal === "function";
+
+    const handleOpenTerminal = async () => {
+        if (!terminalAvailable) return;
+        try {
+            await window.dinolabsOpenTerminal(rootDirectoryHandle || null);
+        } catch { }
+    };
+
+    const handleLoadRepository = async () => {
+        const hasUnsavedChanges = Object.values(unsavedChanges).some(Boolean);
+
+        if (hasUnsavedChanges) {
+            const result = await guardedShowDialog({
+                title: "Unsaved Changes",
+                message: "You have unsaved changes in open files. Loading a new directory will close all files and you will lose your unsaved changes. Are you sure you want to continue?",
+                showCancel: true
+            });
+            if (result === null) return;
+        }
+
+        try {
+            setIsNavigatorLoading(true);
+            const directoryHandle = await window.showDirectoryPicker();
+            await loadRepositoryFromHandle(directoryHandle);
+        } catch { } finally {
+            setIsNavigatorLoading(false);
+        }
+    };
+
+    const loadRepositoryFromHandle = async (directoryHandle) => {
+        const rootName = directoryHandle.name;
+
+        setPanes([{ openedTabs: [], activeTabId: null }]);
+        setActivePaneIndex(0);
+        setUnsavedChanges({});
+        setOriginalContents({});
+        setModifiedContents({});
+        setPaneWidths({ pane1: 50, pane2: 50 });
+
+        setRootDirectoryHandle(directoryHandle);
+        setRootDirectoryName(rootName);
+        setRepositoryFiles(await loadDirectoryContents(directoryHandle, rootName));
+        setIsRootOpen(true);
+        setOpenedDirectories((prev) => ({ ...prev, [rootName]: true }));
+    };
+
+    useEffect(() => {
+        if (typeof window.dinolabsHandleForRecent !== "function") return undefined;
+        const consume = async (item) => {
+            if (!item) return;
+            window.__dinolabsPendingOpen = null;
+            const handle = window.dinolabsHandleForRecent(item);
+            if (!handle) return;
+            try {
+                setIsNavigatorLoading(true);
+                if (item.kind === "directory") {
+                    await loadRepositoryFromHandle(handle);
+                } else {
+                    await openFile(handle, handle.name);
+                }
+            } catch { } finally {
+                setIsNavigatorLoading(false);
+            }
+        };
+        const onRecent = (event) => { consume(event.detail); };
+        window.addEventListener("dinolabs-open-recent", onRecent);
+        consume(window.__dinolabsPendingOpen);
+        return () => window.removeEventListener("dinolabs-open-recent", onRecent);
+    }, []);
+
+    const handleLoadFile = async () => {
+        try {
+            const [fileHandle] = await window.showOpenFilePicker({ multiple: false });
+            openFile(fileHandle, fileHandle.name);
+        } catch { }
+    };
+
+    const toggleDirectory = async (directoryKey) => {
+        const currentlyOpen = openedDirectories[directoryKey];
+        setOpenedDirectories((prev) => ({ ...prev, [directoryKey]: !prev[directoryKey] }));
+        if (currentlyOpen) return;
+        const findNodeInner = (nodes) => {
+            for (let node of nodes) {
+                if (node.fullPath === directoryKey) return node;
+                if (node.type === "directory" && node.files) {
+                    const res = findNodeInner(node.files);
+                    if (res) return res;
+                }
+            }
+            return null;
+        };
+        const node = findNodeInner(repositoryFiles);
+        if (node && node.files === undefined && node.handle) {
+            const children = await loadDirectoryContents(node.handle, node.fullPath);
+            setRepositoryFiles((prevTree) => updateTreeWithDirectoryContents(prevTree, directoryKey, children));
+        }
+    };
+
+    const openFile = async (fileHandle, fileName, fullPath = null) => {
+        const fileId = canonicalTabId(fullPath || fileName);
+        const { language, category } = getFileTypeInfo(fileName);
+        const isInSplitView = panes.length > 1 && panes.every(pane => pane.openedTabs.length > 0);
+        const isMedia = ["image", "video", "audio", "pdf", "threeD"].includes(category);
+        const isTextFile = TEXT_EXTENSIONS.includes(fileName.split(".").pop()?.toLowerCase() || "");
+        const isTabularFile = TABULAR_EXTENSIONS.includes(fileName.split(".").pop()?.toLowerCase() || "");
+        const isPresentationFile = PRESENTATION_EXTENSIONS.includes(fileName.split(".").pop()?.toLowerCase() || "");
+        const isCodeFile = !isMedia && !isTextFile && !isTabularFile && !isPresentationFile;
+        if (isInSplitView && !isCodeFile) {
+            return;
+        }
+        const existing = locateTab(panes, fileId);
+        if (existing) {
+            setPanes((prev) => {
+                const next = [...prev];
+                next[existing.paneIndex].activeTabId = existing.tab.id;
+                return next;
+            });
+            setActivePaneIndex(existing.paneIndex);
+            return;
+        }
+        const isBinaryTabular = WORKBOOK_EXTENSIONS.includes(fileName.split(".").pop()?.toLowerCase() || "");
+
+        if (isBinaryTabular && fileHandle) {
+            try {
+                const probe = await fileHandle.getFile();
+
+                const sheetBytes = await largestSheetBytes(probe);
+
+                if (sheetBytes !== null && sheetBytes > SHEET_UNCOMPRESSED_CEILING) {
+                    await showDialog({
+                        title: "Workbook Too Large",
+                        message: `The largest sheet in ${fileName} holds ${(sheetBytes / 1048576).toFixed(0)} MB of uncompressed data, above the ${(SHEET_UNCOMPRESSED_CEILING / 1048576).toFixed(0)} MB a browser tab can parse without stalling. Export the sheet to CSV and open that instead, which has no size limit.`
+                    });
+
+                    return;
+                }
+
+                if (probe.size > WORKBOOK_HARD_BYTE_CEILING) {
+                    await showDialog({
+                        title: "Workbook Too Large",
+                        message: `${fileName} is ${(probe.size / 1048576).toFixed(1)} MB. Spreadsheet formats have to be decompressed and parsed entirely in memory, so they are capped at ${(WORKBOOK_HARD_BYTE_CEILING / 1048576).toFixed(0)} MB here. Export the sheet to CSV and open that instead, which has no size limit.`
+                    });
+
+                    return;
+                }
+            } catch { }
+        }
+
+        let content = null;
+        let finalHandle = fileHandle;
+        const isPackagedText = PACKAGED_TEXT_EXTENSIONS.includes(fileName.split(".").pop()?.toLowerCase() || "");
+
+        if (!isMedia && !isBinaryTabular && !isPackagedText && !isPresentationFile) {
+            try {
+                if (!fileHandle) throw new Error("No handle.");
+                const file = await fileHandle.getFile();
+                content = modifiedContents[fileId] || (await file.text());
+            } catch {
+                content = category === "code" ? "Error reading file content." : "The content of this file type could not be automatically detected. Try to open it anyway.";
+                finalHandle = null;
+            }
+        }
+        const newTab = {
+            id: fileId,
+            name: fileName,
+            fileHandle: finalHandle,
+            language,
+            isMedia,
+            content,
+            forceOpen: false,
+            searchTerm: "",
+            replaceTerm: "",
+            searchPositions: [],
+            currentSearchIndex: -1,
+            isSearchOpen: false,
+            isReplaceOpen: false,
+            isSingleFile: !fileId.includes("/"),
+            isAccount: false,
+            connector: fileHandle && fileHandle.connector ? fileHandle.connector : null
+        };
+        setPanes((prev) => {
+            const next = [...prev];
+            const filteredTabs = next[activePaneIndex].openedTabs.filter(tab => tab.id !== fileId);
+            next[activePaneIndex].openedTabs = [...filteredTabs, newTab];
+            next[activePaneIndex].activeTabId = newTab.id;
+            return next;
+        });
+        setOriginalContents((p) => ({ ...p, [fileId]: content }));
+        setUnsavedChanges((p) => ({ ...p, [fileId]: false }));
+        if (!fullPath) saveHandle(fileId, finalHandle);
+    };
+
+    const openAccount = () => {
+        const fileId = "account";
+        const existingPaneIndex = panes.findIndex((pane) => pane.openedTabs.some((tab) => tab.id === fileId));
+        if (existingPaneIndex !== -1) {
+            setActivePaneIndex(existingPaneIndex);
+            setPanes((prev) => {
+                const next = [...prev];
+                next[existingPaneIndex].activeTabId = fileId;
+                return next;
+            });
+            return;
+        }
+        const newTab = {
+            id: fileId,
+            name: "Account",
+            fileHandle: null,
+            language: "",
+            isMedia: false,
+            content: "",
+            forceOpen: false,
+            searchTerm: "",
+            replaceTerm: "",
+            searchPositions: [],
+            currentSearchIndex: -1,
+            isSearchOpen: false,
+            isReplaceOpen: false,
+            isSingleFile: true,
+            isAccount: true
+        };
+        setPanes((prev) => {
+            const next = [...prev];
+            next[activePaneIndex].openedTabs.push(newTab);
+            next[activePaneIndex].activeTabId = newTab.id;
+            return next;
+        });
+    };
+
+    const handleFileClick = (file) => openFile(file.handle, file.name, file.fullPath);
+
+    const closeTab = async (paneIndex, tabId) => {
+        if (unsavedChanges[tabId]) {
+            const r = await guardedShowDialog({
+                title: "System Alert",
+                message: "You have unsaved changes in this file. Are you sure you want to close it?",
+                showCancel: true
+            });
+            if (r === null) return;
+        }
+        setPanes((prev) => {
+            let next = [...prev];
+            const pane = next[paneIndex];
+            pane.openedTabs = pane.openedTabs.filter((tab) => tab.id !== tabId);
+            if (pane.activeTabId === tabId) pane.activeTabId = pane.openedTabs[0]?.id ?? null;
+            if (!pane.openedTabs.length) {
+                next.splice(paneIndex, 1);
+                if (activePaneIndex >= paneIndex && activePaneIndex > 0) setActivePaneIndex(activePaneIndex - 1);
+                if (!next.length) next = [{ openedTabs: [], activeTabId: null }];
+                if (next.length === 1) setPaneWidths({ pane1: 100, pane2: 0 });
+            }
+            return next;
+        });
+        setUnsavedChanges((p) => {
+            const u = { ...p };
+            delete u[tabId];
+            return u;
+        });
+        setOriginalContents((p) => {
+            const u = { ...p };
+            delete u[tabId];
+            return u;
+        });
+        setModifiedContents((p) => {
+            const u = { ...p };
+            delete u[tabId];
+            return u;
+        });
+    };
+
+    const switchTab = (paneIndex, tabId) => {
+        setPanes((prev) => {
+            const next = [...prev];
+            next[paneIndex].activeTabId = tabId;
+            return next;
+        });
+        setActivePaneIndex(paneIndex);
+    };
+
+    const splitTab = () => {
+        setPanes((prev) => {
+            if (prev.length >= 2) return prev;
+            const currentPane = prev[activePaneIndex];
+            const currentTabIndex = currentPane.openedTabs.findIndex((t) => t.id === currentPane.activeTabId);
+            const currentTab = currentPane.openedTabs[currentTabIndex];
+            if (!currentTab) return prev;
+            const fileExt = currentTab.name.split(".").pop()?.toLowerCase() || "";
+            const isCodeFile = (!currentTab.isMedia && !currentTab.isAccount) && ![...TEXT_EXTENSIONS, ...TABULAR_EXTENSIONS].includes(fileExt);
+            if (!isCodeFile) return prev;
+            const tabCopy = {
+                ...currentTab,
+                forceOpen: currentTab.forceOpen || unsavedChanges[currentTab.id]
+            };
+            const remainingTabs = currentPane.openedTabs.filter((_, index) => index !== currentTabIndex);
+            const newActiveTabId = remainingTabs.length > 0
+                ? (remainingTabs[Math.min(currentTabIndex, remainingTabs.length - 1)]?.id || remainingTabs[0]?.id)
+                : null;
+            const updatedCurrentPane = {
+                ...currentPane,
+                openedTabs: remainingTabs,
+                activeTabId: newActiveTabId
+            };
+            const newPane = {
+                openedTabs: [tabCopy],
+                activeTabId: tabCopy.id
+            };
+            setPaneWidths({ pane1: 50, pane2: 50 });
+            const updatedPanes = [...prev];
+            updatedPanes[activePaneIndex] = updatedCurrentPane;
+            updatedPanes.push(newPane);
+            return updatedPanes;
+        });
+        setActivePaneIndex(1);
+    };
+
+    const handleForceOpenTab = (paneIndex, tabId) => tabPatch(paneIndex, tabId, { forceOpen: true });
+
+    const handleDragStart = (e, sourcePaneIndex, tabId) => e.dataTransfer.setData("text/plain", JSON.stringify({ sourcePaneIndex, tabId }));
+
+    const handleDrop = (e, targetPaneIndex) => {
+        e.preventDefault();
+        const { sourcePaneIndex, tabId } = JSON.parse(e.dataTransfer.getData("text/plain"));
+        if (sourcePaneIndex === targetPaneIndex) return;
+        const currentPanes = panesRef.current;
+        const next = [...currentPanes];
+        const sourcePane = next[sourcePaneIndex];
+        const targetPane = next[targetPaneIndex];
+        const tabToMove = sourcePane.openedTabs.find((t) => t.id === tabId);
+        if (!tabToMove) return;
+        sourcePane.openedTabs = sourcePane.openedTabs.filter((t) => t.id !== tabId);
+        if (sourcePane.activeTabId === tabId) sourcePane.activeTabId = sourcePane.openedTabs[0]?.id ?? null;
+        const existingTab = targetPane.openedTabs.find((t) => t.id === tabId);
+        if (!existingTab) {
+            targetPane.openedTabs.push(tabToMove);
+            targetPane.activeTabId = tabId;
+        } else targetPane.activeTabId = existingTab.id;
+        let newActivePaneIndex = activePaneIndex;
+        if (!sourcePane.openedTabs.length) {
+            next.splice(sourcePaneIndex, 1);
+            if (activePaneIndex === sourcePaneIndex)
+                newActivePaneIndex = targetPaneIndex < sourcePaneIndex ? targetPaneIndex : targetPaneIndex - 1;
+            else if (activePaneIndex > sourcePaneIndex) newActivePaneIndex = activePaneIndex - 1;
+            if (next.length === 1) setPaneWidths({ pane1: 100, pane2: 0 });
+        }
+        if (!next.length) {
+            next.push({ openedTabs: [], activeTabId: null });
+            setPaneWidths({ pane1: 100, pane2: 0 });
+            newActivePaneIndex = 0;
+        }
+        setPanes(next);
+        setActivePaneIndex(newActivePaneIndex);
+    };
+
+    const handleEdit = (paneIndex, tabId, _prevState, newState) => {
+        if (!newState || newState.fullCode === undefined) {
+            setUnsavedChanges((p) => ({ ...p, [tabId]: true }));
+            return;
+        }
+
+        const originalContent = originalContents[tabId];
+        const normalize = (value) => (typeof value === "string" ? value.replace(/\r\n/g, "\n") : value);
+        setUnsavedChanges((p) => ({ ...p, [tabId]: normalize(newState.fullCode) !== normalize(originalContent) }));
+        tabPatch(paneIndex, tabId, { content: newState.fullCode });
+        setModifiedContents((p) => ({ ...p, [tabId]: newState.fullCode }));
+    };
+
+    const handleSave = (paneIndex, tabId, newFullCode) => {
+        setOriginalContents((p) => ({ ...p, [tabId]: newFullCode }));
+        setUnsavedChanges((p) => ({ ...p, [tabId]: false }));
+        setModifiedContents((p) => {
+            const u = { ...p };
+            delete u[tabId];
+            return u;
+        });
+    };
+
+    const performGlobalSearch = async () => {
+        if (isGlobalSearching) {
+            needsSearchRef.current = true;
+            return;
+        }
+        if (!globalSearchQuery || !rootDirectoryHandle) {
+            setGlobalSearchResults([]);
+            setPanes((prev) =>
+                prev.map((pane) => ({
+                    ...pane,
+                    openedTabs: pane.openedTabs.map((tab) => ({ ...tab, searchTerm: "" }))
+                }))
+            );
+            return;
+        }
+        const myToken = ++searchTokenRef.current;
+        activeSearchCount.current++;
+        setIsGlobalSearching(true);
+
+        try {
+            const total = await countSearchableFiles(rootDirectoryHandle);
+
+            if (myToken === searchTokenRef.current) {
+                setGlobalOperationProgress({ type: "search", current: 0, total });
+            }
+
+            const results = [];
+            const q = isCaseSensitiveSearch ? globalSearchQuery : globalSearchQuery.toLowerCase();
+            const progressCounter = { current: 0 };
+            const updateFrequency = Math.max(1, Math.min(5, Math.floor(total / 10)));
+            const tasks = [];
+            for await (const file of walkSearchableFiles(rootDirectoryHandle, rootDirectoryName)) {
+                tasks.push(pLimiter(async () => {
+                    if (myToken !== searchTokenRef.current) return;
+                    try {
+                        const hasModified = file.fullPath in modifiedContents;
+                        if (hasModified) {
+                            const content = modifiedContents[file.fullPath];
+                            const lines = content.split("\n");
+                            lines.forEach((line, idx) => {
+                                const hay = isCaseSensitiveSearch ? line : line.toLowerCase();
+                                if (hay.includes(q)) results.push({ filePath: file.fullPath, lineNumber: idx + 1, lineContent: line });
+                            });
+                        } else if (file.handle) {
+                            const fileObj = await file.handle.getFile();
+                            const content = await fileObj.text();
+                            const lines = content.split("\n");
+                            lines.forEach((line, idx) => {
+                                const hay = isCaseSensitiveSearch ? line : line.toLowerCase();
+                                if (hay.includes(q)) results.push({ filePath: file.fullPath, lineNumber: idx + 1, lineContent: line });
+                            });
+                        }
+                    } catch { }
+                    progressCounter.current++;
+                    if (myToken === searchTokenRef.current && (progressCounter.current % updateFrequency === 0 || progressCounter.current === total)) {
+                        setGlobalOperationProgress(p => ({ ...p, current: progressCounter.current }));
+                    }
+                }));
+            }
+            await Promise.all(tasks);
+            if (myToken !== searchTokenRef.current) return;
+            results.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.lineNumber - b.lineNumber);
+            setGlobalSearchResults(results);
+            setPanes((prev) =>
+                prev.map((pane) => ({
+                    ...pane,
+                    openedTabs: pane.openedTabs.map((tab) => ({ ...tab, searchTerm: globalSearchQuery }))
+                }))
+            );
+        } finally {
+            activeSearchCount.current--;
+            if (activeSearchCount.current === 0) {
+                setIsGlobalSearching(false);
+                setGlobalOperationProgress(null);
+                if (needsSearchRef.current) {
+                    needsSearchRef.current = false;
+                    performGlobalSearch();
+                }
+            }
+        }
+    };
+
+    const performGlobalReplace = async () => {
+        if (!globalSearchQuery || !rootDirectoryHandle || isGlobalReplacing) return;
+        setIsGlobalReplacing(true);
+        try {
+            const regex = new RegExp(escapeRegExp(globalSearchQuery), isCaseSensitiveSearch ? "g" : "gi");
+            let totalMatches = 0;
+            const filesWithMatches = [];
+            const progressCounter = { current: 0 };
+            const total = await countSearchableFiles(rootDirectoryHandle);
+            setGlobalOperationProgress({ type: "count", current: 0, total });
+            const updateFrequency = Math.max(1, Math.min(5, Math.floor(total / 10)));
+            const countTasks = [];
+            for await (const file of walkSearchableFiles(rootDirectoryHandle, rootDirectoryName)) {
+                countTasks.push(pLimiter(async () => {
+                    let count = 0;
+                    try {
+                        const hasModified = file.fullPath in modifiedContents;
+                        if (hasModified) {
+                            const content = modifiedContents[file.fullPath];
+                            count = (content.match(regex) || []).length;
+                        } else if (file.handle) {
+                            const fileObj = await file.handle.getFile();
+                            const content = await fileObj.text();
+                            count = (content.match(regex) || []).length;
+                        }
+                        if (count > 0) {
+                            filesWithMatches.push({ file, matchCount: count });
+                            totalMatches += count;
+                        }
+                    } catch { }
+                    progressCounter.current++;
+                    if (progressCounter.current % updateFrequency === 0 || progressCounter.current === total) {
+                        setGlobalOperationProgress(p => ({ ...p, current: progressCounter.current }));
+                    }
+                }));
+            }
+            await Promise.all(countTasks);
+            if (!totalMatches) {
+                setGlobalOperationProgress(null);
+                return;
+            }
+            const msg = `Are you sure you want to replace ${totalMatches} ${totalMatches === 1 ? "occurrence" : "occurrences"} of "${globalSearchQuery}" across ${filesWithMatches.length} ${filesWithMatches.length === 1 ? "file" : "files"}?`;
+            const ok = await guardedShowDialog({ title: "System Alert", message: msg, showCancel: true });
+            if (ok === null) return;
+            setGlobalOperationProgress({ type: "replace", current: 0, total: filesWithMatches.length });
+            const progressCounterReplace = { current: 0 };
+            const replaceUpdateFreq = Math.max(1, Math.min(3, Math.floor(filesWithMatches.length / 5)));
+            const replaceTasks = [];
+            const allOpenFiles = [];
+            panes.forEach(pane => {
+                pane.openedTabs.forEach(tab => {
+                    if (!tab.isMedia && !tab.isAccount) {
+                        allOpenFiles.push(tab.id);
+                    }
+                });
+            });
+            for (const { file } of filesWithMatches) {
+                replaceTasks.push(pLimiter(async () => {
+                    const hasModified = file.fullPath in modifiedContents;
+                    const isOpenFile = allOpenFiles.includes(file.fullPath);
+                    let newContent = null;
+                    let changed = false;
+                    try {
+                        if (hasModified) {
+                            let content = modifiedContents[file.fullPath];
+                            newContent = content.replace(regex, globalReplaceTerm);
+                            changed = newContent !== content;
+                        } else if (file.handle) {
+                            if (isOpenFile) {
+                                const fileObj = await file.handle.getFile();
+                                const originalContent = await fileObj.text();
+                                newContent = originalContent.replace(regex, globalReplaceTerm);
+                                changed = newContent !== originalContent;
+                            } else {
+                                const fileObj = await file.handle.getFile();
+                                const originalContent = await fileObj.text();
+                                newContent = originalContent.replace(regex, globalReplaceTerm);
+                                changed = newContent !== originalContent;
+                                if (changed) {
+                                    const writable = await file.handle.createWritable({ keepExistingData: false });
+                                    await writable.write(newContent);
+                                    await writable.close();
+                                }
+                            }
+                        }
+                    } catch { }
+                    progressCounterReplace.current++;
+                    if (progressCounterReplace.current % replaceUpdateFreq === 0 || progressCounterReplace.current === filesWithMatches.length) {
+                        setGlobalOperationProgress(p => ({ ...p, current: progressCounterReplace.current }));
+                    }
+                    if (changed && (hasModified || isOpenFile)) {
+                        return { fullPath: file.fullPath, newContent, isOpenFile };
+                    }
+                    return null;
+                }));
+            }
+            const changedFiles = (await Promise.all(replaceTasks)).filter(Boolean);
+            const updatedFiles = {};
+            const openFileUpdates = {};
+            changedFiles.forEach(c => {
+                updatedFiles[c.fullPath] = c.newContent;
+                if (c.isOpenFile) {
+                    openFileUpdates[c.fullPath] = c.newContent;
+                }
+            });
+            setModifiedContents((p) => ({ ...p, ...updatedFiles }));
+            setUnsavedChanges((p) => {
+                const next = { ...p };
+                for (const path in updatedFiles) next[path] = true;
+                return next;
+            });
+            setOriginalContents((p) => {
+                const next = { ...p };
+                for (const path in openFileUpdates) {
+                    next[path] = openFileUpdates[path];
+                }
+                return next;
+            });
+            setPanes((prev) =>
+                prev.map((pane) => ({
+                    ...pane,
+                    openedTabs: pane.openedTabs.map((tab) => (updatedFiles[tab.id] ? { ...tab, content: updatedFiles[tab.id] } : tab))
+                }))
+            );
+            for (const { file } of filesWithMatches) {
+                const isOpenFile = allOpenFiles.includes(file.fullPath);
+                if (isOpenFile && file.fullPath in openFileUpdates) {
+                    try {
+                        const writable = await file.handle.createWritable({ keepExistingData: false });
+                        await writable.write(openFileUpdates[file.fullPath]);
+                        await writable.close();
+                    } catch { }
+                }
+            }
+            performGlobalSearch();
+        } finally {
+            setIsGlobalReplacing(false);
+            setGlobalOperationProgress(null);
+        }
+    };
+
+    const toggleCollapse = (filePath) => setCollapsedFiles((p) => ({ ...p, [filePath]: !p[filePath] }));
+
+    const handleSearchSuggestionClick = async (filePath, lineNumber) => {
+        const prefixedFilePath = canonicalTabId(filePath);
+        const located = locateTab(panes, prefixedFilePath);
+        if (located) {
+            const { paneIndex: targetPaneIndex, tab: targetTab } = located;
+            setPanes((prev) => {
+                const next = [...prev];
+                next[targetPaneIndex].openedTabs = next[targetPaneIndex].openedTabs.map((t) =>
+                    t.id === targetTab.id ? { ...t, searchTerm: globalSearchQuery, isSearchOpen: false } : t
+                );
+                next[targetPaneIndex].activeTabId = targetTab.id;
+                return next;
+            });
+            setActivePaneIndex(targetPaneIndex);
+            const ref = editorRefs.current[targetPaneIndex][targetTab.id];
+            ref?.current?.jumpToLine?.(lineNumber);
+            return;
+        }
+        try {
+            let fileHandle;
+            try {
+                const rel = prefixedFilePath.replace(`${rootDirectoryName}/`, "");
+                fileHandle = await resolveHandleFromPath(rootDirectoryHandle, rel);
+            } catch { }
+            if (!fileHandle) {
+                const [pickedFile] = await window.showOpenFilePicker({ multiple: false, suggestedName: prefixedFilePath.split("/").pop() });
+                if (!pickedFile) return;
+                fileHandle = pickedFile;
+            }
+            const fileData = await fileHandle.getFile();
+            const resultExt = prefixedFilePath.split(".").pop()?.toLowerCase() || "";
+            const content = WORKBOOK_EXTENSIONS.includes(resultExt) || PACKAGED_TEXT_EXTENSIONS.includes(resultExt) ? null : await fileData.text();
+            const fileTypeInfo = getFileTypeInfo(prefixedFilePath);
+            const newTabId = canonicalTabId(prefixedFilePath);
+            const existingPaneIndex = (locateTab(panes, newTabId) || { paneIndex: -1 }).paneIndex;
+            if (existingPaneIndex !== -1) {
+                const existingTab = panes[existingPaneIndex].openedTabs.find((tab) => canonicalTabId(tab.id) === newTabId);
+                setActivePaneIndex(existingPaneIndex);
+                setPanes((prev) => {
+                    const next = [...prev];
+                    next[existingPaneIndex].openedTabs = next[existingPaneIndex].openedTabs.map((t) =>
+                        t.id === newTabId ? { ...t, searchTerm: globalSearchQuery, isSearchOpen: false } : t
+                    );
+                    next[existingPaneIndex].activeTabId = existingTab.id;
+                    return next;
+                });
+                const ref = editorRefs.current[existingPaneIndex][existingTab.id];
+                ref?.current?.jumpToLine?.(lineNumber);
+                return;
+            }
+            const newTab = {
+                id: newTabId,
+                name: prefixedFilePath.split("/").pop(),
+                content,
+                language: fileTypeInfo.language || "Unknown",
+                forceOpen: false,
+                searchTerm: globalSearchQuery,
+                replaceTerm: "",
+                searchPositions: [],
+                currentSearchIndex: -1,
+                isSearchOpen: false,
+                isReplaceOpen: false,
+                fileHandle,
+                fullPath: prefixedFilePath,
+                isMedia: ["image", "video", "audio"].includes(fileTypeInfo.category),
+                isAccount: false
+            };
+            setPanes((prev) => {
+                const next = [...prev];
+                next[activePaneIndex].openedTabs.push(newTab);
+                next[activePaneIndex].activeTabId = newTab.id;
+                return next;
+            });
+            setOriginalContents((p) => ({ ...p, [newTabId]: content }));
+            setUnsavedChanges((p) => ({ ...p, [newTabId]: false }));
+            setTimeout(() => {
+                const ref = editorRefs.current[activePaneIndex][newTab.id];
+                ref?.current?.jumpToLine?.(lineNumber);
+            }, 100);
+        } catch { }
+    };
+
+    const copyRelativePathToClipboard = () => {
+        if (!contextMenuTarget) return;
+        let { path, type } = contextMenuTarget;
+        let relativePath = path.replace(rootDirectoryName + "/", "");
+        if (relativePath === rootDirectoryName) relativePath = "/";
+        if (type === "directory" && !relativePath.endsWith("/")) relativePath += "/";
+        navigator.clipboard.writeText(relativePath).finally(() => setContextMenuVisible(false));
+    };
+
+    const handleCopy = () => {
+        if (!contextMenuTarget) return;
+        setCopiedItem({ type: contextMenuTarget.type, path: contextMenuTarget.path });
+        setContextMenuVisible(false);
+    };
+
+    const pasteOrMoveCommonOptimistic = ({ type, from, toParent, toPath, overwrite }, isMove) => {
+        setRepositoryFiles((prev) => {
+            let working = prev;
+            if (overwrite) working = removeNodeFromTree(working, toPath).nextTree;
+            const sourceNode = findNode(working, from);
+            if (!sourceNode) return prev;
+            const newNode = type === "file"
+                ? updateSingleFileNodePath(sourceNode, toPath)
+                : cloneNodeWithNewPrefix(sourceNode, from, toPath);
+            let updatedTree = insertNodeAtPath(working, toParent, newNode, rootDirectoryName);
+            if (isMove) {
+                updatedTree = removeNodeFromTree(updatedTree, from).nextTree;
+            }
+            return updatedTree;
+        });
+    };
+
+    const removeOpenedForPath = (path) => {
+        setOpenedDirectories(prev => {
+            const next = { ...prev };
+            const normPath = normalizePath(path);
+            const prefix = normPath + "/";
+            for (let key in next) {
+                const normKey = normalizePath(key);
+                if (normKey === normPath || normKey.startsWith(prefix)) {
+                    delete next[key];
+                }
+            }
+            return next;
+        });
+    };
+
+    const remapOpenedDirectories = (oldPath, newPath, isCopy) => {
+        const oldNorm = normalizePath(oldPath);
+        const newNorm = normalizePath(newPath);
+        const oldPrefix = oldNorm + "/";
+        setOpenedDirectories(prev => {
+            const next = { ...prev };
+            for (let key in prev) {
+                const normKey = normalizePath(key);
+                if (normKey === oldNorm || normKey.startsWith(oldPrefix)) {
+                    const suffix = normKey === oldNorm ? "" : normKey.slice(oldNorm.length + 1);
+                    const newKey = newNorm + (suffix ? "/" + suffix : "");
+                    next[newKey] = prev[key];
+                    if (!isCopy) delete next[key];
+                }
+            }
+            return next;
+        });
+    };
+
+    const handlePaste = async (e) => {
+        e?.preventDefault?.();
+        e?.stopPropagation?.();
+        if (!copiedItem || !contextMenuTarget || !["directory", "navigator"].includes(contextMenuTarget.type)) return;
+        if (fsOpLoading) return;
+        const targetDirHandle = await getDirectoryHandleByPath(contextMenuTarget.path);
+        if (!targetDirHandle) return;
+        const itemName = copiedItem.path.split("/").pop();
+        const targetPath = normalizePath(`${contextMenuTarget.path}/${itemName}`);
+        if (samePath(targetPath, copiedItem.path)) return;
+        const exists = await fsEntryExists(targetDirHandle, itemName, copiedItem.type);
+        let overwrite = false;
+        if (exists) {
+            const r = await guardedShowDialog({
+                title: "Overwrite?",
+                message: `An item named "${itemName}" already exists. Do you want to overwrite it?`,
+                showCancel: true
+            });
+            if (r === null) return;
+            overwrite = true;
+        }
+        await withFsOverlay(async () => {
+            pasteOrMoveCommonOptimistic({ type: copiedItem.type, from: copiedItem.path, toParent: contextMenuTarget.path, toPath: targetPath, overwrite }, false);
+            if (overwrite) removeOpenedForPath(targetPath);
+            remapOpenedDirectories(copiedItem.path, targetPath, true);
+            try {
+                if (copiedItem.type === "file") {
+                    const src = await getFileHandleByPath(repositoryFilesRef.current, copiedItem.path);
+                    if (!src) throw new Error("Source file not found.");
+                    const sourceFile = await src.getFile();
+                    await overwriteFileAtomic(targetDirHandle, itemName, sourceFile);
+                } else {
+                    const sourceDirHandle = await getDirectoryHandleByPath(copiedItem.path);
+                    if (!sourceDirHandle) throw new Error("Source directory not found.");
+                    if (overwrite) await overwriteDirectoryAtomic(targetDirHandle, itemName, sourceDirHandle);
+                    else {
+                        const newDirHandle = await targetDirHandle.getDirectoryHandle(itemName, { create: true });
+                        await deepCopyDirectoryFast(sourceDirHandle, newDirHandle);
+                    }
+                }
+            } catch {
+                await guardedShowDialog({
+                    title: "System Alert",
+                    message: "An error occurred while pasting the item.",
+                    showCancel: false
+                });
+            } finally {
+                const srcParent = copiedItem.path.split("/").slice(0, -1).join("/") || rootDirectoryName;
+                await rescanAndSync([srcParent, contextMenuTarget.path]);
+                await hydrateAllOpenedDirectories();
+                setContextMenuVisible(false);
+            }
+        });
+    };
+
+    const createNewFile = async () => {
+        if (!contextMenuTarget) return;
+        const { path, type } = contextMenuTarget;
+        const r = await guardedShowDialog({
+            title: "Create New File",
+            message: "Enter the name of your new file:",
+            inputs: [{ name: "fileName", type: "text", label: "", defaultValue: "" }],
+            showCancel: true
+        });
+        let fileName = r?.fileName;
+        if (!fileName) return;
+        if (!fileName.includes(".")) fileName += ".txt";
+        const targetDirPath = type === "file" ? path.split("/").slice(0, -1).join("/") || rootDirectoryName : path;
+        const dirHandle = await getDirectoryHandleByPath(targetDirPath);
+        if (!dirHandle) return;
+        try {
+            if (await fsEntryExists(dirHandle, fileName, "file")) {
+                await guardedShowDialog({
+                    title: "System Alert",
+                    message: `A file named "${fileName}" already exists in this directory.`,
+                    showCancel: false
+                });
+                return;
+            }
+            await withFsOverlay(async () => {
+                const fullPath = normalizePath(`${targetDirPath}/${fileName}`);
+                const newNode = { name: fileName, type: "file", handle: null, fullPath };
+                setRepositoryFiles((prev) => insertNodeAtPath(prev, targetDirPath, newNode, rootDirectoryName));
+                await dirHandle.getFileHandle(fileName, { create: true });
+                await rescanAndSync([targetDirPath]);
+                setContextMenuVisible(false);
+            });
+        } catch { }
+    };
+
+    const createNewFolder = async () => {
+        if (!contextMenuTarget) return;
+        const { path, type } = contextMenuTarget;
+        const r = await guardedShowDialog({
+            title: "Create New Directory",
+            message: "Enter the name of your new directory:",
+            inputs: [{ name: "folderName", type: "text", label: "", defaultValue: "" }],
+            showCancel: true
+        });
+        const folderName = r?.folderName;
+        if (!folderName) return;
+        const targetDirPath = type === "file" ? path.split("/").slice(0, -1).join("/") || rootDirectoryName : path;
+        const dirHandle = await getDirectoryHandleByPath(targetDirPath);
+        if (!dirHandle) return;
+        try {
+            if (await fsEntryExists(dirHandle, folderName, "directory")) {
+                await guardedShowDialog({
+                    title: "System Alert",
+                    message: `A folder named "${folderName}" already exists in this directory.`,
+                    showCancel: false
+                });
+                return;
+            }
+            await withFsOverlay(async () => {
+                const fp = normalizePath(`${targetDirPath}/${folderName}`);
+                const newNode = { name: folderName, type: "directory", handle: null, fullPath: fp, files: [] };
+                setRepositoryFiles((prev) => insertNodeAtPath(prev, targetDirPath, newNode, rootDirectoryName));
+                await dirHandle.getDirectoryHandle(folderName, { create: true });
+                await rescanAndSync([targetDirPath]);
+                setContextMenuVisible(false);
+            });
+        } catch { }
+    };
+
+    const renameItem = async () => {
+        if (!contextMenuTarget) return;
+        const { type: itemType, path } = contextMenuTarget;
+        if (path === rootDirectoryName) return;
+        const { parent, name: oldName } = splitPath(path);
+        const r = await guardedShowDialog({
+            title: `Rename ${itemType}`,
+            message: `Enter new name for "${oldName}"`,
+            inputs: [{ name: "newName", type: "text", label: "", defaultValue: oldName }],
+            showCancel: true
+        });
+        const newName = r?.newName?.trim();
+        if (!newName || newName === oldName) return setContextMenuVisible(false);
+        const parentDirHandle = await getDirectoryHandleByPath(parent);
+        if (!parentDirHandle) return;
+        const exists = await fsEntryExists(parentDirHandle, newName, itemType === "directory" ? "directory" : "file");
+        let overwrite = false;
+        if (exists) {
+            const res = await guardedShowDialog({
+                title: "Overwrite?",
+                message: `An item named "${newName}" already exists here. Overwrite?`,
+                showCancel: true
+            });
+            if (res === null) return;
+            overwrite = true;
+        }
+        const newFullPath = normalizePath(`${parent}/${newName}`);
+        setRepositoryFiles((prev) => {
+            let w = prev;
+            if (overwrite) w = deleteNodeFromTree(w, newFullPath);
+            if (itemType === "file") {
+                const { nextTree, removedNode } = removeNodeFromTree(w, path);
+                if (!removedNode) return w;
+                return insertNodeAtPath(nextTree, parent, updateSingleFileNodePath(removedNode, newFullPath), rootDirectoryName);
+            }
+            const { nextTree, removedNode } = removeNodeFromTree(w, path);
+            if (!removedNode) return w;
+            return insertNodeAtPath(nextTree, parent, cloneNodeWithNewPrefix(removedNode, path, newFullPath), rootDirectoryName);
+        });
+        if (overwrite) removeOpenedForPath(newFullPath);
+        remapOpenedDirectories(path, newFullPath, false);
+        await withFsOverlay(async () => {
+            try {
+                if (itemType === "file") {
+                    const srcFileHandle = await getFileHandleByPath(repositoryFilesRef.current, path);
+                    if (!srcFileHandle) throw new Error("Source file not found.");
+                    const srcFile = await srcFileHandle.getFile();
+                    await overwriteFileAtomic(parentDirHandle, newName, srcFile);
+                    if (oldName !== newName) {
+                        try {
+                            await parentDirHandle.removeEntry(oldName);
+                        } catch { }
+                    }
+                } else {
+                    const srcDirHandle = await getDirectoryHandleByPath(path);
+                    if (!srcDirHandle) throw new Error("Source directory not found.");
+                    if (overwrite) await overwriteDirectoryAtomic(parentDirHandle, newName, srcDirHandle);
+                    else {
+                        const destDirHandle = await parentDirHandle.getDirectoryHandle(newName, { create: true });
+                        await deepCopyDirectoryFast(srcDirHandle, destDirHandle);
+                        if (oldName !== newName) await parentDirHandle.removeEntry(oldName, { recursive: true });
+                    }
+                }
+            } catch {
+                await guardedShowDialog({
+                    title: "System Alert",
+                    message: "Rename failed.",
+                    showCancel: false
+                });
+            } finally {
+                await rescanAndSync([parent]);
+                await hydrateAllOpenedDirectories();
+                setContextMenuVisible(false);
+            }
+        });
+    };
+
+    const deleteItem = async () => {
+        if (!contextMenuTarget) return;
+        const { type: itemType, path } = contextMenuTarget;
+        const splitted = path.split("/");
+        const itemName = splitted.pop();
+        const parentPath = splitted.join("/");
+        const r = await guardedShowDialog({
+            title: "Confirm Delete",
+            message: `Are you sure you want to delete the ${itemType} "${itemName}"?`,
+            showCancel: true
+        });
+        if (r === null) return;
+        const dirHandle = await getDirectoryHandleByPath(parentPath);
+        if (!dirHandle) return;
+        await withFsOverlay(async () => {
+            setRepositoryFiles((prev) => deleteNodeFromTree(prev, path));
+            removeOpenedForPath(path);
+            try {
+                await dirHandle.removeEntry(itemName, { recursive: itemType === "directory" });
+            } catch { }
+            await rescanAndSync([parentPath]);
+            setContextMenuVisible(false);
+        });
+    };
+
+    const handleContextMenu = (e, target) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!rootDirectoryName) return;
+        setContextMenuVisible(true);
+        setContextMenuPosition({ x: e.clientX, y: e.clientY });
+        setContextMenuTarget(target);
+    };
+
+    const isContextEntry = contextMenuTarget?.type === "file" || contextMenuTarget?.type === "directory";
+    const canPasteIntoContextTarget = Boolean(copiedItem) && (contextMenuTarget?.type === "directory" || contextMenuTarget?.type === "navigator");
+
+    const handleItemDragStart = (e, item) => e.dataTransfer.setData("application/my-app", JSON.stringify({ path: item.fullPath, type: item.type }));
+
+    const handleItemDrop = async (e, targetDirItem) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (fsOpLoading) return;
+        const data = e.dataTransfer.getData("application/my-app");
+        if (!data) return;
+        const { path: sourcePath, type: sourceType } = JSON.parse(data);
+        const targetDirHandle = await getDirectoryHandleByPath(targetDirItem.fullPath);
+        if (!targetDirHandle) return;
+        if (sourceType === "directory" && (targetDirItem.fullPath === sourcePath || targetDirItem.fullPath.startsWith(sourcePath + "/"))) {
+            await guardedShowDialog({
+                title: "System Alert",
+                message: "Cannot move a directory into itself or its subdirectory.",
+                showCancel: false
+            });
+            return;
+        }
+        const itemName = sourcePath.split("/").pop();
+        const sourceParentPath = sourcePath.split("/").slice(0, -1).join("/");
+        const targetPath = normalizePath(`${targetDirItem.fullPath}/${itemName}`);
+        if (samePath(sourcePath, targetPath)) return;
+        const exists = await fsEntryExists(targetDirHandle, itemName, sourceType);
+        let overwrite = false;
+        if (exists) {
+            const r = await guardedShowDialog({
+                title: "Overwrite?",
+                message: `An item named "${itemName}" already exists in the target directory. Do you want to overwrite it?`,
+                showCancel: true
+            });
+            if (r === null) return;
+            overwrite = true;
+        }
+        await withFsOverlay(async () => {
+            pasteOrMoveCommonOptimistic({ type: sourceType, from: sourcePath, toParent: targetDirItem.fullPath, toPath: targetPath, overwrite }, true);
+            if (overwrite) removeOpenedForPath(targetPath);
+            remapOpenedDirectories(sourcePath, targetPath, false);
+            try {
+                if (sourceType === "file") {
+                    const sourceFileHandle = await getFileHandleByPath(repositoryFilesRef.current, sourcePath);
+                    if (!sourceFileHandle) throw new Error("Source file handle not found.");
+                    const sourceFile = await sourceFileHandle.getFile();
+                    await overwriteFileAtomic(targetDirHandle, itemName, sourceFile);
+                    if (!samePath(sourcePath, targetPath)) {
+                        const parentDir = await getDirectoryHandleByPath(sourceParentPath);
+                        try {
+                            await parentDir?.removeEntry(itemName);
+                        } catch { }
+                    }
+                } else {
+                    const sourceDirHandle = await getDirectoryHandleByPath(sourcePath);
+                    if (!sourceDirHandle) throw new Error("Source directory handle not found.");
+                    if (overwrite) await overwriteDirectoryAtomic(targetDirHandle, itemName, sourceDirHandle);
+                    else {
+                        const newDirHandle = await targetDirHandle.getDirectoryHandle(itemName, { create: true });
+                        await deepCopyDirectoryFast(sourceDirHandle, newDirHandle);
+                    }
+                    if (!samePath(sourcePath, targetPath)) {
+                        const parentDir = await getDirectoryHandleByPath(sourceParentPath);
+                        try {
+                            await parentDir?.removeEntry(itemName, { recursive: true });
+                        } catch { }
+                    }
+                }
+            } catch {
+                await guardedShowDialog({
+                    title: "System Alert",
+                    message: "An error occurred while moving the item. Please try again.",
+                    showCancel: false
+                });
+            } finally {
+                await rescanAndSync([sourceParentPath || rootDirectoryName, targetDirItem.fullPath || rootDirectoryName]);
+                await hydrateAllOpenedDirectories();
+            }
+        });
+    };
+
+    const handleZoomIn = () => setZoomLevel((z) => Math.min(z + 0.1, 3));
+    const handleZoomOut = () => setZoomLevel((z) => Math.max(z - 0.1, 0.5));
+    const handleResetZoomLevel = () => setZoomLevel(1);
+
+    const useDragPercent = (isDragging, setIsDragging, calcPct, apply) => ({
+        onMouseDown: () => setIsDragging(true),
+        onMouseMove: (e) => {
+            if (!isDragging) return;
+            const pct = calcPct(e);
+            apply(pct);
+        },
+        onMouseUp: () => setIsDragging(false),
+        onMouseLeave: () => setIsDragging(false)
+    });
+
+    const widthDrag = useDragPercent(
+        isDraggingWidth,
+        setIsDraggingWidth,
+        (e) => {
+            const container = document.querySelector(".studioControlFlex");
+            const containerWidth = container.offsetWidth;
+            return ((e.clientX - container.getBoundingClientRect().left) / containerWidth) * 100;
+        },
+        (newDirectoryWidth) => {
+            if (newDirectoryWidth > 10 && newDirectoryWidth < 50) {
+                setDirectoryWidth(newDirectoryWidth);
+                setContentWidth(100 - newDirectoryWidth);
+            }
+        }
+    );
+
+    const paneDrag = useDragPercent(
+        isDraggingPane,
+        setIsDraggingPane,
+        (e) => {
+            const container = document.querySelector(".studioMarkdownWrapper");
+            const containerWidth = container.offsetWidth;
+            return ((e.clientX - container.getBoundingClientRect().left) / containerWidth) * 100;
+        },
+        (newPaneWidth) => {
+            if (newPaneWidth > 25 && newPaneWidth < 75) setPaneWidths({ pane1: newPaneWidth, pane2: 100 - newPaneWidth });
+        }
+    );
+
+
+    useEffect(() => {
+        if (!saveStatusMessage) return;
+
+        const timer = setTimeout(() => setSaveStatusMessage(null), 3000);
+
+        return () => clearTimeout(timer);
+    }, [saveStatusMessage]);
+
+    useEffect(() => {
+        const targets = [
+            [navigatorListWrapperRef, setNavigatorListHeight],
+            [searchListWrapperRef, setSearchListHeight]
+        ];
+        const observers = [];
+        const cleanups = [];
+
+        for (const [ref, setter] of targets) {
+            const node = ref.current;
+
+            if (!node) continue;
+
+            const measure = () => {
+                const style = window.getComputedStyle(node);
+                const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+                const available = Math.max(0, Math.floor(node.clientHeight - padding));
+
+                setter((previous) => (Math.abs(previous - available) > 1 ? available : previous));
+            };
+
+            measure();
+            const frame = requestAnimationFrame(measure);
+            const timer = setTimeout(measure, 250);
+            cleanups.push(() => {
+                cancelAnimationFrame(frame);
+                clearTimeout(timer);
+            });
+
+            const observer = new ResizeObserver(measure);
+
+            observer.observe(node);
+            observers.push(observer);
+        }
+
+        return () => {
+            observers.forEach((observer) => observer.disconnect());
+            cleanups.forEach((cleanup) => cleanup());
+        };
+    }, [isNavigatorState, isSearchState, isRootOpen, flattenedDirectoryList.length, flattenedSearchList.length, screenSize]);
+
+    const renderNavigatorRow = ({ index, style, data }) => {
+        const item = data[index];
+        if (!item.isVisible) return <div style={{ ...style, display: "none" }} />;
+        const indentStyle = { paddingLeft: `${1 + item.level * 1}rem` };
+        const baseBg = dragOverId === item.id ? "rgba(255,255,255,0.2)" :
+                                    externalDragOver === item.id ? "rgba(100,255,100,0.2)" :
+                                    item.highlight ? "rgba(255,255,255,0.05)" : undefined;
+        const itemClass = `directoryListItem ${item.level > 0 ? "indented" : ""} ${item.level === 0 ? "rootDirectory" : ""} ${unsavedChanges[item.id] ? "studioFileUnsaved" : ""}`;
+
+        const handleDirectoryClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleDirectory(item.id);
+        };
+
+        const handleFileItemClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleFileClick(item);
+        };
+
+        if (item.type === "directory") {
+            return (
+                <div
+                    style={{ ...style, ...indentStyle, background: baseBg, overflow: "hidden" }}
+                    className={itemClass}
+                    draggable
+                    onDragStart={(e) => handleItemDragStart(e, item)}
+                    onDragOver={handleExternalDragOver}
+                    onDragEnter={(e) => {
+                        setDragOverId(item.id);
+                        handleExternalDragEnter(e, item.id);
+                    }}
+                    onDragLeave={(e) => {
+                        setDragOverId(null);
+                        handleExternalDragLeave(e);
+                    }}
+                    onDrop={(e) => {
+                        setDragOverId(null);
+                        if (e.dataTransfer.types.includes("Files")) {
+                            handleExternalFileDrop(e, item.id);
+                        } else {
+                            handleItemDrop(e, item);
+                        }
+                    }}
+                    onClick={handleDirectoryClick}
+                    onContextMenu={(e) => handleContextMenu(e, { type: "directory", path: item.id })}
+                >
+                    <span className="navigatorRow">
+                        <FontAwesomeIcon icon={item.isOpen ? faAngleDown : faAngleRight}/>
+                        {item.name}
+                        {unsavedChanges[item.id] && (
+                            <span className="studioFileUnsavedDot" style={{ pointerEvents: "auto" }} />
+                        )}
+                    </span>
+                </div>
+            );
+        }
+        return (
+            <div
+                style={{ ...style, ...indentStyle, background: baseBg, overflow: "hidden" }}
+                className={itemClass}
+                draggable
+                onDragStart={(e) => handleItemDragStart(e, item)}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={handleFileItemClick}
+                onContextMenu={(e) => handleContextMenu(e, { type: "file", path: item.id })}
+            >
+                <span className="navigatorRow">
+                    {unsavedChanges[item.id] && (
+                        <span className="studioFileUnsavedDot" style={{ pointerEvents: "auto" }} />
+                    )}
+                    {getFileIcon(item.name)}
+                    {item.name}
+                </span>
+            </div>
+        );
+    };
+
+    const renderSearchRow = ({ index, style, data }) => {
+        const item = data[index];
+        if (!item.isVisible) return <div style={{ ...style, display: "none" }} />;
+        const indentStyle = { paddingLeft: `${1 + item.level * 1}rem` };
+        const itemClass = `directoryListItem ${item.level > 0 ? "indented" : ""} ${item.level === 0 ? "rootDirectory" : ""}`;
+        if (item.type === "directory") {
+            return (
+                <div style={{ ...style, ...indentStyle, overflow: "hidden" }} className={itemClass} onClick={() => toggleCollapse(item.fullPath)}>
+                    <span className="navigatorRow">
+                        <FontAwesomeIcon icon={item.isOpen ? faAngleDown : faAngleRight} />
+                        <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.fullPath}</span>
+                    </span>
+                </div>
+            );
+        }
+        return (
+            <div
+                style={{ ...style, ...indentStyle, overflow: "hidden" }}
+                className={itemClass}
+                onClick={() => handleSearchSuggestionClick(item.fullPath, item.lineNumber)}
+            >
+                <span className="navigatorRow">
+                    {getFileIcon(item.fullPath.split("/").pop())}
+                    Line {item.lineNumber}:{" "}
+                    <span
+                        style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                        dangerouslySetInnerHTML={{ __html: highlightResultSnippet(item.lineContent, globalSearchQuery, isCaseSensitiveSearch) }}
+                    />
+                </span>
+            </div>
+        );
+    };
+
+    const getProgressMessage = () => {
+        if (!globalOperationProgress) return "";
+        const { type, current, total } = globalOperationProgress;
+        const filesStr = total ? `${current}/${total}` : `${current}`;
+        if (type === "search") return `Searching ${filesStr} files...`;
+        if (type === "count") return ``;
+        if (type === "replace") return `Replacing in ${filesStr} files...`;
+        return "";
+    };
+
+    useEffect(() => {
+        repositoryFilesRef.current = repositoryFiles;
+        openedDirectoriesRef.current = openedDirectories;
+        fsOpLoadingRef.current = fsOpLoading;
+        panesRef.current = panes;
+    }, [repositoryFiles, openedDirectories, fsOpLoading, panes]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            const hasUnsavedChanges = Object.values(unsavedChanges).some(Boolean);
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+                return "You have unsaved changes. Are you sure you want to leave?";
+            }
+        };
+
+        const handlePopState = async (e) => {
+            const hasUnsavedChanges = Object.values(unsavedChanges).some(Boolean);
+            if (hasUnsavedChanges) {
+                const shouldLeave = await guardedShowDialog({
+                    title: "Unsaved Changes",
+                    message: "You have unsaved changes. Are you sure you want to leave this page?",
+                    showCancel: true
+                });
+
+                if (shouldLeave === null) {
+                    window.history.pushState(null, "", window.location.href);
+                }
+            }
+        };
+
+        const blockNavigation = () => {
+            const hasUnsavedChanges = Object.values(unsavedChanges).some(Boolean);
+            if (hasUnsavedChanges) {
+                window.history.pushState(null, "", window.location.href);
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("popstate", handlePopState);
+
+        blockNavigation();
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [unsavedChanges, guardedShowDialog]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenSize(window.innerWidth);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (!loading && token) {
+            (async () => {
+                try {
+                    const [userResponse, usageResponse] = await Promise.all([
+                        fetch(`${import.meta.env.VITE_API_AUTH_URL}/user-info`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ userID, organizationID })
+                        }),
+                        fetch(`${import.meta.env.VITE_API_AUTH_URL}/usage-info`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ userID, organizationID })
+                        })
+                    ]);
+                    if (userResponse.ok) {
+                        const userData = await userResponse.json();
+                        setKeyBinds(userData[0].userkeybinds ? { ...defaultKeyBinds, ...userData[0].userkeybinds } : defaultKeyBinds);
+                        setZoomLevel(userData[0].userzoomlevel || 1);
+                        setColorTheme(userData[0].usercolortheme || "default");
+                    }
+                    if (usageResponse.ok) {
+                        setIsPlotRendered(false);
+                        const usageData = await usageResponse.json();
+                        setPersonalUsageByDay(usageData.personalUsageInfo.map((i) => ({ day: new Date(i.day), count: +i.usage_count })));
+                        setUsageLanguages(usageData.usageLanguages.map((i) => ({ language: i.language, count: +i.language_count })));
+                        setIsPlotRendered(true);
+                    }
+                    await fetchTodaysEvents();
+                } catch { }
+            })();
+        }
+    }, [userID, organizationID, loading, token]);
+
+    useEffect(() => {
+        if (!loading && token) {
+            (async () => {
+                const connected = await fetchDriveStatus();
+                if (connected) loadDriveFiles("", drivePath);
+            })();
+            (async () => {
+                const connected = await fetchGithubStatus();
+                if (!connected) return;
+                if (githubRepo) loadGithubEntries(githubRepo, githubPath);
+                else loadGithubRepos("");
+            })();
+        }
+    }, [userID, organizationID, loading, token]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(CONNECTOR_NAVIGATION_KEY, JSON.stringify({
+                isConnectorsState,
+                activeConnector,
+                drivePath,
+                githubRepo: githubRepo ? { id: githubRepo.id, owner: githubRepo.owner, name: githubRepo.name, fullName: githubRepo.fullName, defaultBranch: githubRepo.defaultBranch } : null,
+                githubPath
+            }));
+        } catch { }
+    }, [isConnectorsState, activeConnector, drivePath, githubRepo, githubPath]);
+
+    useEffect(() => {
+        const handleDriveMessage = (event) => {
+            if (event.data === "google-drive-connected") {
+                (async () => {
+                    const connected = await fetchDriveStatus();
+                    if (connected) loadDriveFiles(driveQuery);
+                })();
+            }
+            if (event.data === "github-connected") {
+                (async () => {
+                    const connected = await fetchGithubStatus();
+                    if (connected) loadGithubRepos(githubQuery);
+                })();
+            }
+        };
+        window.addEventListener("message", handleDriveMessage);
+        return () => window.removeEventListener("message", handleDriveMessage);
+    }, [userID, organizationID, token, driveQuery, githubQuery]);
+
+    useEffect(() => {
+        if (reminderIntervalRef.current) {
+            clearInterval(reminderIntervalRef.current);
+        }
+        if (calendarEvents.length > 0) {
+            reminderIntervalRef.current = setInterval(checkForReminders, REMINDER_CHECK_INTERVAL);
+            checkForReminders();
+        }
+        return () => {
+            if (reminderIntervalRef.current) {
+                clearInterval(reminderIntervalRef.current);
+            }
+        };
+    }, [calendarEvents, checkForReminders]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const savedState = await loadStateFromDB();
+                const rootHandle = await loadRootHandle();
+
+                if (rootHandle && savedState?.rootDirectoryName) {
+                    setRootDirectoryHandle(rootHandle);
+                    setRootDirectoryName(savedState.rootDirectoryName);
+                    const os = savedState.openedDirectories || {};
+                    os[savedState.rootDirectoryName] = true;
+                    setOpenedDirectories(os);
+                    try {
+                        const rootFiles = await loadDirectoryContents(rootHandle, savedState.rootDirectoryName);
+                        repositoryFilesRef.current = rootFiles;
+                        setRepositoryFiles(rootFiles);
+                    } catch { }
+                    setIsRootOpen(true);
+                }
+                setActivePaneIndex(savedState?.activePaneIndex || 0);
+                if (savedState?.panes?.length) {
+                    const rootHandleLocal = rootHandle;
+                    const restoredPanes = await Promise.all(
+                        savedState.panes.map(async (savedPane) => {
+                            if (!savedPane.openedTabs?.length) return { openedTabs: [], activeTabId: null };
+                            const restoredTabs = await Promise.all(
+                                savedPane.openedTabs.map(async (savedTab) => {
+                                    if (savedTab.id === "account") {
+                                        return {
+                                            id: savedTab.id,
+                                            name: "Account",
+                                            fileHandle: null,
+                                            language: "",
+                                            isMedia: false,
+                                            content: "",
+                                            forceOpen: savedTab.forceOpen || false,
+                                            searchTerm: savedTab.searchTerm || "",
+                                            replaceTerm: savedTab.replaceTerm || "",
+                                            searchPositions: savedTab.searchPositions || [],
+                                            currentSearchIndex: savedTab.currentSearchIndex || -1,
+                                            isSearchOpen: savedTab.isSearchOpen || false,
+                                            isReplaceOpen: savedTab.isReplaceOpen || false,
+                                            isSingleFile: true,
+                                            isAccount: true
+                                        };
+                                    }
+                                    let fileHandle = null;
+                                    try {
+                                        if (savedTab.connector) fileHandle = restoreConnectorHandle(savedTab.connector);
+                                        else if (savedTab.isSingleFile) fileHandle = await loadHandle(savedTab.id);
+                                        else if (rootHandleLocal && savedState.rootDirectoryName && savedTab.id.includes("/")) {
+                                            const rel = savedTab.id.replace(savedState.rootDirectoryName + "/", "");
+                                            fileHandle = await resolveHandleFromPath(rootHandleLocal, rel);
+                                        }
+                                    } catch { }
+                                    const savedIsBinary = WORKBOOK_EXTENSIONS.includes(
+                                        (savedTab.name || "").split(".").pop()?.toLowerCase() || ""
+                                    );
+
+                                    if (savedIsBinary && fileHandle) {
+                                        try {
+                                            const probe = await fileHandle.getFile();
+
+                                            if (probe.size > WORKBOOK_HARD_BYTE_CEILING) return null;
+
+                                            const sheetBytes = await largestSheetBytes(probe);
+
+                                            if (sheetBytes !== null && sheetBytes > SHEET_UNCOMPRESSED_CEILING) return null;
+                                        } catch {
+                                            return null;
+                                        }
+                                    }
+
+                                    let content = "";
+                                    const savedIsPackagedText = PACKAGED_TEXT_EXTENSIONS.includes(
+                                        (savedTab.name || "").split(".").pop()?.toLowerCase() || ""
+                                    );
+
+                                    if (!savedTab.isMedia && !savedIsBinary && !savedIsPackagedText) {
+                                        const hasUnsaved = savedState.unsavedChanges?.[savedTab.id];
+                                        if (hasUnsaved && savedState.modifiedContents?.[savedTab.id]) {
+                                            content = savedState.modifiedContents[savedTab.id];
+                                        } else if (savedTab.content) {
+                                            content = savedTab.content;
+                                        } else if (savedState.originalContents?.[savedTab.id]) {
+                                            content = savedState.originalContents[savedTab.id];
+                                        }
+                                        if (fileHandle && !hasUnsaved) {
+                                            try {
+                                                const file = await fileHandle.getFile();
+                                                content = await file.text();
+                                            } catch { }
+                                        }
+                                    }
+                                    return {
+                                        id: savedTab.id,
+                                        name: savedTab.name,
+                                        fileHandle,
+                                        language: savedTab.language || "Unknown",
+                                        isMedia: savedTab.isMedia || false,
+                                        content,
+                                        forceOpen: savedTab.forceOpen || false,
+                                        searchTerm: savedTab.searchTerm || "",
+                                        replaceTerm: savedTab.replaceTerm || "",
+                                        searchPositions: savedTab.searchPositions || [],
+                                        currentSearchIndex: savedTab.currentSearchIndex || -1,
+                                        isSearchOpen: savedTab.isSearchOpen || false,
+                                        isReplaceOpen: savedTab.isReplaceOpen || false,
+                                        isSingleFile: savedTab.isSingleFile || false,
+                                        isAccount: savedTab.isAccount || false,
+                                        connector: savedTab.connector || null
+                                    };
+                                })
+                            );
+                            return { openedTabs: restoredTabs, activeTabId: savedPane.activeTabId };
+                        })
+                    );
+                    setPanes(restoredPanes);
+                    setOriginalContents(savedState.originalContents || {});
+                    setUnsavedChanges(savedState.isMedia ? (savedState.unsavedChanges || {}) : {});
+                    setModifiedContents(savedState.isMedia ? (savedState.modifiedContents || {}) : {});
+                } else {
+                    setPanes([{ openedTabs: [], activeTabId: null }]);
+                    setOriginalContents({});
+                    setUnsavedChanges({});
+                    setModifiedContents({});
+                }
+                setPendingHydrate(true);
+            } catch {
+                setPanes([{ openedTabs: [], activeTabId: null }]);
+                setOriginalContents({});
+                setUnsavedChanges({});
+                setModifiedContents({});
+            }
+
+            setIsLoaded(true);
+
+            window.setTimeout(() => {
+                sessionStorage.removeItem(RESTORE_FLAG);
+            }, RESTORE_SETTLE_MS);
+        })();
+        return () => {
+            sessionStorage.removeItem(RESTORE_FLAG);
+        };
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            if (!pendingHydrate || !rootDirectoryHandle || !rootDirectoryName) return;
+            if (!repositoryFilesRef.current?.length) return;
+            await hydrateAllOpenedDirectories();
+            setPendingHydrate(false);
+        })();
+    }, [pendingHydrate, rootDirectoryHandle, rootDirectoryName, hydrateAllOpenedDirectories]);
+
+    useEffect(() => {
+        if (!rootDirectoryHandle || !rootDirectoryName) return;
+        if (!repositoryFilesRef.current?.length) return;
+        hydrateAllOpenedDirectories();
+    }, [openedDirectories]);
+
+    useEffect(() => {
+        if (!isLoaded) return;
+        if (saveStateDebounceRef.current) clearTimeout(saveStateDebounceRef.current);
+        saveStateDebounceRef.current = setTimeout(() => {
+            const state = {
+                rootDirectoryName,
+                openedDirectories,
+                isRootOpen,
+                unsavedChanges,
+                originalContents,
+                modifiedContents,
+                panes: panes.map((pane) => ({
+                    openedTabs: pane.openedTabs.map((tab) => ({
+                        id: tab.id,
+                        name: tab.name,
+                        language: tab.language,
+                        isMedia: tab.isMedia,
+                        forceOpen: tab.forceOpen,
+                        searchTerm: tab.searchTerm,
+                        replaceTerm: tab.replaceTerm,
+                        searchPositions: tab.searchPositions,
+                        currentSearchIndex: tab.currentSearchIndex,
+                        isSearchOpen: tab.isSearchOpen,
+                        isReplaceOpen: tab.isReplaceOpen,
+                        isSingleFile: !tab.id.includes("/"),
+                        content: tab.content || "",
+                        isAccount: tab.isAccount || false,
+                        connector: tab.connector || null
+                    })),
+                    activeTabId: pane.activeTabId
+                })),
+                activePaneIndex
+            };
+            saveStateToDB(state);
+            saveRootHandle();
+            panes.forEach((pane) =>
+                pane.openedTabs.forEach((tab) => tab.isSingleFile && tab.fileHandle && saveHandle(tab.id, tab.fileHandle))
+            );
+        }, 500);
+    }, [
+        rootDirectoryName,
+        openedDirectories,
+        isRootOpen,
+        unsavedChanges,
+        originalContents,
+        modifiedContents,
+        panes,
+        activePaneIndex,
+        rootDirectoryHandle,
+        isLoaded
+    ]);
+
+    useEffect(() => {
+        const dir = directoryRef.current, cont = contentRef.current;
+        if (!dir || !cont) return;
+        let isSyncingDir = false, isSyncingCont = false;
+        const onDirScroll = () => {
+            if (isSyncingDir) return (isSyncingDir = false);
+            isSyncingCont = true;
+            cont.scrollTop = dir.scrollTop;
+        };
+        const onContScroll = () => {
+            if (isSyncingCont) return (isSyncingCont = false);
+            isSyncingDir = true;
+            dir.scrollTop = cont.scrollTop;
+        };
+        dir.addEventListener("scroll", onDirScroll);
+        cont.addEventListener("scroll", onContScroll);
+        return () => {
+            dir.removeEventListener("scroll", onDirScroll);
+            cont.removeEventListener("scroll", onContScroll);
+        };
+    }, []);
+
+    useEffect(() => {
+        searchTokenRef.current++;
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (!globalSearchQuery) {
+            setGlobalSearchResults([]);
+            setPanes((prev) =>
+                prev.map((pane) => ({
+                    ...pane,
+                    openedTabs: pane.openedTabs.map((tab) => ({ ...tab, searchTerm: "" }))
+                }))
+            );
+            return;
+        }
+        debounceRef.current = setTimeout(performGlobalSearch, 500);
+        return () => clearTimeout(debounceRef.current);
+    }, [globalSearchQuery, isCaseSensitiveSearch]);
+
+    useEffect(() => {
+        if (!contextMenuVisible || !contextMenuRef.current) return;
+        const menu = contextMenuRef.current;
+        const { innerWidth, innerHeight } = window;
+        const { x, y } = contextMenuPosition;
+        const rect = menu.getBoundingClientRect();
+        let newX = Math.max(Math.min(x, innerWidth - rect.width - 10), 10);
+        let newY = Math.max(Math.min(y, innerHeight - rect.height - 10), 10);
+        if (newX !== x || newY !== y) setContextMenuPosition({ x: newX, y: newY });
+        const handleClickOutside = (e) => {
+            if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) setContextMenuVisible(false);
+        };
+        const handleEsc = (e) => e.key === "Escape" && contextMenuVisible && setContextMenuVisible(false);
+        window.addEventListener("click", handleClickOutside);
+        window.addEventListener("keydown", handleEsc);
+        return () => {
+            window.removeEventListener("click", handleClickOutside);
+            window.removeEventListener("keydown", handleEsc);
+        };
+    }, [contextMenuVisible, contextMenuPosition]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layoutVisibility));
+        } catch { }
+    }, [layoutVisibility]);
+
+    return (
+        <div
+            className="studioPageWrapper"
+            onMouseMove={(e) => {
+                widthDrag.onMouseMove(e);
+                paneDrag.onMouseMove(e);
+            }}
+            onMouseUp={() => {
+                widthDrag.onMouseUp();
+                paneDrag.onMouseUp();
+            }}
+            onMouseLeave={() => {
+                widthDrag.onMouseLeave();
+                paneDrag.onMouseLeave();
+            }}
+        >
+            {layoutVisibility.nav && <Nav activePage="studioide" />}
+            {saveStatusMessage && (
+                <div className="studioSaveStatusBanner">
+                    <span className="studioFileUnsavedDot" />
+                    {saveStatusMessage}
+                </div>
+            )}
+            {screenSize >= 700 && screenSize <= 5399 && isLoaded ? (
+                <div className={`studioHeaderContainer ${layoutVisibility.nav ? "" : "studioHeaderContainerNoNav"}`}>
+                    <div className="studioControlFlex">
+                        <div
+                            className={`leadingIDEDirectoryStack ${layoutVisibility.sidebar ? "" : "studioSidebarHidden"}`}
+                            style={{
+                                width: `${directoryWidth}%`,
+                            }}
+                            ref={directoryRef}
+                            onContextMenu={(e) => handleContextMenu(e, { type: "navigator", path: rootDirectoryName })}
+                            onDragOver={handleExternalDragOver}
+                            onDragEnter={handleNavigatorDragEnter}
+                            onDragLeave={handleNavigatorDragLeave}
+                            onDrop={(e) => {
+                                if (e.dataTransfer.types.includes("Files")) {
+                                    handleExternalFileDrop(e, rootDirectoryName);
+                                }
+                            }}
+                        >
+                            <div className="leadingDirectoryTopBar">
+                                <div className="leadingDirectoryZoomButtonFlex">
+                                    <Tippy content="Zoom In" theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleZoomIn} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                                            <FontAwesomeIcon icon={faPlusSquare} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content="Zoom Out" theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleZoomOut} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                                            <FontAwesomeIcon icon={faMinusSquare} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content="Reset View" theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleResetZoomLevel} disabled={!rootDirectoryName || !isActiveTabCodeFile} style={{ opacity: (!rootDirectoryName || !isActiveTabCodeFile) ? 0.4 : 1 }}>
+                                            <FontAwesomeIcon icon={faRetweet} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content="Import a Directory" theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleLoadRepository}>
+                                            <FontAwesomeIcon icon={faFolderOpen} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content="Import a File" theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleLoadFile}>
+                                            <FontAwesomeIcon icon={faCode} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content={terminalAvailable ? "Open Terminal" : "Terminal Is Available In The Desktop App"} theme="tooltip-light">
+                                        <button className="leadingDirectoryZoomButton" onClick={handleOpenTerminal} disabled={!terminalAvailable} style={{ opacity: terminalAvailable ? 1 : 0.4 }}>
+                                            <FontAwesomeIcon icon={faTerminal} />
+                                        </button>
+                                    </Tippy>
+                                    <Tippy content="Open Connectors" theme="tooltip-light">
+                                        <button
+                                            className="leadingDirectoryZoomButton"
+                                            onClick={() => {
+                                                setIsNavigatorState(false);
+                                                setIsSearchState(false);
+                                                setIsConnectorsState(true);
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faPlug} />
+                                        </button>
+                                    </Tippy>
+                                </div>
+                            </div>
+
+                            <div className="leadingDirectoryStack">
+                                <div className="leadingDirectoryTabsWrapper">
+                                    <button
+                                        className="leadingDirectoryTabButton"
+                                        style={{ backgroundColor: isNavigatorState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
+                                        onClick={() => {
+                                            setIsNavigatorState(true);
+                                            setIsSearchState(false);
+                                            setIsConnectorsState(false);
+                                        }}
+                                    >
+                                        Navigator
+                                    </button>
+                                    <button
+                                        className="leadingDirectoryTabButton"
+                                        style={{ backgroundColor: isSearchState ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.0)" }}
+                                        onClick={() => {
+                                            setIsNavigatorState(false);
+                                            setIsSearchState(true);
+                                            setIsConnectorsState(false);
+                                        }}
+                                    >
+                                        Search
+                                    </button>
+                                </div>
+                                {isNavigatorState && (
+                                    <div className="leadingDirectorySearchWrapper">
+                                        <input
+                                            type="text"
+                                            className="directorySearchInput"
+                                            placeholder="Search the directory..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+                                {isNavigatorState &&
+                                    (isNavigatorLoading ? (
+                                        <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
+                                            <div className="loading-circle" />
+                                        </div>
+                                    ) : (
+                                        <div className="leadingDirectoryFiles" style={{ position: "relative" }}>
+                                            {isExternalDragOverNavigator && (
+                                                <div className="leadingDirectoryFileHoverOver"/>
+                                            )}
+
+                                            {rootDirectoryName && (
+                                                <ul className="leadingDirectoryFileStack">
+                                                    <li className="leadingDirectoryFileStackContent">
+                                                        <div
+                                                            onClick={() => setIsRootOpen(!isRootOpen)}
+                                                            onContextMenu={(e) => handleContextMenu(e, { type: "directory", path: rootDirectoryName })}
+                                                            className="directoryListItemRoot"
+                                                            onDragOver={handleExternalDragOver}
+                                                            onDrop={(e) => {
+                                                                if (e.dataTransfer.types.includes("Files")) {
+                                                                    handleExternalFileDrop(e, rootDirectoryName);
+                                                                } else {
+                                                                    handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
+                                                                }
+                                                            }}
+                                                            onDragEnter={(e) => {
+                                                                setDragOverId(rootDirectoryName);
+                                                                handleExternalDragEnter(e, rootDirectoryName);
+                                                            }}
+                                                            onDragLeave={(e) => {
+                                                                setDragOverId(null);
+                                                                handleExternalDragLeave(e);
+                                                            }}
+                                                            style={{
+                                                                background: dragOverId === rootDirectoryName ? "rgba(255,255,255,0.2)" :
+                                                                                      externalDragOver === rootDirectoryName ? "rgba(100,255,100,0.2)" :
+                                                                                      openedDirectories[rootDirectoryName] ? "rgba(255,255,255,0.05)" : undefined
+                                                            }}
+                                                        >
+                                                            <FontAwesomeIcon icon={isRootOpen ? faAngleDown : faAngleRight} />
+                                                            {rootDirectoryName}
+                                                            {unsavedChanges[rootDirectoryName] && (
+                                                                <Tippy content="Unsaved" theme="tooltip-light">
+                                                                    <span className="studioFileUnsavedDot" />
+                                                                </Tippy>
+                                                            )}
+                                                        </div>
+                                                        {isRootOpen && flattenedDirectoryList.length > 0 && (
+                                                            <div
+                                                                className="nestedDirectoryFileStack"
+                                                                ref={navigatorListWrapperRef}
+                                                                onDragOver={handleExternalDragOver}
+                                                                onDrop={(e) => {
+                                                                    if (e.dataTransfer.types.includes("Files")) {
+                                                                        handleExternalFileDrop(e, rootDirectoryName);
+                                                                    } else {
+                                                                        handleItemDrop(e, { fullPath: rootDirectoryName, type: "directory" });
+                                                                    }
+                                                                }}
+                                                                onDragEnter={(e) => {
+                                                                    setDragOverId(rootDirectoryName);
+                                                                    handleExternalDragEnter(e, rootDirectoryName);
+                                                                }}
+                                                                onDragLeave={(e) => {
+                                                                    setDragOverId(null);
+                                                                    handleExternalDragLeave(e);
+                                                                }}
+                                                            >
+                                                                <List
+                                                                    height={navigatorListHeight}
+                                                                    itemCount={flattenedDirectoryList.length}
+                                                                    itemSize={getVirtualizedItemHeight(screenSize)}
+                                                                    width="100%"
+                                                                    itemData={flattenedDirectoryList}
+                                                                    itemKey={(index, data) => data[index]?.id ?? index}
+                                                                    className="nestedDirectoryFileList"
+                                                                >
+                                                                    {renderNavigatorRow}
+                                                                </List>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )
+                                )}
+                                {isSearchState && (
+                                    <div className="leadingDirectoryGlobalSearchWrapper">
+                                        <div className="leadingDirectoryGlobalSearchFlex">
+                                            <input
+                                                type="text"
+                                                className="leadingDirectoryGlobalSearchInput"
+                                                placeholder="Search across all files..."
+                                                value={globalSearchQuery}
+                                                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                                                disabled={isGlobalReplacing}
+                                            />
+                                            <div className="leadingDirectoryGlobalSearchTrailingButtons">
+                                                <Tippy content="Case Sensitive" theme="tooltip-light">
+                                                    <button
+                                                        className="leadingDirectoryGlobalSearchButton"
+                                                        onClick={() => setIsCaseSensitiveSearch(!isCaseSensitiveSearch)}
+                                                        onMouseDown={(e) => e.preventDefault()}
+                                                    >
+                                                        <FontAwesomeIcon icon={faA} style={{ color: isCaseSensitiveSearch ? "#4ecdc4" : "" }} />
+                                                    </button>
+                                                </Tippy>
+                                                <Tippy content="Search Files" theme="tooltip-light">
+                                                    <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalSearch} disabled={isGlobalSearching || isGlobalReplacing}>
+                                                        <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                                    </button>
+                                                </Tippy>
+                                            </div>
+                                        </div>
+                                        <div className="leadingDirectoryGlobalSearchFlex" style={{ alignItems: "flex-start" }}>
+                                            <input
+                                                type="text"
+                                                className="leadingDirectoryGlobalSearchInput"
+                                                placeholder="Replace with..."
+                                                value={globalReplaceTerm}
+                                                onChange={(e) => setGlobalReplaceTerm(e.target.value)}
+                                                disabled={isGlobalReplacing}
+                                            />
+                                            <div className="leadingDirectoryGlobalSearchTrailingButtons">
+                                                <Tippy content="Replace Across Files" theme="tooltip-light">
+                                                    <button className="leadingDirectoryGlobalSearchButton" onClick={performGlobalReplace} disabled={!globalSearchQuery || isGlobalSearching || isGlobalReplacing}>
+                                                        <FontAwesomeIcon icon={faMagnifyingGlassPlus} />
+                                                    </button>
+                                                </Tippy>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {isSearchState && (
+                                    <div className="leadingDirectoryFiles" ref={searchListWrapperRef}>
+                                        {isGlobalSearching || isGlobalReplacing ? (
+                                            <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
+                                                <div className="loading-circle" />
+                                                <p>{getProgressMessage()}</p>
+                                            </div>
+                                        ) : (
+                                            <List
+                                                height={searchListHeight}
+                                                itemCount={flattenedSearchList.length}
+                                                itemSize={getVirtualizedItemHeight(screenSize)}
+                                                width="100%"
+                                                itemData={flattenedSearchList}
+                                                itemKey={(index, data) => `${data[index]?.fullPath ?? index}:${data[index]?.lineNumber ?? "header"}`}
+                                                className="nestedDirectoryFileList"
+                                            >
+                                                {renderSearchRow}
+                                            </List>
+                                        )}
+                                    </div>
+                                )}
+                                {isConnectorsState && !activeConnector && (
+                                    <div className="leadingDirectoryFiles">
+                                        <ul className="studioConnectorStack">
+                                            {STUDIO_CONNECTORS.map((connector) => (
+                                                <li
+                                                    key={connector.id}
+                                                    className="studioConnectorRow"
+                                                    onClick={() => {
+                                                        setActiveConnector(connector.id);
+                                                        if (connector.id === "google-drive" && isDriveConnected && !driveFiles.length) loadDriveFiles(driveQuery);
+                                                        if (connector.id === "github" && isGithubConnected && !githubRepos.length) loadGithubRepos(githubQuery);
+                                                    }}
+                                                >
+                                                    <span className="studioConnectorIcon" style={{ background: connector.tint, color: connector.color }}>
+                                                        <FontAwesomeIcon icon={connector.icon} />
+                                                    </span>
+                                                    <span className="studioConnectorText">
+                                                        <span className="studioConnectorName">{connector.label}</span>
+                                                        <span className="studioConnectorDetail">{connectorConnected(connector.id) ? (connectorAccount(connector.id) || "Connected") : "Not Connected"}</span>
+                                                    </span>
+                                                    <span className={`studioConnectorDot ${connectorConnected(connector.id) ? "studioConnectorDotOn" : ""}`} />
+                                                    <FontAwesomeIcon icon={faAngleRight} className="studioConnectorChevron" />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "google-drive" && (
+                                    <div className="studioConnectorHeader">
+                                        <Tippy content="Back" theme="tooltip-light">
+                                            <button className="studioDriveStatusButton" onClick={driveBack}>
+                                                <FontAwesomeIcon icon={faAngleLeft} />
+                                            </button>
+                                        </Tippy>
+                                        <span className="studioConnectorHeaderIcon" style={{ background: STUDIO_CONNECTORS[0].tint, color: STUDIO_CONNECTORS[0].color }}>
+                                            <FontAwesomeIcon icon={faGoogleDrive} />
+                                        </span>
+                                        <span className="studioConnectorHeaderText">
+                                            <span className="studioConnectorHeaderTitle">{driveSearching ? "Search Results" : drivePath.length ? drivePath[drivePath.length - 1].name : isDriveConnected ? "My Drive" : "Google Drive"}</span>
+                                            <span className="studioConnectorHeaderSubtitle">{driveSearching ? `Results For "${driveQuery}"` : drivePath.length ? ["My Drive", ...drivePath.map((entry) => entry.name)].join(" › ") : isDriveConnected && driveEmail ? driveEmail : "Not Connected"}</span>
+                                        </span>
+                                        <div className="studioDriveStatusButtons">
+                                            {isDriveConnected && (
+                                                <Tippy content="Refresh Files" theme="tooltip-light">
+                                                    <button className="studioDriveStatusButton" onClick={() => loadDriveFiles(driveQuery)}>
+                                                        <FontAwesomeIcon icon={faRetweet} />
+                                                    </button>
+                                                </Tippy>
+                                            )}
+                                            {isDriveConnected && (
+                                                <Tippy content="Disconnect Google Drive" theme="tooltip-light">
+                                                    <button className="studioDriveStatusButton" onClick={disconnectDrive}>
+                                                        <FontAwesomeIcon icon={faLink} />
+                                                    </button>
+                                                </Tippy>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "google-drive" && !isDriveConnected && (
+                                    <div className="studioDriveConnectWrapper">
+                                        <div className="studioDriveConnectCard">
+                                            <FontAwesomeIcon icon={faGoogleDrive} className="studioDriveConnectIcon" />
+                                            <p className="studioDriveConnectText">Connect your Google Drive to open and edit your Google Docs, Sheets, and Slides directly in these editors.</p>
+                                            <button className="studioDriveConnectButton" onClick={connectDrive}>Connect Google Drive</button>
+                                        </div>
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "google-drive" && isDriveConnected && (
+                                    <div className="leadingDirectorySearchWrapper">
+                                        <input
+                                            type="text"
+                                            className="directorySearchInput"
+                                            placeholder="Search your Google Drive..."
+                                            value={driveQuery}
+                                            onChange={(e) => setDriveQuery(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") loadDriveFiles(driveQuery);
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "google-drive" && isDriveConnected && (
+                                    <div className="leadingDirectoryFiles">
+                                        {isDriveLoading ? (
+                                            <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
+                                                <div className="loading-circle" />
+                                            </div>
+                                        ) : driveFiles.length || (!driveError && !driveSearching && !drivePath.length) ? (
+                                            <ul className="studioDriveFileStack">
+                                                {!driveSearching && !drivePath.length && (
+                                                    <li className="studioDriveFileRow" onClick={() => openDriveFolder({ id: "shared", name: "Shared With Me" })}>
+                                                        <FontAwesomeIcon icon={faFolderOpen} style={{ color: "#fbbc04" }} />
+                                                        <span className="studioDriveFileName">Shared With Me</span>
+                                                    </li>
+                                                )}
+                                                {driveFiles.map((file) => (
+                                                    <li
+                                                        key={file.id}
+                                                        className="studioDriveFileRow"
+                                                        onClick={() => (file.folder ? openDriveFolder(file) : openDriveFile(file))}
+                                                    >
+                                                        <FontAwesomeIcon icon={file.folder ? faFolderOpen : faGoogleDrive} style={{ color: file.folder ? "#fbbc04" : DRIVE_ICON_COLORS[file.mimeType] || "#cdd4e4" }} />
+                                                        <span className="studioDriveFileName">{file.name}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div className="studioDriveEmptyCard">
+                                                <p>{driveError || (driveSearching ? "No files matched your search." : "This folder is empty.")}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "github" && (
+                                    <div className="studioConnectorHeader">
+                                        <Tippy content="Back" theme="tooltip-light">
+                                            <button
+                                                className="studioDriveStatusButton"
+                                                onClick={() => {
+                                                    if (githubRepo && githubPath) {
+                                                        const parentPath = githubPath.split("/").slice(0, -1).join("/");
+                                                        setGithubPath(parentPath);
+                                                        loadGithubEntries(githubRepo, parentPath);
+                                                    } else if (githubRepo) {
+                                                        setGithubRepo(null);
+                                                        setGithubPath("");
+                                                        setGithubEntries([]);
+                                                    } else {
+                                                        setActiveConnector(null);
+                                                    }
+                                                }}
+                                            >
+                                                <FontAwesomeIcon icon={faAngleLeft} />
+                                            </button>
+                                        </Tippy>
+                                        <span className="studioConnectorHeaderIcon" style={{ background: STUDIO_CONNECTORS[1].tint, color: STUDIO_CONNECTORS[1].color }}>
+                                            <FontAwesomeIcon icon={faGithub} />
+                                        </span>
+                                        <span className="studioConnectorHeaderText">
+                                            <span className="studioConnectorHeaderTitle">{githubRepo ? (githubPath ? githubPath.split("/").pop() : githubRepo.name) : isGithubConnected ? "Repositories" : "GitHub"}</span>
+                                            <span className="studioConnectorHeaderSubtitle">{githubRepo ? [githubRepo.fullName, ...githubPath.split("/").filter(Boolean)].join(" › ") : isGithubConnected && githubLogin ? githubLogin : "Not Connected"}</span>
+                                        </span>
+                                        <div className="studioDriveStatusButtons">
+                                            {isGithubConnected && (
+                                                <Tippy content="Refresh" theme="tooltip-light">
+                                                    <button className="studioDriveStatusButton" onClick={() => (githubRepo ? loadGithubEntries(githubRepo, githubPath) : loadGithubRepos(githubQuery))}>
+                                                        <FontAwesomeIcon icon={faRetweet} />
+                                                    </button>
+                                                </Tippy>
+                                            )}
+                                            {isGithubConnected && (
+                                                <Tippy content="Disconnect GitHub" theme="tooltip-light">
+                                                    <button className="studioDriveStatusButton" onClick={disconnectGithub}>
+                                                        <FontAwesomeIcon icon={faLink} />
+                                                    </button>
+                                                </Tippy>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "github" && !isGithubConnected && (
+                                    <div className="studioDriveConnectWrapper">
+                                        <div className="studioDriveConnectCard">
+                                            <FontAwesomeIcon icon={faGithub} className="studioDriveConnectIcon" />
+                                            <p className="studioDriveConnectText">Connect your GitHub to open and edit files from your repositories directly in these editors.</p>
+                                            <button className="studioDriveConnectButton" onClick={connectGithub}>Connect GitHub</button>
+                                        </div>
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "github" && isGithubConnected && !githubRepo && (
+                                    <div className="leadingDirectorySearchWrapper">
+                                        <input
+                                            type="text"
+                                            className="directorySearchInput"
+                                            placeholder="Search your repositories..."
+                                            value={githubQuery}
+                                            onChange={(e) => setGithubQuery(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") loadGithubRepos(githubQuery);
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {isConnectorsState && activeConnector === "github" && isGithubConnected && (
+                                    <div className="leadingDirectoryFiles">
+                                        {isGithubLoading ? (
+                                            <div className="leadingDirectoryFilesSupplement" style={{ textAlign: "center" }}>
+                                                <div className="loading-circle" />
+                                            </div>
+                                        ) : githubRepo ? (
+                                            githubEntries.length ? (
+                                                <ul className="studioDriveFileStack">
+                                                    {githubEntries.map((entry) => (
+                                                        <li
+                                                            key={entry.path}
+                                                            className="studioDriveFileRow"
+                                                            onClick={() => {
+                                                                if (entry.type === "dir") {
+                                                                    setGithubPath(entry.path);
+                                                                    loadGithubEntries(githubRepo, entry.path);
+                                                                } else {
+                                                                    openGithubFile(entry);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <FontAwesomeIcon icon={entry.type === "dir" ? faFolderOpen : faCode} />
+                                                            <span className="studioDriveFileName">{entry.name}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <div className="studioDriveEmptyCard">
+                                                    <p>{githubError || "This folder is empty."}</p>
+                                                </div>
+                                            )
+                                        ) : githubRepos.length ? (
+                                            <ul className="studioDriveFileStack">
+                                                {githubRepos.map((repo) => (
+                                                    <li
+                                                        key={repo.id}
+                                                        className="studioDriveFileRow"
+                                                        onClick={() => {
+                                                            setGithubRepo(repo);
+                                                            setGithubPath("");
+                                                            loadGithubEntries(repo, "");
+                                                        }}
+                                                    >
+                                                        <FontAwesomeIcon icon={faGithub} />
+                                                        <span className="studioDriveFileName">{repo.fullName}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div className="studioDriveEmptyCard">
+                                                <p>{githubError || "No repositories were found on your GitHub account."}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="leadingDirectoryBottomBar" />
+                        </div>
+                        <div
+                            className={`studioControlStack ${layoutVisibility.sidebar ? "" : "studioControlStackFull"}`}
+                            style={{ width: layoutVisibility.sidebar ? `${contentWidth}%` : "100%" }}
+                            ref={contentRef}
+                            onMouseDown={widthDrag.onMouseDown}
+                        >
+                            <div className="topIDEControlBarWrapper">
+                                {panes.map((pane, paneIndex) => (
+                                    <React.Fragment key={`pane-wrapper-${paneIndex}`}>
+                                        <div
+                                            className="topIDEControlBar"
+                                            style={{ height: "100%", width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
+                                            onDragOver={(e) => e.preventDefault()}
+                                            onDrop={(e) => handleDrop(e, paneIndex)}
+                                        >
+                                            {pane.openedTabs.length ? (
+                                                pane.openedTabs.map((tab) => {
+                                                    editorRefs.current[paneIndex] ??= {};
+                                                    editorRefs.current[paneIndex][tab.id] ??= React.createRef();
+                                                    const cls =
+                                                        pane.activeTabId === tab.id && unsavedChanges[tab.id]
+                                                            ? "activeUnsavedTab"
+                                                            : pane.activeTabId === tab.id
+                                                                ? "activeTab"
+                                                                : unsavedChanges[tab.id]
+                                                                    ? "unsavedTab"
+                                                                    : "";
+                                                    return (
+                                                        <div
+                                                            key={tab.id}
+                                                            className={`studioTabItem ${cls}`}
+                                                            onClick={() => switchTab(paneIndex, tab.id)}
+                                                            draggable
+                                                            onDragStart={(e) => handleDragStart(e, paneIndex, tab.id)}
+                                                            style={{ width: "max-content", flexShrink: 0, flexGrow: 0 }}
+                                                        >
+                                                            {unsavedChanges[tab.id] && (
+                                                                <Tippy content="Unsaved" theme="tooltip-light">
+                                                                    <span className="studioFileUnsavedDot" />
+                                                                </Tippy>
+                                                            )}
+                                                            {getFileIcon(tab.name)}
+                                                            {tab.name}
+                                                            <span
+                                                                className="studioCloseTab"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    closeTab(paneIndex, tab.id);
+                                                                }}
+                                                            >
+                                                                ×
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="studioTabItem activeTab">
+                                                    <FontAwesomeIcon icon={faWandMagicSparkles} /> Get Started
+                                                </div>
+                                            )}
+                                        </div>
+                                        {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" />}
+                                    </React.Fragment>
+                                ))}
+                                <div className="studioLayoutControls">
+                                    {LAYOUT_TOGGLES.map(([key, label]) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            title={`${layoutVisibility[key] ? "Hide" : "Show"} ${label}`}
+                                            className={`studioLayoutToggle ${layoutVisibility[key] ? "studioLayoutToggleActive" : ""}`}
+                                            onClick={() => setLayoutVisibility((prev) => ({ ...prev, [key]: !prev[key] }))}
+                                        >
+                                            <FontAwesomeIcon icon={layoutVisibility[key] ? faEye : faEyeSlash} />
+                                            <span>{label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div
+                                className="studioMarkdownWrapper"
+                                onMouseDown={paneDrag.onMouseDown}
+                            >
+                                {panes.map((pane, paneIndex) => (
+                                    <React.Fragment key={`pane-${paneIndex}`}>
+                                        <div
+                                            className="studioMarkdownPaneWrapper"
+                                            style={{ width: panes.length > 1 ? `${paneWidths[`pane${paneIndex + 1}`]}%` : "100%" }}
+                                            onClick={() => setActivePaneIndex(paneIndex)}
+                                        >
+                                            <div className="studioMarkdownPaneFlex">
+                                                {pane.openedTabs.length ? (
+                                                    pane.openedTabs.map((tab) => (
+                                                        <div key={tab.id} className="studioMarkdownPane" style={{ display: pane.activeTabId === tab.id ? "block" : "none" }}>
+                                                            {tab.isAccount ? (
+                                                                <Account
+                                                                    onClose={() => closeTab(paneIndex, tab.id)}
+                                                                    keyBinds={keyBinds}
+                                                                    setKeyBinds={setKeyBinds}
+                                                                    zoomLevel={zoomLevel}
+                                                                    setZoomLevel={setZoomLevel}
+                                                                    colorTheme={colorTheme}
+                                                                    setColorTheme={setColorTheme}
+                                                                />
+                                                            ) : tab.isMedia ? (
+                                                                <>
+                                                                    {mediaExtensions.image.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Image
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                    {mediaExtensions.video.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Video
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                    {mediaExtensions.audio.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Audio
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                    {mediaExtensions.pdf.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <PDF
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                    {mediaExtensions.threeD.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <ThreeD
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    {PRESENTATION_EXTENSIONS.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Slides
+                                                                            fileHandle={tab.fileHandle}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
+                                                                            onSaveStatusChange={(status) => setSaveStatusMessage(status)}
+                                                                        />
+                                                                    )}
+                                                                    {TEXT_EXTENSIONS.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Text fileHandle={tab.fileHandle} keyBinds={keyBinds}
+                                                                            onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
+                                                                            onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                                                        />
+                                                                    )}
+                                                                    {TABULAR_EXTENSIONS.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
+                                                                        <Tabular
+                                                                            fileHandle={tab.fileHandle}
+                                                                            keyBinds={keyBinds}
+                                                                            onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
+                                                                            onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                                                        />
+                                                                    )}
+                                                                    {(!tab.fileHandle ||
+                                                                        ![...TEXT_EXTENSIONS, ...TABULAR_EXTENSIONS].includes(tab.fileHandle.name.split(".").pop()?.toLowerCase() || "")) && (
+                                                                            <Markdown
+                                                                                fileContent={tab.content}
+                                                                                detectedLanguage={tab.language}
+                                                                                forceOpen={tab.forceOpen}
+                                                                                onForceOpen={() => handleForceOpenTab(paneIndex, tab.id)}
+                                                                                searchTerm={tab.searchTerm}
+                                                                                setSearchTerm={(term) => tabPatch(paneIndex, tab.id, { searchTerm: term })}
+                                                                                replaceTerm={tab.replaceTerm}
+                                                                                setReplaceTerm={(term) => tabPatch(paneIndex, tab.id, { replaceTerm: term })}
+                                                                                searchPositions={tab.searchPositions}
+                                                                                setSearchPositions={(positions) => tabPatch(paneIndex, tab.id, { searchPositions: positions })}
+                                                                                currentSearchIndex={tab.currentSearchIndex}
+                                                                                setCurrentSearchIndex={(index) => tabPatch(paneIndex, tab.id, { currentSearchIndex: index })}
+                                                                                onSplit={splitTab}
+                                                                                disableSplit={panes.length >= 2 || pane.openedTabs.length <= 1 || pane.openedTabs.some((inner) => inner.isMedia || inner.isAccount || [...TEXT_EXTENSIONS, ...TABULAR_EXTENSIONS].includes(inner.name.split(".").pop()?.toLowerCase() || ""))}
+                                                                                paneIndex={paneIndex}
+                                                                                tabId={tab.id}
+                                                                                isSearchOpen={tab.isSearchOpen}
+                                                                                isReplaceOpen={tab.isReplaceOpen}
+                                                                                setTabSearchOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isSearchOpen: isOpen })}
+                                                                                setTabReplaceOpen={(isOpen) => tabPatch(paneIndex, tab.id, { isReplaceOpen: isOpen })}
+                                                                                ref={editorRefs.current[paneIndex][tab.id]}
+                                                                                onEdit={handleEdit}
+                                                                                onSave={handleSave}
+                                                                                fileHandle={tab.fileHandle}
+                                                                                isGlobalSearchActive={!!globalSearchQuery}
+                                                                                keyBinds={keyBinds}
+                                                                                colorTheme={colorTheme}
+                                                                                zoomLevel={zoomLevel}
+                                                                            />
+                                                                        )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <NoFileSelected
+                                                        handleLoadRepository={handleLoadRepository}
+                                                        handleLoadFile={handleLoadFile}
+                                                        isPlotRendered={isPlotRendered}
+                                                        personalUsageByDay={personalUsageByDay}
+                                                        usageLanguages={usageLanguages}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        {paneIndex < panes.length - 1 && <div className="resizablePaneDivider" onMouseDown={paneDrag.onMouseDown} />}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                            <div className="bottomIDEControlBar" />
+                        </div>
+                    </div>
+                </div>
+            ) : !isLoaded ? (
+                <Loading />
+            ) : (
+                <Unavailable screenSize={screenSize} />
+            )}
+            {fsOpLoading && (
+                <div className="loading-container">
+                    <div className="loading-circle" />
+                </div>
+            )}
+            {screenSize >= 700 && screenSize <= 5399 && contextMenuVisible && createPortal(
+                <ul
+                    className="studioContextMenu"
+                    popover="manual"
+                    ref={(node) => {
+                        contextMenuRef.current = node;
+
+                        if (!node || typeof node.showPopover !== "function") return;
+
+                        try {
+                            if (!node.matches(":popover-open")) node.showPopover();
+                        } catch { }
+                    }}
+                    style={{ top: contextMenuPosition.y, left: contextMenuPosition.x }}
+                >
+                    {[
+                        [
+                            { label: "Add File", icon: faFileCirclePlus, action: createNewFile },
+                            { label: "Add Folder", icon: faFolderPlus, action: createNewFolder }
+                        ],
+                        [
+                            isContextEntry && { label: "Copy", icon: faCopy, action: handleCopy },
+                            canPasteIntoContextTarget && { label: "Paste", icon: faPaste, action: handlePaste }
+                        ],
+                        [
+                            isContextEntry && { label: "Rename", icon: faPenToSquare, action: renameItem },
+                            isContextEntry && { label: "Delete", icon: faTrash, action: deleteItem }
+                        ],
+                        [
+                            { label: "Copy Relative Path", icon: faLink, action: copyRelativePathToClipboard }
+                        ]
+                    ].map((group) => group.filter(Boolean)).filter((group) => group.length).map((group, groupIndex) => (
+                        <React.Fragment key={`studioContextGroup-${groupIndex}`}>
+                            {groupIndex > 0 && <li className="studioContextMenuSeparator" />}
+                            {group.map((entry) => (
+                                <li key={entry.label} className="studioContextMenuItem" onClick={entry.action}>
+                                    <span className="studioContextMenuItemLabel">
+                                        <FontAwesomeIcon icon={entry.icon} />
+                                        {entry.label}
+                                    </span>
+                                </li>
+                            ))}
+                        </React.Fragment>
+                    ))}
+                </ul>,
+                document.body
+            )}
+        </div>
+    );
+}

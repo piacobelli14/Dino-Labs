@@ -1,0 +1,1261 @@
+.dataTabularContentWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.dataTabularToolbarWrapper {
+    width: 100%;
+    z-index: 10;
+}
+
+.dataTabularToolBar {
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-bottom: 1px solid #3d4354;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTabularWrapperContainer {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 200px);
+    overflow: hidden;
+}
+
+.dataTabularTitleWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 35%;
+    box-sizing: border-box;
+    overflow: scroll;
+    padding: 0 0.4rem;
+    margin-right: 2rem;
+}
+
+.dataTabularFileNameStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.dataTabularFileNameInput {
+    padding: 0.6rem 0.8rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    width: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.dataTabularFileNameInput svg {
+    margin-right: 8px;
+}
+
+.dataTabularOperationsButtonsWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px 0 8px;
+}
+
+.dataTabularOperationsButton {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    outline: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTabularOperationsButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    outline: none;
+}
+
+.dataTabularOperationsButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dataTabularDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    z-index: 10050;
+    box-shadow: 0 0 20px black;
+    overflow: hidden;
+    user-select: none;
+}
+
+.dataTabularDropdownMenu.filter-dropdown,
+.dataTabularDropdownMenu[data-filter="true"],
+.dataTabularDropdownMenu:has(.dataTabularDropdownMenuHeader),
+.dataTabularDropdownMenu:has(.dataTabularDropdownMenuSelection) {
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: 320px !important;
+    max-height: 60vh !important;
+}
+
+.dataTabularDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.dataTabularDropdownMenuItem:hover {
+    opacity: 0.8;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    transform: translateX(1px);
+}
+
+.dataTabularDropdownMenuHeader {
+    padding: 14px 24px;
+    border-bottom: 1px solid #3d4354;
+    box-sizing: border-box;
+}
+
+.dataTabularDropdownMenuHeaderSearch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-sizing: border-box;
+    padding: 6px 4px; 
+}
+
+.dataTabularDropdownMenuHeaderSearch svg {
+    font-size: 10px;
+    color: #ebf0f8;
+}
+
+.dataTabularDropdownMenuSearch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #3d4354;
+    padding: 0; 
+}
+
+.dataTabularDropdownMenuSearch input {
+    background: transparent;
+    color: #ebf0f8;
+    border: none;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    outline: none;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.dataTabularDropdownMenuSearch input::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.dataTabularDropdownMenuSearch input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+}
+
+.dataTabularDropdownMenuSelection {
+    display: flex;
+    gap: 8px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #3d4354;
+    box-sizing: border-box;
+}
+
+.dataTabularDropdownMenuSelection button {
+    flex: 1;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    color: #ebf0f8;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTabularDropdownMenuSelection button:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.dataTabularDropdownMenuSelection button:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dataTabularDropdownMenuSelectionList {
+    overflow: auto;
+    max-height: 120px;
+    min-height: 120px;
+}
+
+.dataTabularDropdownMenuSelectionListNoValue {
+    padding: 14px 24px;
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+}
+
+.dataTabularDropdownMenuSelectionListLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+}
+
+.dataTabularDropdownMenuSelectionListLabel:hover {
+    opacity: 0.6; 
+    transform: translateX(1px);
+}
+
+.dataTabularDropdownMenuSelectionListLabel span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dataTabularDropdownMenuSelectionBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-top: 1px solid #3d4354;
+    box-sizing: border-box;
+}
+
+.dataTabularDropdownMenuSelectionBottom span {
+    font-size: 12px !important;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+}
+
+.dataTabularDropdownMenuSelectionBottom button {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    color: #ebf0f8;
+    border: 1px solid #4ecdc4;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTabularDropdownMenuSelectionBottom button:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.dataTabularWrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.dataEditingTableGridWrapper {
+    border: none;
+    outline: none;
+    padding: 24px;
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.dataEditingTableGrid {
+    display: grid;
+    grid-template-columns: repeat(10, auto);
+    grid-template-rows: repeat(8, auto);
+    gap: 8px;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.dataEditingTableGridCells {
+    width: 1.8vw;
+    height: 1.8vw;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+}
+
+.dataTabularWrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dataTabularWrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dataTabularWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.dataTabularWrapper::-webkit-scrollbar-thumb:hover {
+    background: #4ecdc4;
+}
+
+.dataTableGridContainer::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dataTableGridContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dataTableGridContainer::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.dataTableGridContainer::-webkit-scrollbar-thumb:hover {
+    background: #4ecdc4;
+}
+
+.dataTableColumnHeaderContainer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 60px;
+    height: 50px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%);
+}
+
+.dataTableCornerHeader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 50px;
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%) !important;
+    border-right: 1px solid #3d4354;
+    border-bottom: 1px solid #3d4354;
+    box-sizing: border-box;
+    cursor: pointer; 
+}
+
+.dataTableColumnHeaderContent {
+    position: relative;
+    height: 100%;
+    will-change: transform;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataTableColumnHeaderCell {
+    height: 30px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #ebf0f8;
+    border: 1px solid #3d4354;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1vw;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataTableCornerHeader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 50px;
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+    border-right: 1px solid #3d4354;
+    border-bottom: 1px solid #3d4354;
+    box-sizing: border-box;
+}
+
+.dataTableColumnHeaderContent {
+    position: relative;
+    height: 100%;
+    will-change: transform;
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataColumnHeaderCellWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    position: absolute;
+    top: 0;
+}
+
+.dataTabularHeaderFilterContainer {
+    width: 100%;
+    height: 30px;
+    border-right: 1px solid #3d4354;
+    border-top: 1px solid #3d4354;
+    border-bottom: 1px solid #3d4354;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%) !important; 
+    box-sizing: border-box;
+}
+
+.dataTabularHeaderFilterIcon {
+    width: 20%;
+    height: 100%;
+    font-size: 0.6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-left: 1px solid #3d4354;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%) !important; 
+    color: #6f7789;
+}
+
+.dataTabularHeaderFilter {
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%);
+    width: 80%;
+    height: 100%;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #cdd4e4;
+    border: none;
+    cursor: pointer;
+    padding: 0 0.6rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    border-radius: 0;
+}
+
+.dataTabularHeaderFilter:hover,
+.dataTabularHeaderFilter:focus {
+    outline: none;
+    border: none;
+}
+
+.dataTabularHeaderFilter::-ms-expand {
+    display: none;
+}
+
+.dataTabularHeaderFilter {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.dataTabularColumnResizeHandle {
+    position: absolute;
+    right: -2.5;
+    top: 0;
+    width: 5;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+}
+
+.dataTableRowHeaderContainer {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataTableRowHeaderContent {
+    position: relative;
+    width: 100%;
+    will-change: transform;
+    background: linear-gradient(to bottom, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataTableRowHeaderCell {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    color: #cdd4e4;
+    border-bottom: 1px solid #3d4354;
+    border-right: 1px solid #3d4354;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(to right, #0a0c10 0%, #171b24 100%) !important;
+}
+
+.dataTabularRowResizeHandle {
+    position: absolute;
+    bottom: -2.5;
+    left: 0;
+    width: 100%;
+    height: 5;
+    cursor: row-resize;
+    background: transparent;
+}
+
+.dataTableGridContainer {
+    position: absolute;
+    top: 50px;
+    left: 60px;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.dataTableSelectionOverlay {
+    position: absolute;
+    background-color: rgba(78, 205, 196, 0.1);
+    box-sizing: border-box;
+    border: 2px solid #4ecdc4;
+    pointer-events: auto;
+}
+
+.dataTableSelectionHandleBottomRight {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 10px;
+    height: 10px; 
+    background-color: #4ecdc4;
+    cursor: grab;
+    border: 1px solid #ebf0f8;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+.dataTableSelectionHandleBottomRight:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+.dataTableSelectionHandleBottomRight:focus {
+    opacity: 1.0;
+    outline: none;
+}
+
+.dataTableSelectionFormulaOverlay {
+    position: absolute;
+    border: 2px dashed #fbbf24;
+    background-color: rgba(251, 191, 36, 0.08);
+}
+
+.dataTableSelectionRangeOverlay {
+    position: absolute;
+    border: 2px dashed #a855f7;
+    background-color: rgba(168, 85, 247, 0.08);
+}
+
+.dataTableSummaryStatsWrapper {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dataTableSummaryStatsSubWrapper {
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    padding: 12px 24px;
+    min-width: 200px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 10px black;
+}
+
+.dataTableSummaryTitleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.dataTableSummaryTitleWrapper strong {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+}
+
+.dataTableSummaryStatList {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #6f7789;
+    line-height: 1.4;
+}
+
+.dataTableEditingSearchBoxWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    border: 3px solid #3d4354;
+    border-radius: 6px;
+    box-shadow: 0 0 40px black;
+    cursor: move;
+    z-index: 6;
+    width: 400px;
+    box-sizing: border-box;
+    padding: 24px 0; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    top: 0; 
+    left: 0;
+}
+
+.dataTableEditngSearchBarWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    width: 90%;
+    min-width: 90%;
+    max-width: 90%;
+    border-radius: 6px;
+    padding: 1rem 0.4rem; 
+    border: 1px solid #3d4354; 
+    border-radius: 6px; 
+    background-color: rgba(255,255,255,0.05);
+    margin: 0.6rem 0; 
+}
+
+.dataTableEditingSearchLabel {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    width: 90%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.4rem;
+    margin-bottom: 8px; 
+}
+
+.dataTableEditingSearchLabel span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.dataTableEditingSearchInput {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTableEditingSearchInput::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.dataTableEditingSearchInput:hover {
+    outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.dataTableEditingSearchInput:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dataTableEditingSearchOperationsButtonWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 90%;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.dataTableEditingSearchOperationsButton {
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.8rem 0.8rem;
+    border: 1px solid #3d4354;
+}
+
+.dataTableEditingSearchOperationsButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.dataTableEditingSearchOperationsButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dataTableCell {
+    box-sizing: border-box;
+    border-bottom: 1px solid #3d4354;
+    border-right: 1px solid #3d4354;
+    overflow: hidden;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    padding: 0px 0px;
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+.dataTableCell:hover {
+    outline: none;
+}
+
+.dataTableCell:focus {
+    outline: none;
+}
+
+.dataTableCellInput {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+    padding: 0 4px;
+    background-color: transparent;
+    color: #cdd4e4;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.dataTableCellInput:hover {
+    outline: none;
+}
+
+.dataTableCellInput:focus {
+    outline: none;
+}
+
+.dataTableEditingButtonsWrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 60%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dataTableStatusGroup {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.dataTableStatusItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #9aa3b5;
+    white-space: nowrap;
+    border-right: 1px solid #3d4354;
+}
+
+.dataTableStatusItem:last-child {
+    border-right: none;
+}
+
+.dataTableStatusItem svg {
+    flex-shrink: 0;
+    font-size: 0.66rem;
+    color: #6f7789;
+}
+
+.dataTableStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dataTableStatusBusy {
+    color: #4ecdc4;
+}
+
+.dataTableStatusBusy svg {
+    color: #4ecdc4;
+}
+
+.dataTableStatusActions {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.dataTableStatusIconButton {
+    padding: 5px 10px !important;
+}
+
+.dataTableStatusActions .dataTableEditingButton {
+    padding: 5px 10px;
+    border-right: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.dataTableStatusActions .dataTableEditingButton:last-child {
+    border-right: none;
+}
+
+.dataTableStatusActions .dataTableEditingButton:hover:not(:disabled) {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.dataTableEditingInputWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 0rem;
+    padding: 0 0.4rem;
+}
+
+.dataTableEditingButton {
+    background-color: transparent;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ebf0f8;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dataTableEditingButton:hover {
+    opacity: 0.6; 
+    transform: scale(1.05); 
+    border: none; 
+    outline: none; 
+}
+
+.dataTableEditingButton:focus {
+    background-color: transparent;
+    border: none; 
+    outline: none; 
+}
+
+.dataFormulaBarWrapper {
+    padding: 12px 24px; 
+    border-bottom: 1px solid #3d4354; 
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+}
+
+.dataFormulaBarWrapper input {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    color: #ebf0f8; 
+    border: 1px solid #3d4354; 
+    border-radius: 6px; 
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem; 
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    outline: none; 
+    flex: 1;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.dataFormulaBarWrapper input::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.dataFormulaBarWrapper input:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.dataFormulaBarWrapper input:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.dataContextMenu[popover],
+.dataTabularDropdownMenu[popover] {
+    inset: auto;
+    right: auto;
+    bottom: auto;
+    margin: 0;
+    width: fit-content;
+    height: fit-content;
+    color: #ebf0f8;
+}
+
+.dataContextMenu {
+    position: fixed;
+    z-index: 10100;
+    min-width: 200px;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 2px solid #3d4354;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+    user-select: none;
+    overflow: hidden;
+}
+
+.dataContextMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 4px;
+    color: #ebf0f8;
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.dataContextMenuItem:hover {
+    background: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.dataContextMenuItem {
+    justify-content: space-between;
+}
+
+.dataContextMenuItemLabel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dataContextMenuItemBind {
+    color: #6f7789;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.dataContextMenuItem:hover .dataContextMenuItemBind {
+    color: #4ecdc4;
+}
+
+.dataContextMenuSeparator {
+    height: 1px;
+    margin: 4px 0;
+    background: #3d4354;
+}
+
+.dataTableCellIdle {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.dataTableSheetTab.active {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    color: #12151b;
+}
+
+.dataTableSheetBar {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    height: 38px;
+    min-height: 38px;
+    box-sizing: border-box;
+    background: #12151b;
+    border-top: 2px solid #3d4354;
+}
+
+.dataTableSheetBarTabs {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.dataTableSheetTab {
+    padding: 0 20px;
+    max-width: 260px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: transparent;
+    border: none;
+    border-right: 2px solid #262b36;
+    border-radius: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #9aa3b5;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dataTableSheetTab:hover {
+    background-color: #1c212b;
+    color: #ebf0f8;
+}
+
+.dataTableSheetTab.current {
+    background-color: #1f2530;
+    box-shadow: inset 0 -3px 0 0 #4ecdc4;
+    color: #4ecdc4;
+}
+
+.dataTableSheetBarCount {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 20px;
+    border-left: 2px solid #262b36;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6f7789;
+    white-space: nowrap;
+}
+.dataTableEditingSearchHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 24px 16px 24px;
+    border-bottom: 1px solid #3d4354;
+}
+
+.dataTableEditingSearchTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+}
+
+.dataTableEditingSearchClose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dataTableEditingSearchClose:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+input.dataSettingsCheckbox {
+  position: relative;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #13151a;
+  border: 2px solid #3d4354;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+input.dataSettingsCheckbox:checked {
+  background: #4ecdc4;
+  border-color: #4ecdc4;
+}
+
+input.dataSettingsCheckbox:checked::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: solid #08090c;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.dropdown.dataFormulaFunctionDropdown {
+  width: 180px;
+  flex: 0 0 180px;
+}

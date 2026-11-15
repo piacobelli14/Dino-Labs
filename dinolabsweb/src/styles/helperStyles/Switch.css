@@ -1,50 +1,46 @@
-@media (min-width: 700px) and (max-width: 5399px) {
-    .consoleSwitch {
-        position: relative;
-        display: inline-block;
-        width: 1.8vw;
-        height: 1vw;
-        color: #222222;
-    }
+.consoleSwitch {
+    position: relative;
+    display: inline-block;
+    min-width: 40px;
+    max-width: 40px;
+    height: 20px;
+    cursor: pointer; 
+}
 
-    .consoleSwitch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
+.consoleSwitch input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
 
-    .consoleSlider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #f5f5f5;
-        transition: 0.4s;
-        border-radius: 1rem;
-        box-shadow: 0 0 0.4vh white;
-    }
+.consoleSlider {
+    position: absolute;
+    inset: 0;
+    background: #f5f5f5;
+    border-radius: 999px;
+    box-shadow: 0 0 0.4vh black;
+    transition: background-color .25s;
+}
 
-    .consoleSlider:before {
-        position: absolute;
-        content: "";
-        height: 1vw;
-        width: 1vw;
-        margin-top: 0.2vw;
-        margin-bottom: 0.2vw;
-        background-color: #5C2BE2;
-        transition: 0.4s;
-        border-radius: 50%;
-        transform: translateX(-0.4vw);
-    }
+.consoleSlider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #895BBA;
+    transform: translateY(-50%);
+    transition: transform .25s, background .25s;
+}
 
-    input:checked+.consoleSlider {
-        background-color: #5C2BE2;
-    }
+.consoleSwitch input:checked+.consoleSlider {
+    background: #895BBA;
+}
 
-    input:checked+.consoleSlider:before {
-        background-color: #f5f5f5;
-        transform: translateX(calc(1.6vw - 1.2vw));
-    }
+.consoleSwitch input:checked+.consoleSlider::before {
+    transform: translate(18px, -50%);
+    background: #f5f5f5;
 }

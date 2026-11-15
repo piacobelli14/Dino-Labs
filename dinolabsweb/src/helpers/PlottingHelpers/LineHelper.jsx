@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import useAuth from "../../UseAuth.jsx";
 
+
 const ManagerLinePlot = ({
   plotType,
   data,
@@ -25,7 +26,7 @@ const ManagerLinePlot = ({
       };
     } else if (size >= 500 && size <= 699) {
       return {
-        fontSize: 80,
+        fontSize: 8,
         grid: { left: 30, right: 30, bottom: 10, top: 15, containLabel: true },
         lineWidth: 2,
         symbolSize: 9,

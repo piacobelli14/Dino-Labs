@@ -1,0 +1,1601 @@
+.textTextContentWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.textTextToolbarWrapper {
+    width: 100%;
+    flex-shrink: 0;
+    z-index: 4;
+}
+
+.textTextToolBar {
+    width: 100%;
+    padding: 10px 24px 12px 24px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-bottom: 1px solid #3d4354;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.textTextTitleWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.textTextFileNameStack {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.textTextFileNameInput {
+    padding: 0.6rem 0.8rem;
+    box-sizing: border-box;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #ebf0f8;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 6rem;
+    max-width: 32%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin: 0;
+}
+
+.textTextFileNameInput svg {
+    margin-right: 8px;
+}
+
+.textTextOperationsButtonsWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    min-width: 0;
+    gap: 8px;
+    padding: 2px 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.textTextOperationsButtonsWrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.textTextOperationsButtonsWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.textTextOperationsButton {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.textTextOperationsButton {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    outline: none;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.textTextOperationsButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+    outline: none;
+}
+
+.textTextOperationsButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.textTextContent {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    overflow: auto;
+    padding: 40px 24px 240px 24px;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%) !important;
+}
+
+.textTextEditor {
+    position: relative;
+    width: 100%;
+    max-width: 816px;
+    min-height: 1056px;
+    margin: 0 auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 72px 88px;
+    outline: none;
+    color: #12151b;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    z-index: 1;
+    border-radius: 6px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+.textTextEditingSearchBoxWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    border: 3px solid #3d4354;
+    border-radius: 6px;
+    box-shadow: 0 0 40px black;
+    cursor: move;
+    z-index: 6;
+    width: 400px;
+    box-sizing: border-box;
+    padding: 24px 0; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    top: 0; 
+    left: 0;
+}
+
+.textTextEditngSearchBarWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    width: 90%;
+    min-width: 90%;
+    max-width: 90%;
+    border-radius: 6px;
+    padding: 1rem 0.4rem; 
+    border: 1px solid #3d4354; 
+    border-radius: 6px; 
+    background-color: rgba(255,255,255,0.05);
+    margin: 0.6rem 0; 
+}
+
+.textTextEditingSearchLabel {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    width: 90%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.4rem;
+    margin-bottom: 8px; 
+}
+
+.textTextEditingSearchLabel span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.textTextEditingSearchInput {
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    width: 90%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.textTextEditingSearchInput::placeholder {
+    color: #6f7789;
+    font-weight: 700;
+}
+
+.textTextEditingSearchInput:hover {
+    outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.textTextEditingSearchInput:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.textTextEditingSearchOperationsButtonWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 90%;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.textTextEditingSearchOperationsButton {
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.8rem 0.8rem;
+    border: 1px solid #3d4354;
+}
+
+.textTextEditingSearchOperationsButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.textTextEditingSearchOperationsButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.textTextEditingSearchCloseButton {
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+}
+
+.textTextDropdownMenu {
+    position: fixed;
+    min-width: 240px;
+    min-height: 100px;
+    max-height: 56vh;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    z-index: 20;
+    box-shadow: 0 0 20px black;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+    user-select: none;
+}
+
+.textTextDropdownMenu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.textTextDropdownMenu::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.textTextDropdownMenuItem {
+    display: flex;
+    padding: 12px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.textTextDropdownMenuItem:hover {
+    opacity: 0.8; 
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    transform: translateX(1px);
+}
+
+.math-expression {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    vertical-align: baseline;
+    font-family: 'Times New Roman', serif;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.math-expression:hover {
+    background-color: rgba(78, 205, 196, 0.15);
+}
+
+sup,
+sub {
+    font-size: 0.65em;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.textTextEditor [contenteditable="true"]:focus {
+    outline: 1px solid #4ecdc4;
+    background-color: rgba(78, 205, 196, 0.1);
+    border-radius: 2px;
+}
+
+.search-match {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 2px;
+}
+
+.search-match-active {
+    background-color: rgba(255, 165, 0, 0.8);
+    border-radius: 2px;
+}
+
+.textTextDrawSymbolWrapper {
+    display: flex;
+    width: 100%;
+    min-height: 500px;
+    max-height: 500px;
+    height: 500px;
+    padding-bottom: 24px;
+    box-sizing: border-box;
+}
+
+.textTextDrawSymbolSketchBoxStack {
+    flex: 1;
+    width: 60%;
+    overflow: hidden;
+    padding: 24px 12px;
+    box-sizing: border-box;
+}
+
+.textTextDrawSymbolSketchBoxStack canvas {
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: crosshair;
+    display: block;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+}
+
+.textTextDrawSymbolSketchBoxStackBottom {
+    display: flex;
+    gap: 8px;
+    padding: 12px 0;
+}
+
+.textTextDrawSymbolSketchBoxStackBottomButton {
+    color: #ebf0f8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0.6rem 0.8rem;
+    width: 100%;
+    border: 1px solid #3d4354;
+}
+
+.textTextDrawSymbolSketchBoxStackBottomButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(78, 205, 196, 0.2);
+}
+
+.textTextDrawSymbolSketchBoxStackBottomButton:focus {
+    outline: none;
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.textTextContent .textTextEditor,
+.textTextContent .textTextEditor:focus,
+.textTextContent .textTextEditor:hover {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #12151b !important;
+}
+
+.textTextContent .textTextEditorRich,
+.textTextContent .textTextEditorRich :where(*:not(math):not(math *)) {
+    all: revert;
+}
+
+.textTextContent .textTextEditorRich,
+.textTextContent .textTextEditorRich:focus,
+.textTextContent .textTextEditorRich:hover {
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 816px;
+    min-height: 1056px;
+    padding: 72px 88px;
+    margin: 0 auto;
+    outline: none;
+    background: transparent !important;
+    color: #000000 !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    font-size: 11pt !important;
+    line-height: normal !important;
+    white-space: normal !important;
+    text-align: left !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    box-shadow: none;
+    border-radius: 0;
+    overflow-wrap: break-word;
+}
+
+.textTextContent .textTextEditorRich .dw-page-layer {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    background: transparent !important;
+}
+
+.textTextContent .textTextEditorRich .dw-page {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.textTextContent .textTextEditorRich > *:not(.dw-page-layer) {
+    position: relative;
+    z-index: 1;
+}
+
+.textContextMenu[popover] {
+    inset: auto;
+    right: auto;
+    bottom: auto;
+    margin: 0;
+    width: fit-content;
+    height: fit-content;
+}
+
+.textContextMenu {
+    position: fixed;
+    z-index: 10100;
+    min-width: 200px;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 2px solid #3d4354;
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
+    color: #ebf0f8;
+    user-select: none;
+}
+
+.textContextMenuItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 4px;
+    color: #ebf0f8;
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.textContextMenuItem:hover {
+    background: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.textContextMenuItemLabel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.textContextMenuItemBind {
+    color: #6f7789;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.textContextMenuItem:hover .textContextMenuItemBind {
+    color: #4ecdc4;
+}
+
+.textContextMenuSeparator {
+    height: 1px;
+    margin: 4px 0;
+    background: #3d4354;
+}
+
+.textTextDrawCanvasFrame {
+    width: 100%;
+    flex: 0 0 auto;
+    height: 28vh;
+    box-sizing: border-box;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+}
+
+.textTextDrawCanvasFrame canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.textTextEditorRich {
+    white-space: normal;
+    font-weight: 400;
+    line-height: normal;
+    color: #000000;
+}
+
+.textTextEditorRich .dw-p,
+.textTextEditorRich h1,
+.textTextEditorRich h2,
+.textTextEditorRich h3,
+.textTextEditorRich h4,
+.textTextEditorRich h5,
+.textTextEditorRich h6,
+.textTextEditorRich p {
+    margin: 0;
+    padding: 0;
+}
+
+.textTextEditorRich sup,
+.textTextEditorRich sub {
+    font-size: 0.7em;
+    line-height: 0;
+}
+
+.textTextEditorRich .dw-tab {
+    display: inline-block;
+    min-width: 36pt;
+}
+
+.textTextEditorRich .dw-table {
+    border-collapse: collapse;
+    margin: 6pt 0;
+    max-width: 100%;
+}
+
+.textTextEditorRich .dw-td {
+    border: 1px solid #000000;
+    vertical-align: top;
+}
+
+.textTextEditorRich strong,
+.textTextEditorRich b {
+    font-weight: 700;
+}
+
+.textTextEditorRich em,
+.textTextEditorRich i {
+    font-style: italic;
+}
+
+.textTextEditorRich .dw-contextual + .dw-contextual {
+    margin-top: 0;
+}
+
+.textTextEditorRich .dw-contextual:has(+ .dw-contextual) {
+    margin-bottom: 0;
+}
+
+.textTextEditorRich .dw-math {
+    background: transparent;
+    font-family: "Cambria Math", "Times New Roman", serif;
+    white-space: nowrap;
+}
+
+.textTextEditorRich .dw-math math {
+    font-size: 1.05em;
+}
+
+.textTextEditingButtonsWrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 100%;
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.textTextEditingButtonsWrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.textTextEditingButtonsWrapper::-webkit-scrollbar-thumb {
+    background: #3d4354;
+    border-radius: 2px;
+}
+
+.textTextStatusGroup {
+    display: flex;
+    align-items: stretch;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.textTextStatusItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #9aa3b5;
+    white-space: nowrap;
+    border-right: 1px solid #3d4354;
+}
+
+.textTextStatusItem:last-child {
+    border-right: none;
+}
+
+.textTextStatusItem svg {
+    flex-shrink: 0;
+    font-size: 0.66rem;
+    color: #6f7789;
+}
+
+.textTextStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.textTextStatusActions {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border: 1px solid #3d4354;
+    border-radius: 5px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.textTextEditingButton {
+    background-color: transparent;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ebf0f8;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextStatusIconButton {
+    padding: 5px 10px !important;
+}
+
+.textTextStatusActions .textTextEditingButton {
+    padding: 5px 10px;
+    border-right: 1px solid #3d4354;
+    border-radius: 0;
+}
+
+.textTextStatusActions .textTextEditingButton:last-child {
+    border-right: none;
+}
+
+.textTextStatusActions .textTextEditingButton:hover:not(:disabled) {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.textTextStatusIconButton {
+    padding: 5px 10px;
+}
+
+.textTextStatusMenuButton {
+    padding: 5px 10px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+.textTextEditorColorControl {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px;
+    border-right: 1px solid #3d4354;
+    color: #ebf0f8;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextEditorColorControl:last-child {
+    border-right: none;
+}
+
+.textTextEditorColorControl:hover {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.textTextEditorColorSwatch {
+    display: block;
+    width: 16px;
+    height: 4px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px #3d4354;
+}
+
+.textTextEditorRich {
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.textTextEditorRich .dw-table {
+    max-width: 100%;
+    table-layout: auto;
+}
+
+.textTextEditorRich .dw-td {
+    overflow-wrap: break-word;
+}
+
+.textTextEditorRich img,
+.textTextEditorRich math {
+    max-width: 100%;
+}
+
+.textTextStatusItem {
+    min-width: 0;
+}
+
+.textTextStatusItem > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.textTextStatusGroup,
+.textTextStatusActions {
+    flex: 0 0 auto;
+}
+
+.textTextEditorRich .dw-image {
+    max-width: 100%;
+    height: auto;
+    vertical-align: baseline;
+}
+
+.textTextEditorRich .dw-link {
+    color: #0563C1;
+    text-decoration: underline;
+}
+
+.textTextEditorRich .dw-list {
+    margin: 0;
+    padding-left: 0;
+}
+
+.textTextEditorRich .dw-list .dw-p {
+    display: list-item;
+}
+
+.textTextEditorRich .dw-image-placeholder {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px dashed #9aa3b5;
+    border-radius: 4px;
+    background: #f4f5f7;
+    color: #6f7789;
+    font-size: 9pt;
+    text-align: center;
+}
+
+.textTextSizeInput {
+    width: 40px;
+    min-width: 40px;
+    padding: 5px 4px;
+    background-color: transparent;
+    border: none;
+    border-right: 1px solid #3d4354;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: center;
+}
+
+.textTextSizeInput:focus {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.textTextSizeInput {
+    width: 40px;
+    min-width: 40px;
+    padding: 5px 4px;
+    background-color: transparent;
+    border: none;
+    border-right: 1px solid #3d4354;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: center;
+}
+
+.textTextSizeInput:focus {
+    background-color: rgba(78, 205, 196, 0.12);
+    color: #4ecdc4;
+}
+
+.textTextDocumentStyleHost {
+    display: none;
+}
+
+.textTextDocumentHost {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    overflow: auto;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+}
+
+.textTextDocumentHost > * {
+    width: 100%;
+    height: 100%;
+}
+
+.textTextContent .textTextEditorRich table,
+.textTextContent .textTextEditorRich thead,
+.textTextContent .textTextEditorRich tbody,
+.textTextContent .textTextEditorRich tr,
+.textTextContent .textTextEditorRich td,
+.textTextContent .textTextEditorRich th,
+.textTextContent .textTextEditorRich p,
+.textTextContent .textTextEditorRich li,
+.textTextContent .textTextEditorRich ul,
+.textTextContent .textTextEditorRich ol,
+.textTextContent .textTextEditorRich h1,
+.textTextContent .textTextEditorRich h2,
+.textTextContent .textTextEditorRich h3,
+.textTextContent .textTextEditorRich h4,
+.textTextContent .textTextEditorRich h5,
+.textTextContent .textTextEditorRich h6,
+.textTextContent .textTextEditorRich span,
+.textTextContent .textTextEditorRich a,
+.textTextContent .textTextEditorRich sup,
+.textTextContent .textTextEditorRich sub,
+.textTextContent .textTextEditorRich br,
+.textTextContent .textTextEditorRich img {
+    color: inherit !important;
+    background-color: inherit;
+}
+
+.textTextContent .textTextEditorRich .dw-run,
+.textTextContent .textTextEditorRich .dw-p,
+.textTextContent .textTextEditorRich .dw-td,
+.textTextContent .textTextEditorRich .dw-link,
+.textTextContent .textTextEditorRich .dw-image {
+    background-color: transparent;
+}
+
+.textTextContent .textTextEditorRich .dw-table {
+    width: auto !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    box-sizing: border-box !important;
+}
+
+.textTextContent .textTextEditorRich .dw-td,
+.textTextContent .textTextEditorRich .dw-td * {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+}
+
+.textTextContent .textTextEditorRich .dw-image,
+.textTextContent .textTextEditorRich img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.textTextContent .textTextEditorRich .dw-p,
+.textTextContent .textTextEditorRich li {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+}
+
+.textTextContent .textTextEditorRich .dw-page-gap {
+    display: block !important;
+    width: calc(100% + 176px) !important;
+    margin: 0 0 0 -88px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    user-select: none !important;
+}
+
+.textTextRuler {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    margin: 2px auto 0 auto;
+    box-sizing: border-box;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: none;
+    box-shadow: inset 0 0 0 1px #3d4354;
+    border-radius: 4px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.textTextRulerMargin {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border-right: 1px solid #3d4354;
+}
+
+.textTextRulerMargin.right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid #3d4354;
+}
+
+.textTextRulerTick {
+    position: absolute;
+    top: 13px;
+    width: 1px;
+    height: 4px;
+    background: #4a5160;
+}
+
+.textTextRulerTick.major {
+    top: 11px;
+    height: 6px;
+    background: #8b93a5;
+}
+
+.textTextRulerLabel {
+    position: absolute;
+    top: 2px;
+    width: 24px;
+    margin-left: -12px;
+    text-align: center;
+    font-size: 0.56rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #8b93a5;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.textTextRulerHandle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    cursor: ew-resize;
+    background: #4ecdc4;
+    border: 1px solid #12151b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.textTextRulerHandle.first {
+    top: 1px;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    border-radius: 0;
+}
+
+.textTextRulerHandle.left {
+    bottom: 1px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    border-radius: 0;
+}
+
+.textTextRulerHandle.right {
+    bottom: 1px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    border-radius: 0;
+}
+
+.textTextRulerHandle:hover {
+    background: #ffffff;
+}
+
+.textTextSpacingValue {
+    display: flex;
+    align-items: center;
+    padding: 5px 6px;
+    border-right: 1px solid #3d4354;
+    color: #ebf0f8;
+    font-size: 0.66rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+.textTextStepperSign {
+    margin-left: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.textTextEditingSearchHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    box-sizing: border-box;
+    padding: 0 0.4rem 0.6rem 0.4rem;
+    border-bottom: 1px solid #3d4354;
+    margin-bottom: 0.2rem;
+}
+
+.textTextEditingSearchTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+}
+
+.textTextEditingSearchClose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.textTextEditingSearchClose:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.textTextContent .textTextEditorRich .dw-p,
+.textTextContent .textTextEditorRich li,
+.textTextContent .textTextEditorRich h1,
+.textTextContent .textTextEditorRich h2,
+.textTextContent .textTextEditorRich h3,
+.textTextContent .textTextEditorRich h4,
+.textTextContent .textTextEditorRich h5,
+.textTextContent .textTextEditorRich h6 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.textTextEditorRich .dw-equation {
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+.textTextEditorRich .dw-equation-active {
+    outline: 1px solid #4ecdc4;
+    background: rgba(78, 205, 196, 0.1);
+}
+
+.textTextEditorRich .dw-slot {
+    display: inline-block;
+    min-width: 0.65em;
+    border-bottom: 1px dashed #9aa3b5;
+}
+
+.textTextModalScrim {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 11;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(10, 12, 16, 0.55);
+}
+
+.textTextModal {
+    display: flex;
+    flex-direction: column;
+    width: 38rem;
+    height: 27rem;
+    max-width: calc(100vw - 4rem);
+    max-height: calc(100vh - 4rem);
+    box-sizing: border-box;
+    overflow: hidden;
+    background: linear-gradient(160deg, #171b24 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #ebf0f8;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.textTextModalWide {
+    width: 46rem;
+    height: 30rem;
+}
+
+.textTextModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    height: 3rem;
+    padding: 0 10px 0 16px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #3d4354;
+}
+
+.textTextModalTitle {
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #ebf0f8;
+}
+
+.textTextModalClose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextModalClose:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.textTextModalBody {
+    display: flex;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.textTextModalSidebar {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 2px;
+    width: 13rem;
+    padding: 10px;
+    box-sizing: border-box;
+    border-right: 1px solid #3d4354;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.textTextModalSidebarItem {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
+    height: 2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    outline: none;
+    color: #9aa3b5;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextModalSidebarItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ebf0f8;
+}
+
+.textTextModalSidebarItem.current {
+    background: rgba(78, 205, 196, 0.15);
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+}
+
+.textTextModalSidebarGlyph {
+    display: flex;
+    justify-content: center;
+    width: 1.1rem;
+    font-size: 0.86rem;
+    font-family: "Cambria Math", "Latin Modern Math", serif;
+}
+
+.textTextModalContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    gap: 10px;
+    min-width: 0;
+    min-height: 0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.textTextModalSearch {
+    flex-shrink: 0;
+    height: 2rem;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.72rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.textTextModalSource {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.textTextModalSearch::placeholder {
+    color: #6f7789;
+}
+
+.textTextModalSearch:focus {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+}
+
+.textTextModalGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 2.25rem);
+    grid-auto-rows: 2.25rem;
+    justify-content: start;
+    align-content: start;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d4354 transparent;
+}
+
+.textTextModalGridShort {
+    flex: 0 0 auto;
+    height: 2.25rem;
+    overflow: hidden;
+}
+
+.textTextModalCell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.86rem;
+    font-family: "Cambria Math", "Latin Modern Math", serif;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextModalCell:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.textTextModalEmpty {
+    grid-column: 1 / -1;
+    padding: 6px 2px;
+    color: #6f7789;
+    font-size: 0.72rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.textTextModalPreview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    height: 5rem;
+    padding: 8px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    color: #000000;
+    font-size: 1.2rem;
+    font-family: "Cambria Math", "Latin Modern Math", serif;
+    overflow: auto;
+}
+
+.textTextModalFooter {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.textTextModalButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 6px;
+    height: 2rem;
+    padding: 0 12px;
+    background: linear-gradient(160deg, #1f242e 0%, #12151b 100%);
+    border: 1px solid #3d4354;
+    border-radius: 6px;
+    outline: none;
+    color: #ebf0f8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.textTextModalButton:hover {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.textTextModalButtonPrimary {
+    background: linear-gradient(135deg, #4ecdc4 0%, #3bb3ac 100%);
+    border-color: #4ecdc4;
+    color: #12151b;
+}
+
+.textTextModalDraw {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    gap: 10px;
+    min-height: 0;
+}
+
+.textTextModalDraw .textTextDrawCanvasFrame {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+}
+
+.textTextModalTemplate {
+    width: auto;
+    min-width: 3rem;
+    height: 3rem;
+    padding: 0 10px;
+    font-size: 1.05rem;
+}
+
+.textTextModalTemplate math {
+    pointer-events: none;
+}
+
+.textTextModalTemplateGrid {
+    grid-template-columns: repeat(auto-fill, minmax(3rem, max-content));
+    grid-auto-rows: 3rem;
+}
+
+.textTextModalPreview .dw-ph,
+.textTextModalTemplate .dw-ph {
+    padding: 0 2px;
+    border: 1px dashed #6f7789;
+    border-radius: 2px;
+    color: #6f7789;
+}
+
+.textTextModalPreview .dw-ph {
+    border-color: #9aa3b5;
+    color: #9aa3b5;
+}
+
+.textTextModalTemplate:hover .dw-ph {
+    border-color: #12151b;
+    color: #12151b;
+}
+
+.textTextModalSidebarItem.current .textTextModalSidebarGlyph {
+    color: #4ecdc4;
+}
+
+.textTextEditingSearchLabel .textSettingsCheckbox {
+    position: relative;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #13151a;
+    border: 2px solid #3d4354;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.textTextEditingSearchLabel .textSettingsCheckbox:checked {
+    background: #4ecdc4;
+    border-color: #4ecdc4;
+}
+
+.textTextEditingSearchLabel .textSettingsCheckbox:checked::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 4px;
+    width: 4px;
+    height: 8px;
+    border: solid #08090c;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
