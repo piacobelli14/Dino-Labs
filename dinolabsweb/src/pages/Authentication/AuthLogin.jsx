@@ -51,9 +51,9 @@ const Login = () => {
                 } else {
                     setToken(data.token);
                     if (data.isadmin === true) {
-                        navigate("/dinolabs");
+                        navigate("/studio");
                     } else {
-                        navigate("/dinolabs");
+                        navigate("/studio");
                     }
                 }
             } else if (response.status === 429) {
@@ -84,9 +84,9 @@ const Login = () => {
             if (response.status === 200) {
                 setToken(data.token);
                 if (data.isadmin === true) {
-                    navigate("/dinolabs");
+                    navigate("/studio");
                 } else {
-                    navigate("/dinolabs");
+                    navigate("/studio");
                 }
             } else if (response.status === 429) {
                 setLoginError("Too many attempts. Please try again later.");
@@ -137,7 +137,7 @@ const Login = () => {
                     <div className={!isTouchDevice ? "loginBlock" : "loginBlockTouch"} style={{"backgroundColor": "rgba(255, 255, 255, 0.0)"}}>
                         <img
                             className={!isTouchDevice ? "loginLogo" : "loginLogoTouch"}
-                            src="./DinoLabsLogo-Letters-White.png"
+                            src="./studioLogo-Letters-White.png"
                             alt=""
                         />
 
