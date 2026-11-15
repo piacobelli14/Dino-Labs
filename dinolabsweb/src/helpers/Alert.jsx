@@ -102,7 +102,7 @@ function Alert({
         <div className="notiAlert" role="dialog" aria-modal="true">
           <img
             className="notiAlertImage"
-            src="./dinolabs.png"
+            src="./DinoLabsLogo-White.png"
             alt="Logo"
           />
           {title && <label className="notiAlertHeader">{title}</label>}
