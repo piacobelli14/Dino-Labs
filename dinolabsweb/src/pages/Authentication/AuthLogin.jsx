@@ -137,7 +137,7 @@ const Login = () => {
                     <div className={!isTouchDevice ? "loginBlock" : "loginBlockTouch"} style={{"backgroundColor": "rgba(255, 255, 255, 0.0)"}}>
                         <img
                             className={!isTouchDevice ? "loginLogo" : "loginLogoTouch"}
-                            src="./studioLogo-Letters-White.png"
+                            src="./DinoLabsLogo-Letters-White.png"
                             alt=""
                         />
 
