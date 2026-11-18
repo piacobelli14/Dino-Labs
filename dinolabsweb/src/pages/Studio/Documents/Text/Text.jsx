@@ -3876,7 +3876,7 @@ function useDebounce(callback, delay) {
   }, [callback, delay]);
 }
 
-export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave, onEdit }) {
+export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave, onEdit, onDirtyChange }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState("idle");
@@ -3956,6 +3956,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
   const recordHistory = useCallback((previous, next) => {
     clearTimeout(saveTimeout.current);
+    pendingHistoryRef.current = null;
 
     const entries = historyRef.current.slice(0, historyIndexRef.current + 1);
 
@@ -3970,23 +3971,47 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     setHistoryIndex(entries.length - 1);
   }, []);
 
+  const pendingHistoryRef = useRef(null);
+  const baselineRef = useRef(null);
+  const editCallbacksRef = useRef({ onEdit, onDirtyChange });
+
+  editCallbacksRef.current = { onEdit, onDirtyChange };
+
+  const flushHistory = useCallback(() => {
+    clearTimeout(saveTimeout.current);
+
+    const content = pendingHistoryRef.current;
+
+    pendingHistoryRef.current = null;
+
+    if (content === null) return;
+
+    const entries = historyRef.current.slice(0, historyIndexRef.current + 1);
+
+    if (entries.length && entries[entries.length - 1] === content) return;
+
+    entries.push(content);
+    historyRef.current = entries;
+    historyIndexRef.current = entries.length - 1;
+    setHistory(entries);
+    setHistoryIndex(entries.length - 1);
+  }, []);
+
   const saveToHistory = useCallback((content) => {
     if (isUndoRedoAction.current) return;
 
     clearTimeout(saveTimeout.current);
+    pendingHistoryRef.current = content;
+    saveTimeout.current = setTimeout(flushHistory, 300);
+  }, [flushHistory]);
 
-    const currentHistory = history;
-    const currentIndex = historyIndex;
+  const emitEdit = useCallback((previous, next, live) => {
+    editCallbacksRef.current.onEdit?.(previous, next);
 
-    saveTimeout.current = setTimeout(() => {
-      const trimmedHistory = currentHistory.slice(0, currentIndex + 1);
+    if (baselineRef.current === null) return;
 
-      if (trimmedHistory.length === 0 || trimmedHistory[trimmedHistory.length - 1] !== content) {
-        setHistory([...trimmedHistory, content]);
-        setHistoryIndex(currentIndex + 1);
-      }
-    }, 300);
-  }, [history, historyIndex]);
+    editCallbacksRef.current.onDirtyChange?.((live === undefined ? next.fullCode : live) !== baselineRef.current);
+  }, []);
 
   useEffect(() => {
     async function loadFile() {
@@ -4153,8 +4178,10 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     writeEditor(pendingDocumentRef.current);
     pendingDocumentRef.current = null;
+    baselineRef.current = readEditor();
+    editCallbacksRef.current.onDirtyChange?.(false);
     requestAnimationFrame(() => paginate());
-  }, [loading, writeEditor, paginate]);
+  }, [loading, writeEditor, readEditor, paginate]);
 
   const serializeDocument = useCallback(async (content, kind) => {
 
@@ -4205,7 +4232,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     saveToHistory(currentContent);
 
-    onEdit?.({ fullCode: history[historyIndex] || "" }, { fullCode: currentContent });
+    emitEdit({ fullCode: history[historyIndex] || "" }, { fullCode: currentContent });
     debouncedNotifySaveStatus("Unsaved Changes");
   }, [saveToHistory, onEdit, debouncedNotifySaveStatus, history, historyIndex, readEditor]);
 
@@ -4229,10 +4256,22 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
         await writable.write(payload);
         await writable.close();
         setSaveStatus("saved");
-        setHistory([]);
-        setHistoryIndex(-1);
+        clearTimeout(saveTimeout.current);
+        pendingHistoryRef.current = null;
+
+        if (historyRef.current[historyIndexRef.current] !== content) {
+          const entries = [...historyRef.current.slice(0, historyIndexRef.current + 1), content];
+
+          historyRef.current = entries;
+          historyIndexRef.current = entries.length - 1;
+          setHistory(entries);
+          setHistoryIndex(entries.length - 1);
+        }
+
+        baselineRef.current = content;
         notifySaveStatus("Saved!", { operation: "save" });
         onSave?.(content);
+        editCallbacksRef.current.onDirtyChange?.(false);
         setTimeout(() => {
           setSaveStatus("idle");
           notifySaveStatus("", { operation: "save" });
@@ -4279,18 +4318,23 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     }
   }, [fileHandle, readEditor, serializeDocument]);
 
-  const handleUndo = useCallback(() => {
-    if (historyIndex <= 0) return;
-
+  const stepHistory = useCallback((direction) => {
     const editor = editorRef.current;
     if (!editor) return;
 
+    flushHistory();
+
+    const newIndex = historyIndexRef.current + direction;
+
+    if (newIndex < 0 || newIndex >= historyRef.current.length) return;
+
     isUndoRedoAction.current = true;
 
-    const newIndex = historyIndex - 1;
-    const content = history[newIndex];
+    const previous = readEditor();
+    const content = historyRef.current[newIndex];
 
     writeEditor(content);
+    historyIndexRef.current = newIndex;
     setHistoryIndex(newIndex);
 
     editor.focus();
@@ -4301,43 +4345,17 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     sel.removeAllRanges();
     sel.addRange(range);
 
-    onEdit?.({ fullCode: readEditor() }, { fullCode: content });
-    debouncedNotifySaveStatus("Unsaved Changes", { operation: "undo" });
+    emitEdit({ fullCode: previous }, { fullCode: content }, readEditor());
+    debouncedNotifySaveStatus("Unsaved Changes", { operation: direction < 0 ? "undo" : "redo" });
 
     setTimeout(() => {
       isUndoRedoAction.current = false;
     }, 100);
-  }, [historyIndex, history, onEdit, debouncedNotifySaveStatus, writeEditor, readEditor]);
+  }, [flushHistory, emitEdit, debouncedNotifySaveStatus, writeEditor, readEditor]);
 
-  const handleRedo = useCallback(() => {
-    if (historyIndex >= history.length - 1) return;
+  const handleUndo = useCallback(() => stepHistory(-1), [stepHistory]);
 
-    const editor = editorRef.current;
-    if (!editor) return;
-
-    isUndoRedoAction.current = true;
-
-    const newIndex = historyIndex + 1;
-    const content = history[newIndex];
-
-    writeEditor(content);
-    setHistoryIndex(newIndex);
-
-    editor.focus();
-    const range = document.createRange();
-    const sel = window.getSelection();
-    range.selectNodeContents(editor);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
-
-    onEdit?.({ fullCode: readEditor() }, { fullCode: content });
-    debouncedNotifySaveStatus("Unsaved Changes", { operation: "redo" });
-
-    setTimeout(() => {
-      isUndoRedoAction.current = false;
-    }, 100);
-  }, [historyIndex, history, onEdit, debouncedNotifySaveStatus, writeEditor, readEditor]);
+  const handleRedo = useCallback(() => stepHistory(1), [stepHistory]);
 
   const handleCut = () => {
     const editor = editorRef.current;
@@ -4350,7 +4368,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     setTimeout(() => {
       const newContent = editor.textContent || "";
-      onEdit?.({ fullCode: currentContent }, { fullCode: newContent });
+      emitEdit({ fullCode: currentContent }, { fullCode: newContent });
       debouncedNotifySaveStatus("Unsaved Changes", { operation: "cut" });
     }, 0);
   };
@@ -4368,7 +4386,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     setTimeout(() => {
       const newContent = editor.textContent || "";
-      onEdit?.({ fullCode: currentContent }, { fullCode: newContent });
+      emitEdit({ fullCode: currentContent }, { fullCode: newContent });
       debouncedNotifySaveStatus("Unsaved Changes", { operation: "paste" });
     }, 0);
   };
@@ -4508,7 +4526,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     setEquationSource("");
     setEquationMenu(null);
     saveToHistory(readEditor());
-    onEdit?.({ fullCode: previous }, { fullCode: readEditor() });
+    emitEdit({ fullCode: previous }, { fullCode: readEditor() });
     debouncedNotifySaveStatus("Unsaved Changes");
     paginateRef.current?.();
   }, [equationSource, restoreSelection, readEditor, saveToHistory, onEdit, debouncedNotifySaveStatus]);
@@ -4583,7 +4601,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     selection.addRange(restored);
 
     saveToHistory(readEditor());
-    onEdit?.({ fullCode: previous }, { fullCode: readEditor() });
+    emitEdit({ fullCode: previous }, { fullCode: readEditor() });
     debouncedNotifySaveStatus("Unsaved Changes");
     paginateRef.current?.();
   }, [readEditor, saveToHistory, onEdit, debouncedNotifySaveStatus, restoreSelection]);
@@ -4639,7 +4657,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     setIndents(next);
     saveToHistory(readEditor());
-    onEdit?.({ fullCode: previous }, { fullCode: readEditor() });
+    emitEdit({ fullCode: previous }, { fullCode: readEditor() });
     debouncedNotifySaveStatus("Unsaved Changes");
     paginateRef.current?.();
   }, [selectedParagraphs, readEditor, saveToHistory, onEdit, debouncedNotifySaveStatus]);
@@ -4662,7 +4680,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     }
 
     saveToHistory(readEditor());
-    onEdit?.({ fullCode: previous }, { fullCode: readEditor() });
+    emitEdit({ fullCode: previous }, { fullCode: readEditor() });
     debouncedNotifySaveStatus("Unsaved Changes");
     paginateRef.current?.();
   }, [selectedParagraphs, readEditor, saveToHistory, onEdit, debouncedNotifySaveStatus, restoreSelection]);
@@ -4756,7 +4774,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     const previous = historyRef.current[historyIndexRef.current] ?? "";
 
     saveToHistory(readEditor());
-    onEdit?.({ fullCode: previous }, { fullCode: readEditor() });
+    emitEdit({ fullCode: previous }, { fullCode: readEditor() });
     debouncedNotifySaveStatus("Unsaved Changes");
   }, [saveToHistory, readEditor, onEdit, debouncedNotifySaveStatus, toggleInlineStyle, applyInlineStyle]);
 
@@ -4968,7 +4986,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
       scrollCaretIntoView();
     }
 
-    onEdit?.({ fullCode: previous }, { fullCode: nextText });
+    emitEdit({ fullCode: previous }, { fullCode: nextText });
     debouncedNotifySaveStatus("Unsaved Changes");
   }, [recordHistory, setCaretOffset, scrollCaretIntoView, onEdit, debouncedNotifySaveStatus]);
 
@@ -5298,7 +5316,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     setTimeout(() => {
       const newContent = editor.textContent || "";
-      onEdit?.({ fullCode: currentContent }, { fullCode: newContent });
+      emitEdit({ fullCode: currentContent }, { fullCode: newContent });
       debouncedNotifySaveStatus("Unsaved Changes", { operation: "insertSymbol" });
     }, 10);
   }, [saveToHistory, debouncedNotifySaveStatus, onEdit]);
@@ -5518,7 +5536,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
     const newText = text.substring(0, start) + replaceTerm + text.substring(end);
     editor.textContent = newText;
 
-    onEdit?.({ fullCode: currentContent }, { fullCode: newText });
+    emitEdit({ fullCode: currentContent }, { fullCode: newText });
     debouncedNotifySaveStatus("Unsaved Changes", { operation: "replace" });
     setTimeout(() => findAllMatches(searchTerm), 0);
   };
@@ -5540,7 +5558,7 @@ export default function Text({ fileHandle, keyBinds, onSaveStatusChange, onSave,
 
     editor.textContent = text;
 
-    onEdit?.({ fullCode: currentContent }, { fullCode: text });
+    emitEdit({ fullCode: currentContent }, { fullCode: text });
     debouncedNotifySaveStatus("Unsaved Changes", { operation: "replaceAll" });
     setTimeout(() => findAllMatches(searchTerm), 0);
   };

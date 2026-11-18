@@ -22,6 +22,7 @@ const EMU_PER_POINT = 12700;
 const DEFAULT_SLIDE_WIDTH = 9144000;
 const DEFAULT_SLIDE_HEIGHT = 6858000;
 const HISTORY_LIMIT = 80;
+const HISTORY_DELAY_MS = 300;
 const FONT_SIZE_LADDER = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 54, 66, 80, 96];
 const SLIDE_RAIL_WIDTH = 168;
 
@@ -1040,29 +1041,67 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
   const slideBtnRef = useRef(null);
   const bannerTimerRef = useRef(null);
   const [stageScale, setStageScale] = useState(1);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
+  const historyTimerRef = useRef(null);
+  const savedSnapshotRef = useRef(null);
+  const lastDirtyRef = useRef(false);
+  const latestSlidesRef = useRef(slides);
+
+  latestSlidesRef.current = slides;
 
   const notifySaveStatus = useCallback((status) => {
     setSaveBanner(status);
     onSaveStatusChange?.(status);
-    onDirtyChange?.(status === "Unsaved Changes");
 
     if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
 
     bannerTimerRef.current = setTimeout(() => setSaveBanner(null), SAVE_BANNER_TIMEOUT_MS);
-  }, [onSaveStatusChange, onDirtyChange]);
+  }, [onSaveStatusChange]);
+
+  const recordHistory = useCallback((next) => {
+    if (historyTimerRef.current) {
+      clearTimeout(historyTimerRef.current);
+      historyTimerRef.current = null;
+    }
+
+    const snapshot = JSON.stringify(next);
+    const trimmed = historyRef.current.slice(0, historyIndexRef.current + 1);
+
+    if (!trimmed.length || trimmed[trimmed.length - 1] === snapshot) return;
+
+    const appended = [...trimmed, snapshot].slice(-HISTORY_LIMIT);
+
+    historyRef.current = appended;
+    historyIndexRef.current = appended.length - 1;
+    setHistory(appended);
+    setHistoryIndex(appended.length - 1);
+  }, []);
 
   const commitSlides = useCallback((next) => {
     setSlides(next);
-    setHistory((previous) => {
-      const trimmed = previous.slice(0, historyIndex + 1);
-      const appended = [...trimmed, JSON.parse(JSON.stringify(next))].slice(-HISTORY_LIMIT);
-
-      setHistoryIndex(appended.length - 1);
-
-      return appended;
-    });
+    recordHistory(next);
     notifySaveStatus("Unsaved Changes");
-  }, [historyIndex, notifySaveStatus]);
+  }, [recordHistory, notifySaveStatus]);
+
+  useEffect(() => {
+    if (!historyRef.current.length || dragRef.current || resizeRef.current) return undefined;
+
+    historyTimerRef.current = setTimeout(() => recordHistory(latestSlidesRef.current), HISTORY_DELAY_MS);
+
+    return () => clearTimeout(historyTimerRef.current);
+  }, [slides, recordHistory]);
+
+  useEffect(() => {
+    if (savedSnapshotRef.current === null) return;
+
+    const dirty = JSON.stringify(slides) !== savedSnapshotRef.current;
+
+    if (dirty === lastDirtyRef.current) return;
+
+    lastDirtyRef.current = dirty;
+    onDirtyChange?.(dirty);
+  }, [slides, history, onDirtyChange]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1173,7 +1212,10 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
 
         setPictures(loadedPictures);
         setSlides(parsed);
-        setHistory([JSON.parse(JSON.stringify(parsed))]);
+        historyRef.current = [JSON.stringify(parsed)];
+        historyIndexRef.current = 0;
+        savedSnapshotRef.current = historyRef.current[0];
+        setHistory(historyRef.current);
         setHistoryIndex(0);
         setCurrentSlide(0);
         setSelectedShape(null);
@@ -1529,19 +1571,27 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
     setCurrentSlide(target);
   }, [slides, currentSlide, commitSlides]);
 
-  const undo = useCallback(() => {
-    if (historyIndex <= 0) return;
+  const stepHistory = useCallback((direction) => {
+    if (dragRef.current || resizeRef.current) return;
 
-    setHistoryIndex(historyIndex - 1);
-    setSlides(JSON.parse(JSON.stringify(history[historyIndex - 1])));
-  }, [history, historyIndex]);
+    recordHistory(latestSlidesRef.current);
 
-  const redo = useCallback(() => {
-    if (historyIndex >= history.length - 1) return;
+    const target = historyIndexRef.current + direction;
+    const snapshot = historyRef.current[target];
 
-    setHistoryIndex(historyIndex + 1);
-    setSlides(JSON.parse(JSON.stringify(history[historyIndex + 1])));
-  }, [history, historyIndex]);
+    if (snapshot === undefined) return;
+
+    const restored = JSON.parse(snapshot);
+
+    historyIndexRef.current = target;
+    setHistoryIndex(target);
+    setSlides(restored);
+    setCurrentSlide((previous) => Math.max(0, Math.min(restored.length - 1, previous)));
+  }, [recordHistory]);
+
+  const undo = useCallback(() => stepHistory(-1), [stepHistory]);
+
+  const redo = useCallback(() => stepHistory(1), [stepHistory]);
 
   const startShapeDrag = (event, shape) => {
     if (presenting) return;
@@ -1696,18 +1746,39 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
       await writable.close();
 
       entriesRef.current = await unzipEntries(await blob.arrayBuffer());
+      savedSnapshotRef.current = JSON.stringify(latestSlidesRef.current);
+      lastDirtyRef.current = false;
+      onDirtyChange?.(false);
       notifySaveStatus("Saved Changes");
       onSave?.();
     } catch (saveError) {
       await showDialog({ title: "Save Failed", message: saveError?.message || String(saveError), showCancel: false });
     }
-  }, [buildFile, fileHandle, notifySaveStatus, onSave]);
+  }, [buildFile, fileHandle, notifySaveStatus, onSave, onDirtyChange]);
 
   useEffect(() => {
     const onKeyDown = (event) => {
       const modifier = event.metaKey || event.ctrlKey;
 
-      if (!modifier || event.key.toLowerCase() !== "s") return;
+      if (!modifier) return;
+
+      const key = event.key.toLowerCase();
+
+      if (key === "z" || key === "y") {
+        const target = event.target;
+
+        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (key === "y" || event.shiftKey) redo();
+        else undo();
+
+        return;
+      }
+
+      if (key !== "s") return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -1717,7 +1788,7 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
     window.addEventListener("keydown", onKeyDown, true);
 
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [handleSave]);
+  }, [handleSave, undo, redo]);
 
   const handleDownload = useCallback(async () => {
     const blob = await buildFile();
@@ -2182,52 +2253,15 @@ export default function Slides({ fileHandle, onSave, onSaveStatusChange, onDirty
                       height: `${(shape.height / slideSize.height) * 100}%`
                     };
 
-                    if (shape.kind === "table") {
-      const totalColumns = shape.columns.reduce((sum, value) => sum + value, 0) || 1;
-
-      return (
-        <div key={shape.id} className={selected ? "slidesSlidesShape selected" : "slidesSlidesShape"} style={style}
-          onPointerDown={(event) => startShapeDrag(event, shape)} onPointerMove={moveShapeDrag} onPointerUp={endShapeDrag} onPointerCancel={endShapeDrag}>
-          <table className="slidesSlidesTableShape">
-            <colgroup>
-              {shape.columns.map((column, columnIndex) => <col key={columnIndex} style={{ width: `${(column / totalColumns) * 100}%` }} />)}
-            </colgroup>
-            <tbody>
-              {shape.rows.map((row, rowIndex) => (
-                <tr key={rowIndex} style={{ height: `${(row.height / EMU_PER_POINT) * scale}px` }}>
-                  {row.cells.filter((cell) => !cell.merged).map((cell, cellIndex) => (
-                    <td key={cellIndex} colSpan={cell.span > 1 ? cell.span : undefined} style={{ background: cell.fill || "transparent" }}>
-                      {renderShapeParagraphs({ placeholder: null, paragraphs: cell.paragraphs }, scale)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {handles}
-        </div>
-      );
-    }
-
-    if (shape.kind === "frame") {
-      return (
-        <div key={shape.id} className={selected ? "slidesSlidesShape selected" : "slidesSlidesShape"} style={style}
-          onPointerDown={(event) => startShapeDrag(event, shape)} onPointerMove={moveShapeDrag} onPointerUp={endShapeDrag} onPointerCancel={endShapeDrag}>
-          <span className="slidesSlidesPicturePlaceholder">{shape.name}</span>
-          {handles}
-        </div>
-      );
-    }
-
-    if (shape.kind === "picture") {
+                    if (shape.kind === "picture") {
                       return pictures[shape.id]?.url
                         ? <img key={shape.id} className="slidesSlidesRailPicture" style={position} src={pictures[shape.id].url} alt="" />
                         : <span key={shape.id} className="slidesSlidesRailShape" style={{ ...position, background: "#e6e8ec" }} />;
                     }
 
-    if (shape.kind === "table" || shape.kind === "frame") {
-      return <span key={shape.id} className="slidesSlidesRailShape" style={{ ...position, background: "#eceef2", boxShadow: "inset 0 0 0 1px #cdd2dc" }} />;
-    }
+                    if (shape.kind === "table" || shape.kind === "frame") {
+                      return <span key={shape.id} className="slidesSlidesRailShape" style={{ ...position, background: "#eceef2", boxShadow: "inset 0 0 0 1px #cdd2dc" }} />;
+                    }
 
                     return (
                       <span

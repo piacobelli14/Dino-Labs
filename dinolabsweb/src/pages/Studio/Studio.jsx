@@ -3931,6 +3931,7 @@ export default function Studio() {
                                                                         <Text fileHandle={tab.fileHandle} keyBinds={keyBinds}
                                                                             onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
                                                                             onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
                                                                         />
                                                                     )}
                                                                     {TABULAR_EXTENSIONS.includes(tab.fileHandle?.name.split(".").pop()?.toLowerCase() || "") && (
@@ -3939,6 +3940,7 @@ export default function Studio() {
                                                                             keyBinds={keyBinds}
                                                                             onEdit={(prev, next) => handleEdit(paneIndex, tab.id, prev, next)}
                                                                             onSave={(newFullCode) => handleSave(paneIndex, tab.id, newFullCode)}
+                                                                            onDirtyChange={(dirty) => setUnsavedChanges((p) => ({ ...p, [tab.id]: dirty }))}
                                                                         />
                                                                     )}
                                                                     {(!tab.fileHandle ||

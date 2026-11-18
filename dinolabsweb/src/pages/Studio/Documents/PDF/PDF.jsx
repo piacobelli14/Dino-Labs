@@ -28,6 +28,7 @@ const ZOOM_LADDER = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3,
 const THUMBNAIL_WIDTH = 132;
 const INK_MINIMUM_POINTS = 2;
 const HISTORY_LIMIT = 80;
+const HISTORY_DELAY_MS = 300;
 
 const ANNOTATION_TOOLS = [
   { value: "select", label: "Select", icon: faArrowPointer },
@@ -78,6 +79,13 @@ function annotationBounds(annotation) {
     width: Math.abs((annotation.x2 ?? annotation.x) - annotation.x),
     height: Math.abs((annotation.y2 ?? annotation.y) - annotation.y)
   };
+}
+
+function documentSnapshot(annotations, pages) {
+  return JSON.stringify({
+    annotations: Object.fromEntries(Object.entries(annotations).filter(([, list]) => list && list.length)),
+    pages
+  });
 }
 
 function createAnnotationId() {
@@ -193,31 +201,66 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
   const pagesBtnRef = useRef(null);
   const annotateBtnRef = useRef(null);
   const bannerTimerRef = useRef(null);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
+  const historyTimerRef = useRef(null);
+  const savedSnapshotRef = useRef(null);
+  const lastDirtyRef = useRef(false);
+  const latestRef = useRef({ annotations, pages });
+
+  latestRef.current = { annotations, pages };
 
   const notifySaveStatus = useCallback((status) => {
     setSaveBanner(status);
     onSaveStatusChange?.(status);
-    onDirtyChange?.(status === "Unsaved Changes");
 
     if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
 
     bannerTimerRef.current = setTimeout(() => setSaveBanner(null), SAVE_BANNER_TIMEOUT_MS);
-  }, [onSaveStatusChange, onDirtyChange]);
+  }, [onSaveStatusChange]);
 
   const recordHistory = useCallback((nextAnnotations, nextPages) => {
-    setHistory((previous) => {
-      const trimmed = previous.slice(0, historyIndex + 1);
-      const entry = {
-        annotations: JSON.parse(JSON.stringify(nextAnnotations)),
-        pages: nextPages.map((page) => ({ ...page }))
-      };
-      const appended = [...trimmed, entry].slice(-HISTORY_LIMIT);
+    if (historyTimerRef.current) {
+      clearTimeout(historyTimerRef.current);
+      historyTimerRef.current = null;
+    }
 
-      setHistoryIndex(appended.length - 1);
+    const snapshot = documentSnapshot(nextAnnotations, nextPages);
+    const trimmed = historyRef.current.slice(0, historyIndexRef.current + 1);
 
-      return appended;
-    });
-  }, [historyIndex]);
+    if (!trimmed.length || trimmed[trimmed.length - 1].snapshot === snapshot) return;
+
+    const entry = {
+      snapshot,
+      annotations: JSON.parse(JSON.stringify(nextAnnotations)),
+      pages: nextPages.map((page) => ({ ...page }))
+    };
+    const appended = [...trimmed, entry].slice(-HISTORY_LIMIT);
+
+    historyRef.current = appended;
+    historyIndexRef.current = appended.length - 1;
+    setHistory(appended);
+    setHistoryIndex(appended.length - 1);
+  }, []);
+
+  useEffect(() => {
+    if (!historyRef.current.length || drawingRef.current) return undefined;
+
+    historyTimerRef.current = setTimeout(() => recordHistory(latestRef.current.annotations, latestRef.current.pages), HISTORY_DELAY_MS);
+
+    return () => clearTimeout(historyTimerRef.current);
+  }, [annotations, pages, recordHistory]);
+
+  useEffect(() => {
+    if (savedSnapshotRef.current === null) return;
+
+    const dirty = documentSnapshot(annotations, pages) !== savedSnapshotRef.current;
+
+    if (dirty === lastDirtyRef.current) return;
+
+    lastDirtyRef.current = dirty;
+    onDirtyChange?.(dirty);
+  }, [annotations, pages, history, onDirtyChange]);
 
   const commitChange = useCallback((nextAnnotations, nextPages) => {
     setAnnotations(nextAnnotations);
@@ -399,7 +442,12 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
         setPageCount(source.numPages);
         setPages(initial);
         setAnnotations({});
-        setHistory([{ annotations: {}, pages: initial.map((page) => ({ ...page })) }]);
+        const first = { snapshot: documentSnapshot({}, initial), annotations: {}, pages: initial.map((page) => ({ ...page })) };
+
+        historyRef.current = [first];
+        historyIndexRef.current = 0;
+        savedSnapshotRef.current = first.snapshot;
+        setHistory([first]);
         setHistoryIndex(0);
         setCurrentPage(1);
       } catch (loadError) {
@@ -628,18 +676,17 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
 
     if (!drawing) return;
 
-    setAnnotations((previous) => {
-      const list = previous[drawing.page] || [];
-      const entry = list.find((candidate) => candidate.id === drawing.entry.id);
-      const next = entry && entry.kind === "ink" && entry.points.length < INK_MINIMUM_POINTS
-        ? { ...previous, [drawing.page]: list.filter((candidate) => candidate.id !== entry.id) }
-        : previous;
+    const previous = latestRef.current.annotations;
+    const list = previous[drawing.page] || [];
+    const entry = list.find((candidate) => candidate.id === drawing.entry.id);
+    const next = entry && entry.kind === "ink" && entry.points.length < INK_MINIMUM_POINTS
+      ? { ...previous, [drawing.page]: list.filter((candidate) => candidate.id !== entry.id) }
+      : previous;
 
-      recordHistory(next, pages);
-      notifySaveStatus("Unsaved Changes");
+    if (next !== previous) setAnnotations(next);
 
-      return next;
-    });
+    recordHistory(next, latestRef.current.pages);
+    notifySaveStatus("Unsaved Changes");
   };
 
   const deleteAnnotation = useCallback((pageNumber, id) => {
@@ -713,25 +760,26 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
     commitChange(remaining, pages.filter((page) => page.number !== currentPage));
   }, [pages, currentPage, annotations, commitChange]);
 
-  const undo = useCallback(() => {
-    if (historyIndex <= 0) return;
+  const stepHistory = useCallback((direction) => {
+    if (drawingRef.current) return;
 
-    const entry = history[historyIndex - 1];
+    recordHistory(latestRef.current.annotations, latestRef.current.pages);
 
-    setHistoryIndex(historyIndex - 1);
+    const target = historyIndexRef.current + direction;
+    const entry = historyRef.current[target];
+
+    if (!entry) return;
+
+    historyIndexRef.current = target;
+    setHistoryIndex(target);
+    setSelectedAnnotation(null);
     setAnnotations(JSON.parse(JSON.stringify(entry.annotations)));
     setPages(entry.pages.map((page) => ({ ...page })));
-  }, [history, historyIndex]);
+  }, [recordHistory]);
 
-  const redo = useCallback(() => {
-    if (historyIndex >= history.length - 1) return;
+  const undo = useCallback(() => stepHistory(-1), [stepHistory]);
 
-    const entry = history[historyIndex + 1];
-
-    setHistoryIndex(historyIndex + 1);
-    setAnnotations(JSON.parse(JSON.stringify(entry.annotations)));
-    setPages(entry.pages.map((page) => ({ ...page })));
-  }, [history, historyIndex]);
+  const redo = useCallback(() => stepHistory(1), [stepHistory]);
 
   const buildDocument = useCallback(async () => {
     const source = await PDFDocument.load(bytesRef.current);
@@ -785,6 +833,9 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
       await writable.close();
 
       bytesRef.current = bytes;
+      savedSnapshotRef.current = documentSnapshot(latestRef.current.annotations, latestRef.current.pages);
+      lastDirtyRef.current = false;
+      onDirtyChange?.(false);
       notifySaveStatus("Saved Changes");
       onSave?.();
     } catch (saveError) {
@@ -794,13 +845,31 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
         showCancel: false
       });
     }
-  }, [buildDocument, fileHandle, notifySaveStatus, onSave]);
+  }, [buildDocument, fileHandle, notifySaveStatus, onSave, onDirtyChange]);
 
   useEffect(() => {
     const onKeyDown = (event) => {
       const modifier = event.metaKey || event.ctrlKey;
 
-      if (!modifier || event.key.toLowerCase() !== "s") return;
+      if (!modifier) return;
+
+      const key = event.key.toLowerCase();
+
+      if (key === "z" || key === "y") {
+        const target = event.target;
+
+        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (key === "y" || event.shiftKey) redo();
+        else undo();
+
+        return;
+      }
+
+      if (key !== "s") return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -810,7 +879,7 @@ export default function PDF({ fileHandle, onSaveStatusChange, onSave, onDirtyCha
     window.addEventListener("keydown", onKeyDown, true);
 
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [handleSave]);
+  }, [handleSave, undo, redo]);
 
   const handleDownload = useCallback(async () => {
     const bytes = await buildDocument();

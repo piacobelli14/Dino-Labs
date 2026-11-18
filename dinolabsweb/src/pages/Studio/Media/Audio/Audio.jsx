@@ -14,6 +14,26 @@ import "../../../../styles/helperStyles/Slider.css";
 import "../../../../styles/helperStyles/Checkbox.css";
 import "tippy.js/dist/tippy.css";
 
+const EDIT_HISTORY_LIMIT = 80;
+const EDIT_HISTORY_DELAY_MS = 300;
+const EDIT_HISTORY_KEYS = ["tracks", "timelineClips", "duration", "volume", "pan", "bass", "mid", "treble", "vocalBoost", "vocalIsolation", "echo", "reverb", "pitchShift", "fadeIn", "fadeOut", "attack", "decay", "sustain", "release", "currentPlaybackRate"];
+const EDIT_DIRTY_KEYS = EDIT_HISTORY_KEYS;
+
+const editValuesMatch = (a, b) => {
+    if (a === b) return true;
+    if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
+    if (Array.isArray(a) || Array.isArray(b)) {
+        return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((item, index) => editValuesMatch(item, b[index]));
+    }
+    if (Object.getPrototypeOf(a) !== Object.prototype || Object.getPrototypeOf(b) !== Object.prototype) return false;
+
+    const keys = Object.keys(a);
+
+    return keys.length === Object.keys(b).length && keys.every((key) => editValuesMatch(a[key], b[key]));
+};
+
+const editStatesMatch = (a, b, keys) => keys.every((key) => editValuesMatch(a[key], b[key]));
+
 export default function Audio({ fileHandle, onSaveStatusChange, onDirtyChange }) {
     const DEFAULT_ATTACK = 5.0;
     const DEFAULT_DECAY = 5.0;
@@ -727,13 +747,132 @@ export default function Audio({ fileHandle, onSaveStatusChange, onDirtyChange })
         return wavBlob;
     };
 
+    const liveEditState = { tracks, timelineClips, duration, volume, pan, bass, mid, treble, vocalBoost, vocalIsolation, echo, reverb, pitchShift, fadeIn, fadeOut, attack, decay, sustain, release, currentPlaybackRate };
+    const editSetters = { tracks: setTracks, timelineClips: setTimelineClips, duration: setDuration, volume: setVolume, pan: setPan, bass: setBass, mid: setMid, treble: setTreble, vocalBoost: setVocalBoost, vocalIsolation: setVocalIsolation, echo: setEcho, reverb: setReverb, pitchShift: setPitchShift, fadeIn: setFadeIn, fadeOut: setFadeOut, attack: setAttack, decay: setDecay, sustain: setSustain, release: setRelease, currentPlaybackRate: setCurrentPlaybackRate };
+    const latestEditRef = useRef(liveEditState);
+    const editHistoryRef = useRef([]);
+    const editIndexRef = useRef(-1);
+    const savedEditRef = useRef(null);
+    const editTimerRef = useRef(null);
+    const editTouchedRef = useRef(false);
+    const lastDirtyRef = useRef(false);
+    const editShortcutsRef = useRef(null);
+    const [historyPosition, setHistoryPosition] = useState({ index: -1, length: 0 });
+
+    latestEditRef.current = liveEditState;
+    const commitEditHistory = () => {
+        if (editTimerRef.current) {
+            clearTimeout(editTimerRef.current);
+            editTimerRef.current = null;
+        }
+
+        const current = latestEditRef.current;
+
+        if (!current.tracks.length) return;
+
+        const kept = editHistoryRef.current.slice(0, editIndexRef.current + 1);
+        const last = kept[kept.length - 1];
+
+        if (last && editStatesMatch(last, current, EDIT_HISTORY_KEYS)) return;
+
+        if (!last || !editTouchedRef.current) {
+            editHistoryRef.current = [current];
+            savedEditRef.current = current;
+        } else {
+            editHistoryRef.current = [...kept, current].slice(-EDIT_HISTORY_LIMIT);
+        }
+
+        editIndexRef.current = editHistoryRef.current.length - 1;
+        setHistoryPosition({ index: editIndexRef.current, length: editHistoryRef.current.length });
+    };
+
+    const stepEditHistory = (direction) => {
+        commitEditHistory();
+
+        const target = editIndexRef.current + direction;
+        const state = editHistoryRef.current[target];
+
+        if (!state) return;
+
+        const current = latestEditRef.current;
+
+        editIndexRef.current = target;
+
+        for (const key of EDIT_HISTORY_KEYS) {
+            if (current[key] !== state[key]) editSetters[key](state[key]);
+        }
+
+        setHistoryPosition({ index: target, length: editHistoryRef.current.length });
+    };
+
+    const handleUndo = () => stepEditHistory(-1);
+
+    const handleRedo = () => stepEditHistory(1);
+
+    editShortcutsRef.current = { undo: handleUndo, redo: handleRedo, commit: commitEditHistory };
+
+    useEffect(() => {
+        if (editTimerRef.current) clearTimeout(editTimerRef.current);
+
+        editTimerRef.current = setTimeout(() => editShortcutsRef.current.commit(), EDIT_HISTORY_DELAY_MS);
+    }, EDIT_HISTORY_KEYS.map((key) => liveEditState[key]));
+
+    useEffect(() => {
+        const onTouch = () => {
+            if (editTouchedRef.current || !editHistoryRef.current.length) return;
+
+            editShortcutsRef.current.commit();
+            editTouchedRef.current = true;
+        };
+
+        const onKeyDown = (event) => {
+            if (!(event.metaKey || event.ctrlKey)) return;
+
+            const key = event.key.toLowerCase();
+
+            if (key !== "z" && key !== "y") return;
+
+            const target = event.target;
+
+            if (target && (target.tagName === "TEXTAREA" || target.isContentEditable || (target.tagName === "INPUT" && !["range", "checkbox", "radio", "button"].includes(target.type)))) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (key === "y" || event.shiftKey) editShortcutsRef.current.redo();
+            else editShortcutsRef.current.undo();
+        };
+
+        window.addEventListener("pointerdown", onTouch, true);
+        window.addEventListener("keydown", onTouch, true);
+        window.addEventListener("keydown", onKeyDown, true);
+
+        return () => {
+            window.removeEventListener("pointerdown", onTouch, true);
+            window.removeEventListener("keydown", onTouch, true);
+            window.removeEventListener("keydown", onKeyDown, true);
+
+            if (editTimerRef.current) clearTimeout(editTimerRef.current);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!savedEditRef.current) return;
+
+        const dirty = editTouchedRef.current && !editStatesMatch(liveEditState, savedEditRef.current, EDIT_DIRTY_KEYS);
+
+        if (dirty === lastDirtyRef.current) return;
+
+        lastDirtyRef.current = dirty;
+        onDirtyChange?.(dirty);
+    });
+
     const [saveBanner, setSaveBanner] = useState(null);
     const saveBannerTimerRef = useRef(null);
 
     const notifySaveStatus = (status) => {
         setSaveBanner(status);
         onSaveStatusChange?.(status);
-        onDirtyChange?.(status === "Unsaved Changes");
 
         if (saveBannerTimerRef.current) clearTimeout(saveBannerTimerRef.current);
 
@@ -774,6 +913,7 @@ export default function Audio({ fileHandle, onSaveStatusChange, onDirtyChange })
             await writable.write(blob);
             await writable.close();
 
+            savedEditRef.current = latestEditRef.current;
             notifySaveStatus("Saved Changes");
         } catch (saveError) {
             await showDialog({ title: "Save Failed", message: saveError?.message || String(saveError), showCancel: false });

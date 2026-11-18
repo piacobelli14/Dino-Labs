@@ -41,6 +41,26 @@ const NON_EDIT_HISTORY_ENTRIES = [
     "Aspect ratio setting changed."
 ];
 
+const DIRTY_STATE_KEYS = ["url", "mediaType", "svgContent", "baseZoom", "baseRotation", "baseFlipX", "baseFlipY", "baseHue", "baseSaturation", "baseBrightness", "baseContrast", "baseOpacity", "baseBlur", "baseSpread", "baseGrayscale", "baseSepia", "panX", "panY", "nativeWidth", "nativeHeight", "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius", "syncCorners", "baseVisible", "baseLocked", "paths", "imageLayers", "shapeLayers", "adjustments", "drawingLayers"];
+
+const HISTORY_STATE_KEYS = [...DIRTY_STATE_KEYS, "imageWidth", "imageHeight"];
+
+const statesMatch = (a, b, keys) => {
+    if (!a || !b) return false;
+
+    for (const key of keys) {
+        const left = a[key];
+        const right = b[key];
+
+        if (left === right) continue;
+        if (left === null || right === null || typeof left !== "object" || typeof right !== "object") return false;
+        if (Array.isArray(left) && Array.isArray(right) && left.length !== right.length) return false;
+        if (JSON.stringify(left) !== JSON.stringify(right)) return false;
+    }
+
+    return true;
+};
+
 const EXPORT_MIME_TYPES = {
     png: "image/png",
     jpg: "image/jpeg",
@@ -506,6 +526,13 @@ export default function image({ fileHandle, onSaveStatusChange, onDirtyChange })
     const lastCropDragPosRef = useRef({ x: 0, y: 0 });
     const historyUpdateTimeoutRef = useRef(null);
     const preventHistoryUpdate = useRef(false);
+    const latestStateRef = useRef(null);
+    const historyRef = useRef([]);
+    const historyIndexRef = useRef(-1);
+    const generateThumbnailRef = useRef(null);
+    const pendingHistoryRef = useRef(null);
+    const savedStateRef = useRef(null);
+    const lastDirtyRef = useRef(false);
     const drawingLayerDraggingRef = useRef(false);
     const lastDrawingLayerPosRef = useRef({ x: 0, y: 0 });
     const resizingDrawingLayer = useRef(null);
@@ -632,31 +659,67 @@ export default function image({ fileHandle, onSaveStatusChange, onDirtyChange })
         });
     };
 
-    const addToHistory = async (description = "Edit", overrides = null) => {
+    const liveState = { url, mediaType, svgContent, baseZoom, baseRotation, baseFlipX, baseFlipY, baseHue, baseSaturation, baseBrightness, baseContrast, baseOpacity, baseBlur, baseSpread, baseGrayscale, baseSepia, panX, panY, imageWidth, imageHeight, nativeWidth, nativeHeight, borderRadius, borderTopLeftRadius, borderTopRightRadius, borderBottomLeftRadius, borderBottomRightRadius, syncCorners, maintainAspectRatio, paths, undonePaths, drawBrushSize, highlightBrushSize, cropHistory, isCropDisabled, circleCrop, baseVisible, baseLocked, drawColor, highlightColor, isDrawColorOpen, isHighlightColorOpen, actionMode, imageLayers, selectedLayers, shapeLayers, adjustments, drawingLayers };
+
+    latestStateRef.current = liveState;
+    historyRef.current = history;
+    historyIndexRef.current = currentHistoryIndex;
+    generateThumbnailRef.current = generateThumbnail;
+
+    const addToHistory = async (description = "Edit", overrides = null, automatic = false) => {
         if (preventHistoryUpdate.current) return;
 
-        const isEdit = !NON_EDIT_HISTORY_ENTRIES.includes(description)
+        const isEdit = !automatic && !NON_EDIT_HISTORY_ENTRIES.includes(description)
             && !/^(Drawing|Highlighting) (mode|brush size)/.test(description);
 
         if (isEdit) notifySaveStatus("Unsaved Changes");
+
+        if (!automatic || !pendingHistoryRef.current) pendingHistoryRef.current = { description, overrides, automatic };
 
         if (historyUpdateTimeoutRef.current) {
             clearTimeout(historyUpdateTimeoutRef.current);
         }
         historyUpdateTimeoutRef.current = setTimeout(async () => {
-            const thumbnail = await generateThumbnail();
-            const currentState = { url, mediaType, svgContent, baseZoom, baseRotation, baseFlipX, baseFlipY, baseHue, baseSaturation, baseBrightness, baseContrast, baseOpacity, baseBlur, baseSpread, baseGrayscale, baseSepia, panX, panY, imageWidth, imageHeight, nativeWidth, nativeHeight, borderRadius, borderTopLeftRadius, borderTopRightRadius, borderBottomLeftRadius, borderBottomRightRadius, syncCorners, maintainAspectRatio, paths, undonePaths, drawBrushSize, highlightBrushSize, cropHistory, isCropDisabled, circleCrop, baseVisible, baseLocked, drawColor, highlightColor, isDrawColorOpen, isHighlightColorOpen, actionMode, imageLayers, selectedLayers, shapeLayers, adjustments, drawingLayers, ...(overrides || {}) };
-            setHistory(prev => {
-                const newHistory = [...prev];
-                if (currentHistoryIndex < prev.length - 1) {
-                    newHistory.splice(currentHistoryIndex + 1);
-                }
-                newHistory.push({ state: currentState, thumbnail, description });
-                return newHistory.slice(-HISTORY_LIMIT);
-            });
-            setCurrentHistoryIndex(prev => Math.min(prev + 1, HISTORY_LIMIT - 1));
+            const pending = pendingHistoryRef.current;
+
+            pendingHistoryRef.current = null;
+
+            if (!pending) return;
+
+            const thumbnail = await generateThumbnailRef.current();
+            const currentState = { ...latestStateRef.current, ...(pending.overrides || {}) };
+            const kept = historyRef.current.slice(0, historyIndexRef.current + 1);
+            const last = kept[kept.length - 1];
+
+            if (pending.automatic && (!last || statesMatch(last.state, currentState, HISTORY_STATE_KEYS))) return;
+
+            const nextHistory = [...kept, { state: currentState, thumbnail, description: pending.description }].slice(-HISTORY_LIMIT);
+
+            historyRef.current = nextHistory;
+            historyIndexRef.current = nextHistory.length - 1;
+            setHistory(nextHistory);
+            setCurrentHistoryIndex(nextHistory.length - 1);
+
+            if (pending.description === "Image loaded.") savedStateRef.current = currentState;
         }, 300);
     };
+
+    useEffect(() => {
+        if (!historyRef.current.length || preventHistoryUpdate.current || shapeDraftRef.current) return;
+
+        addToHistory("Image edited.", null, true);
+    }, HISTORY_STATE_KEYS.map((key) => liveState[key]));
+
+    useEffect(() => {
+        if (!savedStateRef.current) return;
+
+        const dirty = !statesMatch(liveState, savedStateRef.current, DIRTY_STATE_KEYS);
+
+        if (dirty === lastDirtyRef.current) return;
+
+        lastDirtyRef.current = dirty;
+        onDirtyChange?.(dirty);
+    });
 
     const resetImage = () => {
         setBaseZoom(BASE_ZOOM);
@@ -973,25 +1036,32 @@ export default function image({ fileHandle, onSaveStatusChange, onDirtyChange })
         requestAnimationFrame(() => { preventHistoryUpdate.current = false; });
     };
 
-    const undo = () => {
-        if (currentHistoryIndex <= 0) return;
+    const stepHistory = (direction) => {
+        const entries = historyRef.current;
+        const reference = { ...latestStateRef.current };
+        let target = historyIndexRef.current;
 
-        const target = currentHistoryIndex - 1;
+        if (direction < 0 && entries[target] && !statesMatch(entries[target].state, reference, HISTORY_STATE_KEYS)) target += 1;
 
+        do {
+            target += direction;
+        } while (entries[target] && statesMatch(entries[target].state, reference, HISTORY_STATE_KEYS));
+
+        if (!entries[target]) return;
+
+        if (historyUpdateTimeoutRef.current) clearTimeout(historyUpdateTimeoutRef.current);
+
+        pendingHistoryRef.current = null;
+        historyIndexRef.current = target;
         setCurrentHistoryIndex(target);
-        applyHistoryState(history[target]?.state);
-        notifySaveStatus("Unsaved Changes");
+        applyHistoryState(entries[target].state);
+
+        if (!statesMatch(entries[target].state, savedStateRef.current, DIRTY_STATE_KEYS)) notifySaveStatus("Unsaved Changes");
     };
 
-    const redo = () => {
-        if (currentHistoryIndex >= history.length - 1) return;
+    const undo = () => stepHistory(-1);
 
-        const target = currentHistoryIndex + 1;
-
-        setCurrentHistoryIndex(target);
-        applyHistoryState(history[target]?.state);
-        notifySaveStatus("Unsaved Changes");
-    };
+    const redo = () => stepHistory(1);
 
     const undoCrop = () => {
         if (cropHistory.length > 0) {
@@ -1123,7 +1193,6 @@ export default function image({ fileHandle, onSaveStatusChange, onDirtyChange })
     const notifySaveStatus = (status) => {
         setSaveBanner(status);
         onSaveStatusChange?.(status);
-        onDirtyChange?.(status === "Unsaved Changes");
 
         if (saveBannerTimerRef.current) clearTimeout(saveBannerTimerRef.current);
 
@@ -1169,6 +1238,7 @@ export default function image({ fileHandle, onSaveStatusChange, onDirtyChange })
             await writable.write(blob);
             await writable.close();
 
+            savedStateRef.current = { ...latestStateRef.current };
             notifySaveStatus("Saved Changes");
         } catch (saveError) {
             await showDialog({ title: "Save Failed", message: saveError?.message || String(saveError), showCancel: false });

@@ -764,6 +764,50 @@ function readFileCell(store, row, col) {
     return cached ? (cached[col] ?? "") : "";
 }
 
+function readBaseCell(store, row, col) {
+    if (store.kind === "sheet") {
+        const line = store.rows[row];
+
+        return line ? (line[col] ?? "") : "";
+    }
+
+    if (row >= store.rowCount) return "";
+
+    const rows = store.windows.get(windowIndexForRow(row));
+
+    if (!rows) return null;
+
+    const cached = rows.get(row);
+
+    return cached ? (cached[col] ?? "") : "";
+}
+
+function overlaysMatch(store, current, saved) {
+    if (current === saved) return true;
+
+    for (const key of new Set([...Object.keys(current), ...Object.keys(saved)])) {
+        const a = current[key];
+        const b = saved[key];
+
+        if (a === b) continue;
+
+        if (a !== undefined && b !== undefined) {
+            if ((a || "") !== (b || "")) return false;
+            continue;
+        }
+
+        if (!store) return false;
+
+        const comma = key.indexOf(",");
+        const base = readBaseCell(store, Number(key.slice(0, comma)), Number(key.slice(comma + 1)));
+
+        if (base === null) return false;
+        if (((a ?? base) || "") !== ((b ?? base) || "")) return false;
+    }
+
+    return true;
+}
+
 function flattenValues(args) {
     const out = [];
 
@@ -1863,13 +1907,16 @@ const Cell = React.memo(function Cell({ columnIndex, rowIndex, style, data }) {
   );
 }, areCellPropsEqual);
 
-export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSave, onEdit }) {
+export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSave, onEdit, onDirtyChange }) {
   const [tableData, setTableData] = useState({});
   const storeRef = useRef(makeFileStore());
   const fileStatsRef = useRef(null);
   const cancelledRef = useRef(false);
   const workbookRef = useRef(null);
   const sheetOverlaysRef = useRef({});
+  const savedOverlaysRef = useRef({});
+  const onDirtyChangeRef = useRef(onDirtyChange);
+  onDirtyChangeRef.current = onDirtyChange;
   const [sheetNames, setSheetNames] = useState([]);
   const [activeSheet, setActiveSheet] = useState(null);
   const unmountedRef = useRef(false);
@@ -2027,20 +2074,42 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
     setFormulaBarValue("");
   }, [commitActiveCellIfNeeded]);
   const ensureInBounds = useCallback((row, col, effRows, effCols) => ({ row: clampNum(row, 0, effRows - 1), col: clampNum(col, 0, effCols - 1) }), []);
-  function emitEditDiff(beforeOverlay, afterOverlay) {
-    if (typeof onEdit !== "function") return;
+  function reportDirty(overlay) {
+    if (typeof onDirtyChangeRef.current !== "function") return;
 
     const store = storeRef.current;
+    const saved = savedOverlaysRef.current;
+    const activeKey = store.activeSheet ?? "";
+    let dirty = !overlaysMatch(store, overlay, saved[activeKey] || {});
 
-    if (store.rowCount > CSV_DIFF_ROW_LIMIT) {
-      onEdit({}, {});
-      return;
+    if (!dirty) {
+      for (const name of Object.keys(sheetOverlaysRef.current)) {
+        if (name === activeKey) continue;
+        if (!overlaysMatch(null, sheetOverlaysRef.current[name] || {}, saved[name] || {})) {
+          dirty = true;
+          break;
+        }
+      }
     }
 
-    const before = generateCSV(beforeOverlay);
-    const after = generateCSV(afterOverlay);
+    onDirtyChangeRef.current(dirty);
+  }
 
-    if (before !== after) onEdit({ fullCode: before }, { fullCode: after });
+  function emitEditDiff(beforeOverlay, afterOverlay) {
+    if (typeof onEdit === "function") {
+      const store = storeRef.current;
+
+      if (store.rowCount > CSV_DIFF_ROW_LIMIT) {
+        onEdit({}, {});
+      } else {
+        const before = generateCSV(beforeOverlay);
+        const after = generateCSV(afterOverlay);
+
+        if (before !== after) onEdit({ fullCode: before }, { fullCode: after });
+      }
+    }
+
+    reportDirty(afterOverlay);
   }
 
   async function exportWorkbookBlob(bookType) {
@@ -2810,9 +2879,7 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
     setRedoStack(r => [...r, currentState]);
     applyOverlay(previousState);
     onSaveStatusChange?.("Unsaved Changes");
-    if (typeof onEdit === "function") {
-      emitEditDiff(currentState, previousState);
-    }
+    emitEditDiff(currentState, previousState);
   }, [undoStack, commitActiveCellIfNeeded, onEdit, onSaveStatusChange]);
   const handleRedo = useCallback(() => {
     commitActiveCellIfNeeded();
@@ -2823,9 +2890,7 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
     setUndoStack(s => [...s, currentState]);
     applyOverlay(nextState);
     onSaveStatusChange?.("Unsaved Changes");
-    if (typeof onEdit === "function") {
-      emitEditDiff(currentState, nextState);
-    }
+    emitEditDiff(currentState, nextState);
   }, [redoStack, commitActiveCellIfNeeded, onEdit, onSaveStatusChange]);
   const handleSelectAll = useCallback(() => {
     commitActiveCellIfNeeded();
@@ -3425,6 +3490,8 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
     if (hasLoadedFile.current) return;
 
     hasLoadedFile.current = true;
+    savedOverlaysRef.current = {};
+    onDirtyChangeRef.current?.(false);
 
     async function loadFile() {
       try {
@@ -3522,7 +3589,14 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
     function handler(e) {
       const ae = document.activeElement;
       if ((ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA" || ae.isContentEditable) && !isCellInput(ae))) return;
-      if (isCellInput(ae)) return;
+      if (isCellInput(ae)) {
+        if (!(isMac ? e.metaKey : e.ctrlKey)) return;
+        const cellBinds = normalizeBinds(keyBinds);
+        const history = cellHistoryRef.current;
+        if (cellBinds.undo.some(b => matchBind(e, b, isMac)) && !e.shiftKey && history.undo.length <= 1) { stopAll(e); handleUndo(); return; }
+        if (cellBinds.redo.some(b => matchBind(e, b, isMac)) && history.redo.length === 0) { stopAll(e); handleRedo(); return; }
+        return;
+      }
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
       if (cmdOrCtrl) {
         const binds = normalizeBinds(keyBinds);
@@ -4361,6 +4435,8 @@ export default function Tabular({ fileHandle, keyBinds, onSaveStatusChange, onSa
         setSaveStatus("saved");
         onSaveStatusChange?.("Save successful!");
         typeof onSave === "function" && onSave("");
+        savedOverlaysRef.current = { ...sheetOverlaysRef.current, [store.activeSheet ?? ""]: store.overlay };
+        onDirtyChangeRef.current?.(false);
         setTimeout(() => { setSaveStatus("idle"); onSaveStatusChange?.(""); }, SAVE_BANNER_TIMEOUT_MS);
       } catch {
         setSaveStatus("failed"); onSaveStatusChange?.("Save failed!");

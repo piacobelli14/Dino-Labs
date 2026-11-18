@@ -192,6 +192,27 @@ async function encodeCanvasSequence(options) {
     return new Blob([target.buffer], { type: profile.mime });
 }
 
+const EDIT_HISTORY_LIMIT = 80;
+const EDIT_HISTORY_DELAY_MS = 300;
+const EDIT_HISTORY_KEYS = ["url", "nativeWidth", "nativeHeight", "videoWidth", "videoHeight", "zoom", "rotation", "flipX", "flipY", "panX", "panY", "hueGlobal", "saturationGlobal", "brightnessGlobal", "contrastGlobal", "opacityGlobal", "blurGlobal", "spreadGlobal", "grayscaleGlobal", "sepiaGlobal", "borderRadiusGlobal", "borderTopLeftRadiusGlobal", "borderTopRightRadiusGlobal", "borderBottomLeftRadiusGlobal", "borderBottomRightRadiusGlobal", "syncCornersGlobal", "frames", "timelineClips", "textOverlays", "trimStart", "trimEnd", "cropHistory", "isCropDisabled", "globalSpeed", "audioTracks", "transitions", "speedRamps"];
+const EDIT_DIRTY_KEYS = EDIT_HISTORY_KEYS.filter((key) => !["videoWidth", "videoHeight"].includes(key));
+const PRISTINE_FRAMES = [];
+
+const editValuesMatch = (a, b) => {
+    if (a === b) return true;
+    if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
+    if (Array.isArray(a) || Array.isArray(b)) {
+        return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((item, index) => editValuesMatch(item, b[index]));
+    }
+    if (Object.getPrototypeOf(a) !== Object.prototype || Object.getPrototypeOf(b) !== Object.prototype) return false;
+
+    const keys = Object.keys(a);
+
+    return keys.length === Object.keys(b).length && keys.every((key) => editValuesMatch(a[key], b[key]));
+};
+
+const editStatesMatch = (a, b, keys) => keys.every((key) => editValuesMatch(a[key], b[key]));
+
 export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange }) {
   const BASE_ZOOM = 1;
   const BASE_ROTATION = 0;
@@ -341,9 +362,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
   const saveBannerTimerRef = useRef(null);
   const handleSaveRef = useRef(null);
 
-  const [undoStack, setUndoStack] = useState([]);
-  const [redoStack, setRedoStack] = useState([]);
-
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const framesContainerRef = useRef(null);
@@ -434,14 +452,12 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
     setTextOverlays(prev => [...prev, newOverlay]);
     setSelectedTextOverlay(textOverlays.length);
     setTextEditorState(newOverlay);
-    saveState();
   };
 
   const handleUpdateTextOverlay = (index, updates) => {
     const newOverlays = [...textOverlays];
     newOverlays[index] = { ...newOverlays[index], ...updates };
     setTextOverlays(newOverlays);
-    saveState();
   };
 
   const handleDeleteTextOverlay = (index) => {
@@ -450,93 +466,129 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
       setSelectedTextOverlay(-1);
       setShowTextEditor(false);
     }
-    saveState();
   };
 
-  const saveState = () => {
-    const state = {
-      timelineClips: [...timelineClips],
-      textOverlays: [...textOverlays],
-      frames: [...frames],
-      currentTime,
-      videoWidth,
-      videoHeight,
-      panX,
-      panY,
-      zoom,
-      rotation,
-      flipX,
-      flipY
-    };
-    setUndoStack(prev => [...prev.slice(-19), state]);
-    setRedoStack([]);
+  const liveEditState = { url, nativeWidth, nativeHeight, videoWidth, videoHeight, zoom, rotation, flipX, flipY, panX, panY, hueGlobal, saturationGlobal, brightnessGlobal, contrastGlobal, opacityGlobal, blurGlobal, spreadGlobal, grayscaleGlobal, sepiaGlobal, borderRadiusGlobal, borderTopLeftRadiusGlobal, borderTopRightRadiusGlobal, borderBottomLeftRadiusGlobal, borderBottomRightRadiusGlobal, syncCornersGlobal, frames: frames.length === originalExtractedFrames.length && frames.every((frame, index) => frame === originalExtractedFrames[index]) ? PRISTINE_FRAMES : frames, timelineClips, textOverlays, trimStart, trimEnd, cropHistory, isCropDisabled, globalSpeed, audioTracks, transitions, speedRamps };
+  const editSetters = { url: setUrl, nativeWidth: setNativeWidth, nativeHeight: setNativeHeight, videoWidth: setVideoWidth, videoHeight: setVideoHeight, zoom: setZoom, rotation: setRotation, flipX: setFlipX, flipY: setFlipY, panX: setPanX, panY: setPanY, hueGlobal: setHueGlobal, saturationGlobal: setSaturationGlobal, brightnessGlobal: setBrightnessGlobal, contrastGlobal: setContrastGlobal, opacityGlobal: setOpacityGlobal, blurGlobal: setBlurGlobal, spreadGlobal: setSpreadGlobal, grayscaleGlobal: setGrayscaleGlobal, sepiaGlobal: setSepiaGlobal, borderRadiusGlobal: setBorderRadiusGlobal, borderTopLeftRadiusGlobal: setBorderTopLeftRadiusGlobal, borderTopRightRadiusGlobal: setBorderTopRightRadiusGlobal, borderBottomLeftRadiusGlobal: setBorderBottomLeftRadiusGlobal, borderBottomRightRadiusGlobal: setBorderBottomRightRadiusGlobal, syncCornersGlobal: setSyncCornersGlobal, frames: (value) => setFrames(value === PRISTINE_FRAMES ? [...originalFramesRef.current] : value), timelineClips: setTimelineClips, textOverlays: setTextOverlays, trimStart: setTrimStart, trimEnd: setTrimEnd, cropHistory: setCropHistory, isCropDisabled: setIsCropDisabled, globalSpeed: setGlobalSpeed, audioTracks: setAudioTracks, transitions: setTransitions, speedRamps: setSpeedRamps };
+  const latestEditRef = useRef(liveEditState);
+  const editHistoryRef = useRef([]);
+  const editIndexRef = useRef(-1);
+  const savedEditRef = useRef(null);
+  const editTimerRef = useRef(null);
+  const editTouchedRef = useRef(false);
+  const lastDirtyRef = useRef(false);
+  const editShortcutsRef = useRef(null);
+  const originalFramesRef = useRef([]);
+  const [historyPosition, setHistoryPosition] = useState({ index: -1, length: 0 });
+
+  latestEditRef.current = liveEditState;
+  originalFramesRef.current = originalExtractedFrames;
+  const commitEditHistory = () => {
+    if (editTimerRef.current) {
+      clearTimeout(editTimerRef.current);
+      editTimerRef.current = null;
+    }
+
+    const current = latestEditRef.current;
+
+    if (!current.url) return;
+
+    const kept = editHistoryRef.current.slice(0, editIndexRef.current + 1);
+    const last = kept[kept.length - 1];
+
+    if (last && editStatesMatch(last, current, EDIT_HISTORY_KEYS)) return;
+
+    if (!last || !editTouchedRef.current) {
+      editHistoryRef.current = [current];
+      savedEditRef.current = current;
+    } else {
+      editHistoryRef.current = [...kept, current].slice(-EDIT_HISTORY_LIMIT);
+    }
+
+    editIndexRef.current = editHistoryRef.current.length - 1;
+    setHistoryPosition({ index: editIndexRef.current, length: editHistoryRef.current.length });
   };
 
-  const handleUndo = () => {
-    if (undoStack.length === 0) return;
-    const currentState = {
-      timelineClips: [...timelineClips],
-      textOverlays: [...textOverlays],
-      frames: [...frames],
-      currentTime,
-      videoWidth,
-      videoHeight,
-      panX,
-      panY,
-      zoom,
-      rotation,
-      flipX,
-      flipY
-    };
-    setRedoStack(prev => [...prev, currentState]);
-    const prevState = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
-    setTimelineClips(prevState.timelineClips);
-    setTextOverlays(prevState.textOverlays);
-    setFrames(prevState.frames);
-    setCurrentTime(prevState.currentTime);
-    setVideoWidth(prevState.videoWidth);
-    setVideoHeight(prevState.videoHeight);
-    setPanX(prevState.panX);
-    setPanY(prevState.panY);
-    setZoom(prevState.zoom);
-    setRotation(prevState.rotation);
-    setFlipX(prevState.flipX);
-    setFlipY(prevState.flipY);
+  const stepEditHistory = (direction) => {
+    commitEditHistory();
+
+    const target = editIndexRef.current + direction;
+    const state = editHistoryRef.current[target];
+
+    if (!state) return;
+
+    const current = latestEditRef.current;
+
+    editIndexRef.current = target;
+
+    for (const key of EDIT_HISTORY_KEYS) {
+      if (current[key] !== state[key]) editSetters[key](state[key]);
+    }
+
+    setHistoryPosition({ index: target, length: editHistoryRef.current.length });
   };
 
-  const handleRedo = () => {
-    if (redoStack.length === 0) return;
-    const nextState = redoStack[redoStack.length - 1];
-    setRedoStack(prev => prev.slice(0, -1));
-    const currentState = {
-      timelineClips: [...timelineClips],
-      textOverlays: [...textOverlays],
-      frames: [...frames],
-      currentTime,
-      videoWidth,
-      videoHeight,
-      panX,
-      panY,
-      zoom,
-      rotation,
-      flipX,
-      flipY
+  const handleUndo = () => stepEditHistory(-1);
+
+  const handleRedo = () => stepEditHistory(1);
+
+  editShortcutsRef.current = { undo: handleUndo, redo: handleRedo, commit: commitEditHistory };
+
+  useEffect(() => {
+    if (editTimerRef.current) clearTimeout(editTimerRef.current);
+
+    editTimerRef.current = setTimeout(() => editShortcutsRef.current.commit(), EDIT_HISTORY_DELAY_MS);
+  }, EDIT_HISTORY_KEYS.map((key) => liveEditState[key]));
+
+  useEffect(() => {
+    const onTouch = () => {
+      if (editTouchedRef.current || !editHistoryRef.current.length) return;
+
+      editShortcutsRef.current.commit();
+      editTouchedRef.current = true;
     };
-    setUndoStack(prev => [...prev, currentState]);
-    setTimelineClips(nextState.timelineClips);
-    setTextOverlays(nextState.textOverlays);
-    setFrames(nextState.frames);
-    setCurrentTime(nextState.currentTime);
-    setVideoWidth(nextState.videoWidth);
-    setVideoHeight(nextState.videoHeight);
-    setPanX(nextState.panX);
-    setPanY(nextState.panY);
-    setZoom(nextState.zoom);
-    setRotation(nextState.rotation);
-    setFlipX(nextState.flipX);
-    setFlipY(nextState.flipY);
-  };
+
+    const onKeyDown = (event) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+
+      const key = event.key.toLowerCase();
+
+      if (key !== "z" && key !== "y") return;
+
+      const target = event.target;
+
+      if (target && (target.tagName === "TEXTAREA" || target.isContentEditable || (target.tagName === "INPUT" && !["range", "checkbox", "radio", "button"].includes(target.type)))) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (key === "y" || event.shiftKey) editShortcutsRef.current.redo();
+      else editShortcutsRef.current.undo();
+    };
+
+    window.addEventListener("pointerdown", onTouch, true);
+    window.addEventListener("keydown", onTouch, true);
+    window.addEventListener("keydown", onKeyDown, true);
+
+    return () => {
+      window.removeEventListener("pointerdown", onTouch, true);
+      window.removeEventListener("keydown", onTouch, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+
+      if (editTimerRef.current) clearTimeout(editTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!savedEditRef.current) return;
+
+    const dirty = editTouchedRef.current && !editStatesMatch(liveEditState, savedEditRef.current, EDIT_DIRTY_KEYS);
+
+    if (dirty === lastDirtyRef.current) return;
+
+    lastDirtyRef.current = dirty;
+    onDirtyChange?.(dirty);
+  });
 
   const resetVideo = () => {
     setZoom(BASE_ZOOM);
@@ -575,7 +627,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
     setTimelineClips([]);
     setSelectedClips([]);
     setCurrentTime(0);
-    saveState();
   };
 
   const performCanvasVideoCrop = async () => {
@@ -866,7 +917,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
   const notifySaveStatus = (status) => {
     setSaveBanner(status);
     onSaveStatusChange?.(status);
-    onDirtyChange?.(status === "Unsaved Changes");
 
     if (saveBannerTimerRef.current) clearTimeout(saveBannerTimerRef.current);
 
@@ -906,6 +956,7 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
       await writable.write(blob);
       await writable.close();
 
+      savedEditRef.current = latestEditRef.current;
       notifySaveStatus("Saved Changes");
     } catch (saveError) {
       await showDialog({ title: "Save Failed", message: saveError?.message || String(saveError), showCancel: false });
@@ -1079,7 +1130,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
   };
 
   const handleGlobalMouseUp = () => {
-    if (resizingRef.current) saveState();
     resizingRef.current = false;
     setResizingCorner(null);
   };
@@ -1165,7 +1215,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
       setNativeWidth(prev.nativeWidth);
       setNativeHeight(prev.nativeHeight);
       setIsCropping(false);
-      saveState();
     }
   };
 
@@ -1256,7 +1305,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
       setTextEditorState(newOverlay);
       setShowTextEditor(true);
       setActionMode("Idle");
-      saveState();
       return;
     }
   };
@@ -1447,13 +1495,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
             setCurrentTime(newTime);
           }
           break;
-        case "z":
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            if (e.shiftKey) handleRedo();
-            else handleUndo();
-          }
-          break;
         case "c":
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
@@ -1474,15 +1515,6 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
     window.addEventListener("keydown", handleKeyboard);
     return () => window.removeEventListener("keydown", handleKeyboard);
   }, [videoRef, currentTime, actionMode]);
-
-  useEffect(() => {
-    const autoSave = setInterval(() => {
-      if (timelineClips.length > 0 || textOverlays.length > 0) {
-        saveState();
-      }
-    }, 30000);
-    return () => clearInterval(autoSave);
-  }, [timelineClips, textOverlays]);
 
   const layoutButtons = [
     { tip: "Zoom In", onClick: handleZoomIn, icon: faMagnifyingGlassPlus },
@@ -2033,12 +2065,12 @@ export default function Video({ fileHandle, onSaveStatusChange, onDirtyChange })
 
           <div className="videoVideoContentFlexSmall" style={{ justifyContent: "flex-start" }}>
             <Tippy content="Undo (Ctrl+Z)" theme="tooltip-light">
-              <button className="videoVideoButton" onClick={handleUndo} disabled={undoStack.length === 0} style={{ opacity: undoStack.length === 0 ? "0.3" : "1.0" }}>
+              <button className="videoVideoButton" onClick={handleUndo} disabled={historyPosition.index <= 0} style={{ opacity: historyPosition.index <= 0 ? "0.3" : "1.0" }}>
                 <FontAwesomeIcon icon={faArrowLeft} />
               </button>
             </Tippy>
             <Tippy content="Redo (Ctrl+Shift+Z)" theme="tooltip-light">
-              <button className="videoVideoButton" onClick={handleRedo} disabled={redoStack.length === 0} style={{ opacity: redoStack.length === 0 ? "0.3" : "1.0" }}>
+              <button className="videoVideoButton" onClick={handleRedo} disabled={historyPosition.index >= historyPosition.length - 1} style={{ opacity: historyPosition.index >= historyPosition.length - 1 ? "0.3" : "1.0" }}>
                 <FontAwesomeIcon icon={faArrowRight} />
               </button>
             </Tippy>
