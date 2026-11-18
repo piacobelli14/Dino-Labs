@@ -297,7 +297,7 @@ const Register = () => {
                         id="animatedBackgroundEarth"
                         className="loginVideoBackground"
                     >
-                        <source src="/SolarSystemBackground.mp4" type="video/mp4" />
+                        <source src="/ChalkboardBackground.mp4" type="video/mp4" />
                     </video>
                 )}
 
