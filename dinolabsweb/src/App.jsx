@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
 import { useEffect, useState } from "react";
 import "./styles/App.css";
 
+import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Authentication/AuthLogin.jsx";
 import Register from "./pages/Authentication/AuthRegister.jsx";
 import Reset from "./pages/Authentication/AuthReset.jsx";
@@ -50,6 +51,7 @@ function App() {
     <Router>
       <div className={`App ${osClass}`}>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/reset" element={<Reset />} />
@@ -173,8 +175,6 @@ function App() {
               <Thesaurus />
             </ProtectedRoute>
           } />
-
-          <Route index element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </Router>

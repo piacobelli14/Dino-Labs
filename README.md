@@ -168,7 +168,7 @@ dinolabsweb/
 │   ├── ref-images/              Reference imagery
 │   ├── ref-logos/               Brand assets
 │   ├── DinoLabsLogo*.png
-│   └── SolarSystemBackground.mp4
+│   └── ChalkboardBackground.mp4
 ├── src/
 │   ├── pages/
 │   │   ├── Authentication/
