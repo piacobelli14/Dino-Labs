@@ -6,7 +6,7 @@ While this app is self-hosted, free to use, and bears all on this GitHub, it is 
 
 This is a frontend product. The backend is kept intentionally small. This is mostly because this is a frontend learning project for me. How can I make some really cool editors and tools entirely (almost) on the frontend while using minimal existing libraries, packages, etc? That is the question that sparked this project. Calendar CRUD and a PostgreSQL connection proxy are the only two route groups, plus the Dino Auth pass-through for everything user/team-related. Most "creative studio" platforms in this category are thin clients on top of a heavy server. DinoLabs is the inverse.
 
-Hosted at **[DinoLabs](https://dino-labs.vercel.app/login)**. Account creation, sessions, and team management are handled through Dino Auth (see below).
+Hosted at **[DinoLabs](https://dino-labs.vercel.app)**. Account creation, sessions, and team management are handled through Dino Auth (see below).
 
 **Stack:** React + Vite on the frontend, Node.js + Express + PostgreSQL on the backend. File System Access API + IndexedDB for persistence.
 
@@ -296,7 +296,7 @@ What this means in practice:
 
 ## Hosted Version
 
-The intended way to use DinoLabs is at my hosted version available at [DinoLabs](https://dino-labs.vercel.app/login). It runs on infrastructure that handles the file-handle quotas, IndexedDB sync, and the calendar/database backend. Account creation, usage, storage, and everything else is completely free, barring an unforeseen increase in traffic (I'm just one guy and this is a for fun project after all). 
+The intended way to use DinoLabs is at my hosted version available at [DinoLabs](https://dino-labs.vercel.app). It runs on infrastructure that handles the file-handle quotas, IndexedDB sync, and the calendar/database backend. Account creation, usage, storage, and everything else is completely free, barring an unforeseen increase in traffic (I'm just one guy and this is a for fun project after all). 
 
 This repository exists primarily as a reference and as the development home of the project. Self-hosting is possible but is not the supported path.
 
