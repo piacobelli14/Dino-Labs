@@ -26,6 +26,7 @@ import "../styles/helperStyles/Tooltip.css";
 import "../styles/helperStyles/HighlightKill.css";
 import "../styles/mainStyles/Landing.css";
 import "../styles/helperStyles/LoadingSpinner.css";
+import "../styles/helperStyles/Tooltip.css";
 
 const SOURCES = {
   routes: {
